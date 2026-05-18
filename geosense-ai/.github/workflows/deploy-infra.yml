@@ -1,0 +1,16 @@
+name: Deploy Infra
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+  push:
+    paths:
+      - 'infra/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Infra deploy placeholder"
