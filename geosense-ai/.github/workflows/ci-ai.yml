@@ -1,0 +1,16 @@
+name: CI AI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/ai-python/**'
+  push:
+    paths:
+      - 'apps/ai-python/**'
+
+jobs:
+  ai-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "AI Python CI placeholder"

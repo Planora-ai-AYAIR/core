@@ -1,0 +1,2 @@
+# Architecture
+Placeholder architecture notes.
