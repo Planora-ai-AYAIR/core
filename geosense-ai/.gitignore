@@ -1,0 +1,22 @@
+# Node
+node_modules/
+dist/
+
+# .NET
+bin/
+obj/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/

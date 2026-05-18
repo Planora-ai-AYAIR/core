@@ -1,0 +1,16 @@
+name: CI Backend
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api-dotnet/**'
+  push:
+    paths:
+      - 'apps/api-dotnet/**'
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo ".NET API CI placeholder"
