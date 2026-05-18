@@ -1,0 +1,9 @@
+{
+  "name": "geosense-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "start": "echo \"frontend placeholder\"",
+    "test": "echo \"no frontend tests yet\""
+  }
+}
