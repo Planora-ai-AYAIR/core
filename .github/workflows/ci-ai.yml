@@ -8,6 +8,9 @@ on:
     paths:
       - 'apps/ai-python/**'
 
+permissions:
+  contents: read
+
 jobs:
   ai-check:
     runs-on: ubuntu-latest
