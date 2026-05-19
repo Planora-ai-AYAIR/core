@@ -1,2 +1,2 @@
-# GeoSense.Application
+# Planora.Application
 Placeholder application layer.
