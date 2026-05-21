@@ -1,0 +1,37 @@
+<form [formGroup]="signInForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <div class="space-y-4">
+    <app-input
+      formControlName="email"
+      type="email"
+      placeholder="Email"
+      [showError]="
+        (signInForm.get('email')?.touched || false) &&
+        (signInForm.get('email')?.invalid || false)
+      "
+      [errorMessage]="getErrorMessage('email')"
+    ></app-input>
+
+    <app-input
+      formControlName="password"
+      type="password"
+      placeholder="Password"
+      [showError]="
+        (signInForm.get('password')?.touched || false) &&
+        (signInForm.get('password')?.invalid || false)
+      "
+      [errorMessage]="getErrorMessage('password')"
+    ></app-input>
+  </div>
+
+  <div class="pt-4">
+    <app-button
+      type="submit"
+      text="Sign In"
+      variant="primary"
+      [fullWidth]="true"
+      [disabled]="signInForm.invalid"
+      [isLoading]="isLoading()"
+      loadingText="Signing In..."
+    ></app-button>
+  </div>
+</form>

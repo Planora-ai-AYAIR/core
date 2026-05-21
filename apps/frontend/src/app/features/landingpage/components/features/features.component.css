@@ -1,0 +1,148 @@
+/* ── Section background ── */
+.features-section {
+  background-color: #f6f3eb; /* limestone */
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='40' viewBox='0 0 80 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 Q20 10 40 20 T80 20' fill='none' stroke='%23e6decb' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 80px 40px;
+}
+
+/* ── Map area (left panel) ── */
+.map-container {
+  background: #e5dec9;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  background-size: 30px 30px;
+  border-radius: 16px;
+  border: 2px solid #d4c9a8;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Satellite-ish contour lines */
+.map-contours {
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='80' fill='none' stroke='%232B2D31' stroke-width='1.2'/%3E%3Ccircle cx='100' cy='100' r='60' fill='none' stroke='%232B2D31' stroke-width='0.8'/%3E%3Ccircle cx='100' cy='100' r='40' fill='none' stroke='%232B2D31' stroke-width='0.8'/%3E%3Ccircle cx='100' cy='100' r='20' fill='none' stroke='%232B2D31' stroke-width='0.6'/%3E%3C/svg%3E")
+    center/cover no-repeat;
+}
+
+/* Parcel polygon */
+.parcel-polygon {
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  border: 2px solid #b86e3d;
+  border-radius: 8px;
+  background: rgba(184, 110, 61, 0.08);
+  box-shadow: 0 0 20px rgba(184, 110, 61, 0.3);
+}
+
+/* Floating badges on map */
+.map-badge {
+  position: absolute;
+  padding: 4px 10px;
+  background: white;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2b2d31;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: floatBadge 4s ease-in-out infinite;
+}
+
+.map-badge:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.map-badge:nth-child(3) {
+  animation-delay: 1s;
+}
+.map-badge:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+@keyframes floatBadge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Scan ring */
+.scan-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 2px solid rgba(184, 110, 61, 0.6);
+  border-radius: 50%;
+  animation: scanPulse 2s ease-out infinite;
+}
+
+@keyframes scanPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ── Feature cards grid (right side) ── */
+.feature-card {
+  background: white;
+  border: 1px solid #e5dec9;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.25s ease;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.feature-card:hover {
+  border-color: #b86e3d;
+  box-shadow: 0 12px 24px rgba(184, 110, 61, 0.1);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.feature-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.feature-card p {
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 767px) {
+  .map-container {
+    height: 250px;
+    margin-bottom: 2rem;
+  }
+}
