@@ -1,0 +1,67 @@
+<div class="w-full">
+  <!-- Label -->
+  @if (label()) {
+  <label [for]="id()" [id]="id() + '-label'" class="block text-sm font-normal text-gray-300 mb-2">
+    {{ label() }}
+  </label>
+  }
+
+  <!-- Input Container -->
+  <div class="relative">
+    <input #inputEl [type]="currentInputType()" [placeholder]="placeholder() || ' '" [value]="value()" [name]="name()"
+      [id]="id()" [disabled]="isDisabled()" [class]="inputClasses()" [title]="label() || placeholder() || 'Input field'"
+      [attr.aria-labelledby]="label() ? id() + '-label' : null"
+      [attr.aria-label]="!label() ? (placeholder() || 'Input field') : null"
+      [attr.aria-describedby]="shouldShowError() ? id() + '-error' : helperText() ? id() + '-helper' : null"
+      [attr.aria-invalid]="shouldShowError()" (input)="onInput($event)" (blur)="onBlur()" (focus)="onFocus()" />
+
+    <!-- Password Toggle -->
+    @if (isPasswordField()) {
+    <button type="button"
+      class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer text-gray-400 p-1 flex items-center justify-center hover:text-tv-cyan touch-manipulation transition-colors duration-200"
+      (click)="togglePassword()" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+      [attr.title]="showPassword() ? 'Hide password' : 'Show password'" [disabled]="isDisabled()">
+      <span class="sr-only">{{ showPassword() ? 'Hide password' : 'Show password' }}</span>
+      @if (showPassword()) {
+      <i class="pi pi-eye w-5 h-5" aria-hidden="true"></i>
+      } @else {
+      <i class="pi pi-eye-slash w-5 h-5" aria-hidden="true"></i>
+      }
+    </button>
+    }
+
+    <!-- Suffix Icon (e.g., search icon) -->
+    @if (suffixIcon() && !isPasswordField()) {
+    <button type="button"
+      class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer text-gray-400 p-1 flex items-center justify-center hover:text-tv-cyan touch-manipulation transition-colors duration-200"
+      (click)="onSuffixIconClick()" [attr.aria-label]="suffixIconAriaLabel() || 'Toggle'"
+      [attr.title]="suffixIconAriaLabel() || 'Toggle'" [disabled]="isDisabled()">
+      <span class="sr-only">{{ suffixIconAriaLabel() || 'Toggle' }}</span>
+      <i [class]="suffixIcon() + ' w-5 h-5'" aria-hidden="true"></i>
+    </button>
+    }
+
+    <!-- Date Picker Icon (custom) -->
+    @if (isDateField() && !isPasswordField() && !suffixIcon()) {
+    <button type="button"
+      class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer text-gray-400 p-1 flex items-center justify-center hover:text-tv-cyan touch-manipulation transition-colors duration-200"
+      (click)="openDatePicker()" [disabled]="isDisabled()" aria-label="Open calendar">
+      <i class="pi pi-calendar w-5 h-5" aria-hidden="true"></i>
+    </button>
+    }
+  </div>
+
+  <!-- Error Message -->
+  @if (shouldShowError() && errorMessage()) {
+  <span [id]="id() + '-error'" class="block text-xs text-red-500 mt-1.5 px-1" role="alert">
+    {{ errorMessage() }}
+  </span>
+  }
+
+  <!-- Helper Text -->
+  @if (!shouldShowError() && helperText()) {
+  <span [id]="id() + '-helper'" class="block text-xs text-gray-400 mt-1.5 px-1">
+    {{ helperText() }}
+  </span>
+  }
+</div>
