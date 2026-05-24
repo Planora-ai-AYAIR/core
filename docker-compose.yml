@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+
+  # ── .NET API ──────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./apps/api-dotnet
+      dockerfile: src/Planora.API/Dockerfile
+    container_name: planora_api
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PlanoraDev;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - planora_net
+
+  # ── Python AI Service ─────────────────────────────────────────────────────
+  ai:
+    build:
+      context: ./apps/ai-python
+      dockerfile: Dockerfile
+    container_name: planora_ai
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - planora_net
+
+  # ── Angular Frontend ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: planora_frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - planora_net
+
+  # ── SQL Server 2022 ───────────────────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: planora_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q 'SELECT 1' -No"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - planora_net
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: planora_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - planora_net
+
+volumes:
+  sqlserver_data:
+  redis_data:
+
+networks:
+  planora_net:
+    driver: bridge
