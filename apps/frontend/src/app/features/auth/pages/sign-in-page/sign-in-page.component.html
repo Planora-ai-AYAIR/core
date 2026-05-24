@@ -1,0 +1,9 @@
+<app-auth-layout titleText="Welcome Back">
+  <app-sign-in></app-sign-in>
+  <ng-container footer>
+    <p class="text-center text-gray-500 mt-6">
+      Don't have an account?
+      <a [routerLink]="ROUTES.signUp" class="cursor-pointer text-tv-cyan hover:underline">Sign up</a>
+    </p>
+  </ng-container>
+</app-auth-layout>
