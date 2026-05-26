@@ -17,7 +17,7 @@ Rules:
 - Domain: Entities and core business rules. No dependencies on any other layer.
 - Application: Use cases (features). Depends only on Domain.
 - Infrastructure: Database and external integrations. Depends on Application and Domain.
-- WebApi: Entry point and wiring. Depends on Infrastructure and Application.
+- WebApi: Entry point, controllers, and wiring. Depends on Infrastructure and Application.
 
 ### Key Benefits
 
@@ -30,7 +30,7 @@ Rules:
 - Domain should not reference EF Core, ASP.NET, or any infrastructure types.
 - Application handlers must use abstractions or DbContext interfaces, not web concerns.
 - Infrastructure implements persistence and integrations behind abstractions used by Application.
-- WebApi only wires endpoints, DI, middleware, and cross-cutting concerns.
+- WebApi only wires controllers, DI, middleware, and cross-cutting concerns.
 
 ## Vertical Slice Architecture
 
@@ -43,7 +43,8 @@ Each feature lives in its own folder under Application/Features and contains:
 - Request/response records
 - Handler that implements IHandler<TRequest, TResponse>
 - FluentValidation validator
-- Endpoint definition
+
+The corresponding **controller** lives in WebApi/Controllers/ and delegates to the handler via MediatR.
 
 Example:
 
@@ -53,7 +54,10 @@ Application/Features/Post/CreatePost/
 - CreatePostResponse.cs
 - CreatePostHandler.cs
 - CreatePostValidator.cs
-- CreatePostEndpoint.cs
+
+WebApi/Controllers/
+
+- PostsController.cs  (thin — calls MediatR, maps HTTP status codes)
 
 ### Why It Matters
 
@@ -63,8 +67,8 @@ Application/Features/Post/CreatePost/
 
 ### Slice Rules
 
-- All business logic stays in the handler, not in endpoints.
-- The endpoint maps HTTP to the request record and calls the handler.
+- All business logic stays in the handler, not in controllers.
+- The controller maps HTTP to the request record and dispatches via MediatR.
 - Validation is defined inside the same feature folder.
 - DTOs are records and should live with the feature.
 
@@ -77,10 +81,20 @@ Commands and Queries are separate:
 
 Handlers return Result<T> so failures are explicit and consistent.
 
+## Controller Conventions
+
+- All controllers inherit `ControllerBase` and use `[ApiController]`.
+- Route: `[Route("api/[controller]")]` — produces `api/posts`, `api/auth`, etc.
+- Use `[HttpGet]`, `[HttpPost]`, `[HttpPut]`, `[HttpDelete]` attributes.
+- Return `IActionResult` or `ActionResult<T>`.
+- Keep controllers thin: validate → dispatch to MediatR → map result to HTTP response.
+
 ## Recommended Flow for New Features
 
 1. Create a feature folder under Application/Features/<FeatureName>/<ActionName>.
-2. Add request/response records, handler, validator, and endpoint.
-3. Keep endpoints thin and map to HTTP status codes.
-4. Use async EF Core calls from handlers.
-5. Return Result<T> from handlers for success and failure.
+2. Add request/response records, handler, and validator.
+3. Create or update the controller in WebApi/Controllers/.
+4. Keep controllers thin and map to HTTP status codes.
+5. Use async EF Core calls from handlers.
+6. Return Result<T> from handlers for success and failure.
+

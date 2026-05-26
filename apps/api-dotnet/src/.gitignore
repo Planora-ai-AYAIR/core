@@ -372,3 +372,5 @@ web.config.txt
 /BlogZ.Web/appsettings.Development.json
 /BlogZ.Web/appsettings.json
 /BlogZ.Web/Planora.Web.http
+docs/
+_bmad-output/
