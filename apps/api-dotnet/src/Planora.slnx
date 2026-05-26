@@ -1,7 +1,0 @@
-<Solution>
-  <Project Path="Planora.Application/Planora.Application.csproj" />
-  <Project Path="Planora.Domain/Planora.Domain.csproj" />
-  <Project Path="Planora.Infrastructure/Planora.Infrastructure.csproj" />
-  <Project Path="Planora.Presentation/Planora.Presentation.csproj" />
-  <Project Path="Planora.Web/Planora.Web.csproj" />
-</Solution>
