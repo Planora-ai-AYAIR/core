@@ -1,0 +1,6 @@
+@Planora_HostAddress = http://localhost:5015
+
+GET {{Planora_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
