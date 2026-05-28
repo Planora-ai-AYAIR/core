@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Planora.Api;
 using Planora.Application;
 using Planora.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,12 +15,18 @@ builder.Services
     .AddPresentationServices(builder.Configuration);
 
 builder.Services.AddControllers();
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration)
+);
 
 var app = builder.Build();
 
 // ──────────────────────────────────────────────
 //  HTTP Request Pipeline
 // ──────────────────────────────────────────────
+
+app.UseSerilogRequestLogging();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
