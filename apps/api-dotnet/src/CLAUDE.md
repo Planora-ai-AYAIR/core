@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This repo is a .NET 8 REST API using Clean Architecture, Vertical Slice Architecture, CQRS, Controllers, FluentValidation, EF Core, and PostgreSQL.
+This repo is a .NET 8 REST API using Clean Architecture, CQRS, Controllers, FluentValidation, EF Core, and PostgreSQL.
 
 For deeper architectural guidance, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -15,7 +15,8 @@ For deeper architectural guidance, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 - Layers: WebApi -> Infrastructure -> Application -> Domain
 - Domain: entities + business rules only; no dependencies outward
-- Application: vertical slices and CQRS handlers; depends only on Domain
+- Application: CQRS handlers; depends only on Domain
+- Repositories: define interfaces in Application; implement in Infrastructure; handlers depend on interfaces only
 - Infrastructure: persistence/external integrations; depends on Application + Domain
 - WebApi: controllers, DI, middleware, composition only
 
@@ -55,13 +56,6 @@ For deeper architectural guidance, see [ARCHITECTURE.md](ARCHITECTURE.md).
 - Health: /health
 - Swagger JSON: /swagger/v1/swagger.json
 - Swagger UI: /swagger
-
-## Adding a Feature (Vertical Slice)
-
-1. Create a folder under Application/Features/<Feature>/<Action>.
-2. Add handler, validator, and request/response records.
-3. Add or update the corresponding controller in WebApi/Controllers/.
-4. Keep logic in the handler; keep the controller thin.
 
 ## Files Not To Modify
 
