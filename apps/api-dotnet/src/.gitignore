@@ -3,7 +3,7 @@
 ## appsettings*.json
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 .vs
-PLAN.md
+MARKDOWNS
 # User-specific files
 *.rsuser
 *.suo
