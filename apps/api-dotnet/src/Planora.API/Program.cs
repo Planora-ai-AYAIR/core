@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Planora.Api.Extensions;
+using Planora.Api;
+using Planora.Application;
+using Planora.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
