@@ -50,7 +50,11 @@ public static class DependancyInjection
 		});
 
 		// --- Health Checks ---
-		services.AddHealthChecks().AddNpgSql(configuration.GetConnectionString("DefaultConnection")!);
+		var connectionMode = configuration.GetValue<string>("ConnectionMode");
+		var connectionString = connectionMode == "Prod"
+			? configuration.GetConnectionString("ProdCS")
+			: configuration.GetConnectionString("DevCS");
+		services.AddHealthChecks().AddNpgSql(connectionString!);
 
 		services
 			.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -69,6 +73,8 @@ public static class DependancyInjection
 					ClockSkew = TimeSpan.Zero
 				};
 			});
+
+		services.AddAuthorization();
 
 		return services;
 	}
