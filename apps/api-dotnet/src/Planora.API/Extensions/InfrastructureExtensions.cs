@@ -11,7 +11,19 @@ public static class InfrastructureExtensions
         IConfiguration configuration)
     {
         // --- Configuration Options (bound from appsettings sections) ---
-        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services
+            .AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .Validate(options => !string.IsNullOrWhiteSpace(options.SecretKey),
+                "JwtSettings:SecretKey is required.")
+            .Validate(options => options.SecretKey.Length >= 32,
+                "JwtSettings:SecretKey must be at least 32 characters.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Issuer),
+                "JwtSettings:Issuer is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Audience),
+                "JwtSettings:Audience is required.")
+            .ValidateOnStart();
+
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         //services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
 
