@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Planora.Api;
 using Planora.Application;
 using Planora.Infrastructure;
+using Planora.Infrastructure.Persistence.Seeders;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Host.UseSerilog((context, configuration) =>
 );
 
 var app = builder.Build();
+
+await AuthSeeder.SeedAsync(app.Services);
 
 // ──────────────────────────────────────────────
 //  HTTP Request Pipeline

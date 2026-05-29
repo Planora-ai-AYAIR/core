@@ -1,10 +1,18 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Net;
+using System.Net.Mail;
+using FluentEmail.Core;
+using FluentEmail.Smtp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Planora.Application.Interfaces.Repositories;
+using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
+using Planora.Infrastructure.Repositories;
+using Planora.Infrastructure.Services;
 
 namespace Planora.Infrastructure;
 
@@ -18,6 +26,17 @@ public static class DependancyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         //services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
+
+        var emailOptions = configuration.GetSection(EmailOptions.SectionName).Get<EmailOptions>()
+            ?? new EmailOptions();
+
+        services
+            .AddFluentEmail(emailOptions.SenderEmail, emailOptions.SenderName)
+            .AddSmtpSender(new SmtpClient(emailOptions.SmtpHost, emailOptions.SmtpPort)
+            {
+                Credentials = new NetworkCredential(emailOptions.Username, emailOptions.Password),
+                EnableSsl = emailOptions.UseSsl
+            });
 
         services
             .AddDatabase(configuration)
@@ -64,6 +83,14 @@ public static class DependancyInjection
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<PlanoraDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }

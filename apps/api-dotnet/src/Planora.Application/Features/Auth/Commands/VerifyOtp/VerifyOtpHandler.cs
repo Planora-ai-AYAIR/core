@@ -1,0 +1,55 @@
+using MediatR;
+using Planora.Application.Features.Auth;
+using Planora.Application.Interfaces.Repositories;
+using Planora.Application.Interfaces.Services;
+using Planora.Domain.Shared.Results;
+
+namespace Planora.Application.Features.Auth.Commands.VerifyOtp;
+
+public sealed class VerifyOtpHandler(
+    IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
+    IJwtService jwtService,
+    IOtpService otpService) : IRequestHandler<VerifyOtpCommand, Response<VerifyOtpResponse>>
+{
+    public async Task<Response<VerifyOtpResponse>> Handle(VerifyOtpCommand request, CancellationToken ct)
+    {
+        var handler = new ResponseHandler();
+
+        var user = await userRepository.FindByIdAsync(request.UserId, ct);
+        if (user is null)
+        {
+            return handler.NotFound<VerifyOtpResponse>("User not found.");
+        }
+
+        var isValid = await otpService.ValidateAsync(user.Id, OtpPurposes.EmailVerification, request.Otp, ct);
+        if (!isValid)
+        {
+            return handler.BadRequest<VerifyOtpResponse>("Invalid or expired OTP.");
+        }
+
+        var confirmResult = await userRepository.SetEmailConfirmedAsync(user.Id, true, ct);
+        if (!confirmResult.Succeeded)
+        {
+            return handler.BadRequest<VerifyOtpResponse>(string.Join(" ", confirmResult.Errors));
+        }
+
+        var roles = await userRepository.GetRolesAsync(user.Id, ct);
+        var role = roles.FirstOrDefault() ?? AuthRoles.Client;
+
+        var (accessToken, _) = jwtService.GenerateAccessToken(user.Id, user.Email, roles);
+        var refreshExpiry = DateTime.UtcNow.Add(jwtService.GetRefreshTokenLifetime());
+        var refreshToken = await refreshTokenRepository.CreateAsync(user.Id, refreshExpiry, ct);
+
+        var response = new VerifyOtpResponse(
+            user.Id,
+            user.Email,
+            user.PhoneNumber,
+            role,
+            true,
+            accessToken,
+            refreshToken);
+
+        return handler.Success(response, "OTP verified.");
+    }
+}

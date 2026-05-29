@@ -19,6 +19,7 @@ For deeper architectural guidance, see [ARCHITECTURE.md](ARCHITECTURE.md).
 - Repositories: define interfaces in Application; implement in Infrastructure; handlers depend on interfaces only
 - Infrastructure: persistence/external integrations; depends on Application + Domain
 - WebApi: controllers, DI, middleware, composition only
+- Use primary constructors for classes where possible
 
 ## CQRS Rules
 
