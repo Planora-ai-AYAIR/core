@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ROUTES } from '../../../../shared/config/constants';
 
 @Component({
   selector: 'app-cta',
@@ -9,4 +10,6 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
   templateUrl: './cta.component.html',
   styleUrls: ['./cta.component.css'],
 })
-export class CtaComponent {}
+export class CtaComponent {
+  readonly ROUTES = ROUTES;
+}

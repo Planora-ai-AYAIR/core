@@ -4,6 +4,7 @@ import {
   HostListener,
   ViewChild,
   AfterViewInit,
+  OnDestroy,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -18,7 +19,7 @@ import { RouterLink } from '@angular/router';
   templateUrl: './hero.component.html',
   styleUrls: ['./hero.component.css'],
 })
-export class HeroComponent implements AfterViewInit {
+export class HeroComponent implements AfterViewInit, OnDestroy {
   public ROUTES = ROUTES;
 
   targetX = 50;
@@ -30,6 +31,9 @@ export class HeroComponent implements AfterViewInit {
   rotateZ = -35;
 
   activeMetric = signal<string>('bearing');
+
+  private isMouseOverScene = false;
+  private animationFrameId: number | null = null;
 
   @ViewChild('sceneContainer') sceneContainer!: ElementRef<HTMLDivElement>;
 
@@ -78,7 +82,7 @@ export class HeroComponent implements AfterViewInit {
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
-    if (!this.sceneContainer) return;
+    if (!this.sceneContainer || !this.isMouseOverScene) return;
 
     const rect = this.sceneContainer.nativeElement.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -96,14 +100,29 @@ export class HeroComponent implements AfterViewInit {
     this.activeMetric.set(metricId);
   }
 
+  @HostListener('mouseenter')
+  onSceneMouseEnter() {
+    this.isMouseOverScene = true;
+  }
+
+  @HostListener('mouseleave')
+  onSceneMouseLeave() {
+    this.isMouseOverScene = false;
+  }
+
   private startInertiaRenderLoop() {
     const step = () => {
-      this.rotateX += (this.targetX - this.rotateX) * 0.08;
-      this.rotateY += (this.targetY - this.rotateY) * 0.08;
-      this.rotateZ += (this.targetZ - this.rotateZ) * 0.08;
-
-      requestAnimationFrame(step);
+      if (this.isMouseOverScene) {
+        this.rotateX += (this.targetX - this.rotateX) * 0.08;
+        this.rotateY += (this.targetY - this.rotateY) * 0.08;
+        this.rotateZ += (this.targetZ - this.rotateZ) * 0.08;
+      }
+      this.animationFrameId = requestAnimationFrame(step);
     };
-    requestAnimationFrame(step);
+    this.animationFrameId = requestAnimationFrame(step);
+  }
+
+  ngOnDestroy() {
+    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
   }
 }

@@ -1,0 +1,53 @@
+<div class="flex h-screen w-screen overflow-hidden bg-planora-limestone font-sans antialiased">
+  <!-- Mobile backdrop -->
+  @if (sidebarComponent?.isMobileOpen()) {
+    <div
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden"
+      (click)="toggleMobileSidebar()"
+    ></div>
+  }
+
+  <app-sidebar></app-sidebar>
+
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <header
+      class="h-16 min-h-16 border-b border-planora-desert-200 bg-white flex items-center justify-between px-6 z-20 shadow-sm"
+    >
+      <div class="flex items-center gap-4">
+        <button
+          (click)="toggleMobileSidebar()"
+          class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-planora-limestone text-planora-basalt-700 transition-colors focus:outline-none"
+          aria-label="Toggle Menu"
+        >
+          <i class="pi pi-bars text-xl"></i>
+        </button>
+        <div class="text-sm font-medium text-planora-basalt-500">Workspace</div>
+      </div>
+
+      <!-- User profile area -->
+      <div class="flex items-center gap-3 cursor-pointer select-none">
+        <!-- Avatar: use image if available, else initials -->
+        @if (user.avatar) {
+          <img
+            [src]="user.avatar"
+            alt="User avatar"
+            class="w-8 h-8 rounded-full object-cover border border-planora-desert-200"
+          />
+        } @else {
+          <div
+            class="w-8 h-8 rounded-full bg-planora-clay-500 text-white flex items-center justify-center text-xs font-semibold border border-planora-clay-400"
+          >
+            {{ user.name.charAt(0) }}
+          </div>
+        }
+        <span class="hidden sm:block text-sm font-medium text-planora-basalt-700">{{
+          user.name
+        }}</span>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-6 bg-planora-limestone/50">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

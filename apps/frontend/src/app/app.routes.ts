@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './shared/components/layouts/public-layout/public-layout.component';
+import { AuthenticatedLayoutComponent } from './shared/components/layouts/authenticated-layout/authenticated-layout.component';
 
 export const routes: Routes = [
   {
@@ -28,16 +29,41 @@ export const routes: Routes = [
     ],
   },
 
+  /*{
+    path: 'app',
+    component: AuthenticatedLayoutComponent,
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/pages/dashboard-home/dashboard-home.component').then(
+            (m) => m.DashboardHomeComponent,
+          ),
+      },
+      {
+        path: 'parcels',
+        loadChildren: () =>
+          import('./features/parcels/parcels.routing').then((m) => m.PARCEL_ROUTES),
+      },
+      {
+        path: 'analyses',
+        loadChildren: () =>
+          import('./features/analyses/analyses.routing').then((m) => m.ANALYSIS_ROUTES),
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
+  },*/
+
   // 404 Error
   {
-    path: 'Error404',
-    loadComponent: () => import('./shared/components/not-found/not-found').then((m) => m.NotFound),
+    path: 'not-found',
+    loadComponent: () => import('./shared/components/not-found/not-found.component').then((m) => m.NotFoundComponent),
   },
 
   // Wildcard - redirect to 404
   {
     path: '**',
-    redirectTo: 'Error404',
+    redirectTo: 'not-found',
     pathMatch: 'full',
   },
 ];

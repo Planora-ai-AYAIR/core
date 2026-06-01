@@ -14,7 +14,7 @@ export class FeaturesComponent {
       id: 'terrain',
       title: 'Terrain & Topography',
       description:
-        'High‑resolution DTM, contour lines every 0.5m, slope analysis, cut‑fill estimates — no survey crew needed.',
+        'High-resolution DTM, contour lines every 0.5m, slope analysis, cut-fill estimates — no survey crew needed.',
       icon: 'pi-chart-line', // PrimeIcon
       color: 'bg-[#E3D5C0]', // desert
       textColor: 'text-planora-basalt-800',
@@ -50,7 +50,7 @@ export class FeaturesComponent {
       id: 'risks',
       title: 'Flood & Seismic Risks',
       description:
-        'Multi‑hazard assessment: flood zones, groundwater depth, seismic acceleration, liquefaction potential.',
+        'Multi-hazard assessment: flood zones, groundwater depth, seismic acceleration, liquefaction potential.',
       icon: 'pi-exclamation-triangle',
       color: 'bg-[#C1D3B7]', // silt light
       textColor: 'text-planora-basalt-800',

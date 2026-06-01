@@ -1,0 +1,16 @@
+.terms-error {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.2s ease-out,
+    opacity 0.2s ease-out,
+    margin-top 0.2s ease-out;
+}
+
+.terms-error.visible {
+  max-height: 2rem;
+  opacity: 1;
+  margin-top: 0.5rem;
+}

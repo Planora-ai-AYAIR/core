@@ -3,21 +3,21 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
-import { NotAvailableComponent } from './not-available.component';
+import { AuthenticatedLayoutComponent } from './authenticated-layout.component';
 
-describe('NotAvailableComponent', () => {
-  let component: NotAvailableComponent;
-  let fixture: ComponentFixture<NotAvailableComponent>;
+describe('AuthenticatedLayoutComponent', () => {
+  let component: AuthenticatedLayoutComponent;
+  let fixture: ComponentFixture<AuthenticatedLayoutComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NotAvailableComponent ]
+      declarations: [ AuthenticatedLayoutComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NotAvailableComponent);
+    fixture = TestBed.createComponent(AuthenticatedLayoutComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

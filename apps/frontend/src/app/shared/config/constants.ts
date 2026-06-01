@@ -4,6 +4,11 @@ export const ROUTES = {
   signUp: '/auth/sign-up',
   forgotPassword: '/auth/forgot-password',
   verifyOtp: '/auth/verify-otp',
+  resetPassword: '/auth/reset-password',
+
+  dashboard: '/app/dashboard',
+  newAnalysis: '/app/analyses',
+
 };
 
 export const REG_EXP = {
@@ -15,7 +20,7 @@ export const REG_EXP = {
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
-
+  PARCELS_POINTS: 'parcel_points',
 } as const;
 
 export const OTP_CONFIG = {

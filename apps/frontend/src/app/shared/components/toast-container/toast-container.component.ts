@@ -9,7 +9,7 @@ import { ToastService } from '../../services/toaster.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './toast-container.component.html',
-  styleUrls: ['./toast-container.component.scss'],
+  styleUrls: ['./toast-container.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToastContainerComponent implements OnDestroy {
