@@ -10,20 +10,29 @@ export const AUTH_ROUTES: Routes = [
     path: 'sign-in',
     loadComponent: () =>
       import('./pages/sign-in-page/sign-in-page.component').then((m) => m.SignInPageComponent),
-    title:'Sign In'
+    title: 'Sign In',
   },
   {
     path: 'forgot-password',
     loadComponent: () =>
       import('./pages/forgot-password-page/forgot-password-page.component').then(
         (m) => m.ForgotPasswordPageComponent,
-      ),title:'Forget Password'
+      ),
+    title: 'Forget Password',
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./pages/reset-password-page/reset-password-page.component').then(
+        (m) => m.ResetPasswordPageComponent,
+      ),
+    title: 'Reset Password',
   },
   {
     path: 'sign-up',
     loadComponent: () =>
       import('./pages/sign-up-page/sign-up-page.component').then((m) => m.SignUpPageComponent),
-    title:'Sign Up'
+    title: 'Sign Up',
   },
   {
     path: 'verify-otp',
@@ -31,7 +40,6 @@ export const AUTH_ROUTES: Routes = [
       import('./pages/verify-otp-page/verify-otp-page.component').then(
         (m) => m.VerifyOtpPageComponent,
       ),
-    title:'Verify OTP'
+    title: 'Verify OTP',
   },
-
 ];

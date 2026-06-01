@@ -6,7 +6,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 items-start">
       <div class="footer-animate lg:col-span-2 flex flex-col pt-1">
-        <a [routerLink]="ROUTES.home" class="flex items-center gap-2 group">
+        <a [routerLink]="ROUTES.home" class="flex items-center">
           <img
             src="/assets/images/logo/logo.png"
             alt="Planora Logo"
@@ -17,14 +17,18 @@
           AI-powered site pre-qualification for Egypt & Africa. From satellite data to geotechnical
           intelligence in hours, not weeks.
         </p>
+
+        <!-- Social Icons Container -->
         <div class="flex gap-3">
           @for (social of socialLinks; track social.label) {
             <a
               [href]="social.href"
-              class="w-8 h-8 flex items-center justify-center rounded-full border border-planora-desert-300 text-planora-basalt-500 hover:text-planora-clay-500 hover:border-planora-clay-300 transition-colors"
+              class="w-9 h-9 flex items-center justify-center rounded-full border border-planora-desert-300 text-planora-basalt-600 hover:text-planora-clay-500 hover:border-planora-clay-400 hover:bg-planora-desert-100/50 transition-all duration-200 active:scale-95"
               [attr.aria-label]="social.label"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <span class="text-xs font-medium">{{ social.label.charAt(0) }}</span>
+              <i [class]="social.icon" class="text-base"></i>
             </a>
           }
         </div>
@@ -33,7 +37,7 @@
       @for (col of footerColumns; track col.title; let idx = $index) {
         <div class="footer-animate pt-1" [style.animation-delay]="idx * 0.05 + 's'">
           <h4
-            class="font-display text-sm font-semibold text-planora-basalt-800 uppercase tracking-wider mb-5 h-8 flex items-center"
+            class="font-sans text-xs font-bold text-planora-basalt-900 uppercase tracking-widest mb-5 h-8 flex items-center"
           >
             {{ col.title }}
           </h4>
@@ -56,10 +60,10 @@
 
   <div class="border-t border-planora-desert-200/60">
     <div
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-planora-basalt-500"
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-planora-basalt-500"
     >
       <p>© {{ currentYear }} Planora. All rights reserved.</p>
-      <div class="flex gap-5">
+      <div class="flex gap-6">
         <a routerLink="/privacy" class="hover:text-planora-clay-500 transition-colors"
           >Privacy Policy</a
         >

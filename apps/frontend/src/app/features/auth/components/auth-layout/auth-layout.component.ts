@@ -1,14 +1,14 @@
-import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, TemplateRef, ContentChild } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { ROUTES } from '../../../../shared/config/constants';
 
 @Component({
-  standalone: true,
   selector: 'app-auth-layout',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthLayoutComponent {
-
+  ROUTES = ROUTES;
 }

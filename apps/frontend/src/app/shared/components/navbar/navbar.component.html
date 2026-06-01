@@ -39,7 +39,7 @@
           Sign In
         </button>
         <a
-          routerLink="/analyse"
+          [routerLink]="ROUTES.signUp"
           class="px-5 py-2.5 text-sm font-semibold text-planora-limestone bg-planora-clay-500 rounded-sm shadow-md shadow-planora-clay-200/60 hover:bg-planora-clay-600 hover:shadow-lg hover:shadow-planora-clay-300/40 transition-all duration-200 active:scale-95"
         >
           Analyse Land
@@ -116,7 +116,7 @@
         Sign In
       </button>
       <a
-        routerLink="/analyse"
+        [routerLink]="ROUTES.signUp"
         (click)="closeMenu()"
         class="block w-full py-3.5 text-center font-semibold text-planora-limestone bg-planora-clay-500 rounded-sm shadow-md hover:bg-planora-clay-600 hover:shadow-lg transition-all duration-200 active:scale-95"
       >

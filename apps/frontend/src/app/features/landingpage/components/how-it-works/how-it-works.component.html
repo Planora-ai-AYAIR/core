@@ -25,6 +25,10 @@
       <div class="pipeline-line-back absolute hidden md:block"></div>
       <div class="pipeline-line-front absolute hidden md:block animate-pipeline-scan"></div>
 
+      <div
+        class="pipeline-line-vertical absolute md:hidden left-1/2 top-10 bottom-40 w-px border-l border-dashed border-[#d4c9a8] z-0"
+      ></div>
+
       @for (step of steps; track step.step; let i = $index) {
         <div
           class="step-card group flex flex-col items-center text-center flex-1 w-full animate-fade-up"
@@ -37,53 +41,14 @@
               class="node-ring bg-white border-2 border-planora-desert-300 rounded-full flex items-center justify-center shadow-sm group-hover:border-planora-clay-500 transition-all duration-300"
             >
               <div
-                class="node-icon-holder text-planora-clay-500 group-hover:scale-110 transition-transform duration-300"
+                class="text-planora-clay-500 group-hover:scale-110 transition-transform duration-300"
               >
                 @if (step.visual === 'map') {
-                  <svg
-                    class="w-7 h-7"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.75"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                    <line x1="8" y1="2" x2="8" y2="18" />
-                    <line x1="16" y1="6" x2="16" y2="22" />
-                  </svg>
+                  <i class="pi pi-map text-[24px]"></i>
                 } @else if (step.visual === 'satellite') {
-                  <svg
-                    class="w-7 h-7"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.75"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path
-                      d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                    />
-                    <path d="M2 12h20" />
-                  </svg>
+                  <i class="pi pi-globe text-[24px]"></i>
                 } @else if (step.visual === 'report') {
-                  <svg
-                    class="w-7 h-7"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.75"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                  </svg>
+                  <i class="pi pi-file text-[24px]"></i>
                 }
               </div>
             </div>

@@ -43,8 +43,8 @@ export class FooterComponent {
   ];
 
   socialLinks = [
-    { label: 'LinkedIn', icon: 'linkedin', href: '#' },
-    { label: 'Twitter', icon: 'twitter', href: '#' },
-    { label: 'YouTube', icon: 'youtube', href: '#' },
+    { label: 'LinkedIn', icon: 'pi pi-linkedin', href: '#' },
+    { label: 'Twitter', icon: 'pi pi-twitter', href: '#' },
+    { label: 'YouTube', icon: 'pi pi-youtube', href: '#' },
   ];
 }
