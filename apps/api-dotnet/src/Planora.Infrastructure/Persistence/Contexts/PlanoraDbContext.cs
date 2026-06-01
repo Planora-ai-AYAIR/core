@@ -1,15 +1,22 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Planora.Domain.Entities;
+using Planora.Infrastructure.Identity;
 
 namespace Planora.Infrastructure.Persistence.Contexts;
 
 
-public class PlanoraDbContext : DbContext
+public class PlanoraDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public PlanoraDbContext(DbContextOptions<PlanoraDbContext> options) : base(options)
     {
     }
 
-    // --- DbSets here as domain entities are created ---
+    public DbSet<User> Users { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<OtpRecord> OtpRecords { get; set; }
+    public DbSet<AuthAuditLog> AuthAuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

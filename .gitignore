@@ -20,3 +20,5 @@ __pycache__/
 .DS_Store
 .vscode/
 .idea/
+apps/api-dotnet/src/CLAUDE.md
+/apps/api-dotnet/src/CLAUDE.md
