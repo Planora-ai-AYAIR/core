@@ -29,7 +29,7 @@ export const routes: Routes = [
     ],
   },
 
-  /*{
+  {
     path: 'app',
     component: AuthenticatedLayoutComponent,
     children: [
@@ -39,20 +39,23 @@ export const routes: Routes = [
           import('./features/dashboard/pages/dashboard-home/dashboard-home.component').then(
             (m) => m.DashboardHomeComponent,
           ),
+        title: 'Dashboard',
       },
       {
         path: 'parcels',
         loadChildren: () =>
           import('./features/parcels/parcels.routing').then((m) => m.PARCEL_ROUTES),
+        title: 'Parcels',
       },
-      {
+      /*{
         path: 'analyses',
         loadChildren: () =>
           import('./features/analyses/analyses.routing').then((m) => m.ANALYSIS_ROUTES),
-      },
+        title: 'Analyses',
+      },*/
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
-  },*/
+  },
 
   // 404 Error
   {
