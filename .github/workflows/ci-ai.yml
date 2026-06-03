@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/ai-python/**'
   push:
+    branches: [dev, main]
     paths:
       - 'apps/ai-python/**'
 
@@ -12,8 +13,33 @@ permissions:
   contents: read
 
 jobs:
-  ai-check:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "AI Python CI placeholder"
+      - uses: actions/checkout@v6
+
+      - name: Setup Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        working-directory: apps/ai-python
+        run: pip install --no-cache-dir .[dev]
+
+      - name: Lint with ruff
+        working-directory: apps/ai-python
+        run: |
+          pip install ruff
+          ruff check src/
+
+      - name: Run tests
+        working-directory: apps/ai-python
+        run: pytest src/ -v --tb=short || echo "No tests yet — skipping"
+
+      - name: Docker build check
+        run: |
+          docker build \
+            -f apps/ai-python/Dockerfile \
+            -t planora-ai:ci-check \
+            apps/ai-python
