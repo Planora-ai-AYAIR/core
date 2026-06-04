@@ -105,41 +105,40 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-      <!-- Total Area card -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
       <div class="p-4 bg-white border border-planora-desert-100 rounded-2xl shadow-sm">
         <span class="text-[9px] font-bold text-planora-basalt-400 uppercase block mb-1"
           >Total Area</span
         >
-        <div class="flex items-baseline gap-1">
-          <span class="text-lg font-mono font-bold text-planora-basalt-900">{{
-            parcelStats().sqMeters
-          }}</span>
-          <span class="text-[10px] font-bold text-planora-clay-600">m²</span>
+        <div class="flex flex-col">
+          <span class="text-lg font-mono font-bold text-planora-basalt-900 leading-tight">
+            {{ parcelStats().sqMeters }}
+          </span>
+          <span class="text-[10px] font-bold text-planora-clay-600">m² (sq meters)</span>
         </div>
       </div>
-      <!-- Hectares card -->
+
       <div class="p-4 bg-white border border-planora-desert-100 rounded-2xl shadow-sm">
         <span class="text-[9px] font-bold text-planora-basalt-400 uppercase block mb-1"
           >Hectares</span
         >
-        <div class="flex items-baseline gap-1">
-          <span class="text-lg font-mono font-bold text-planora-basalt-900">{{
-            parcelStats().hectares
-          }}</span>
+        <div class="flex flex-col">
+          <span class="text-lg font-mono font-bold text-planora-basalt-900 leading-tight">
+            {{ parcelStats().hectares }}
+          </span>
           <span class="text-[10px] font-bold text-planora-clay-600">ha</span>
         </div>
       </div>
-      <!-- Perimeter card -->
+
       <div class="p-4 bg-white border border-planora-desert-100 rounded-2xl shadow-sm">
         <span class="text-[9px] font-bold text-planora-basalt-400 uppercase block mb-1"
           >Perimeter</span
         >
-        <div class="flex items-baseline gap-1">
-          <span class="text-lg font-mono font-bold text-planora-basalt-900">{{
-            parcelStats().perimeter
-          }}</span>
-          <span class="text-[10px] font-bold text-planora-clay-600">m</span>
+        <div class="flex flex-col">
+          <span class="text-lg font-mono font-bold text-planora-basalt-900 leading-tight">
+            {{ parcelStats().perimeter }}
+          </span>
+          <span class="text-[10px] font-bold text-planora-clay-600">meters (m)</span>
         </div>
       </div>
     </div>
@@ -166,10 +165,30 @@
           >
             + Add
           </button>
+          <button
+            (click)="fileInput.click()"
+            [disabled]="isGeoJsonLoading()"
+            class="text-[10px] font-bold text-planora-clay-600 hover:underline flex items-center gap-1"
+          >
+            <i class="pi pi-upload text-xs"></i> GeoJSON
+          </button>
         </div>
       </div>
 
-      <!-- Node list -->
+      <input
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept=".geojson,.json"
+        class="hidden"
+      />
+
+      @if (geoJsonError()) {
+        <div class="text-xs text-red-600 mt-1">
+          {{ geoJsonError() }}
+        </div>
+      }
+
       <div class="space-y-2 pb-4 overflow-y-auto">
         @for (point of polygonPoints(); track $index) {
           <div
@@ -190,94 +209,98 @@
               >
                 {{ $index + 1 }}
               </div>
+
               <div
-                class="flex-1 grid grid-cols-2 gap-1.5 bg-white border border-planora-desert-100 rounded-xl overflow-hidden p-2 shadow-sm"
+                class="flex-1 bg-white border border-planora-desert-100 rounded-xl p-3 shadow-sm"
               >
-                <div>
-                  <span class="text-[8px] font-black text-planora-basalt-300 uppercase">Lng</span>
-                  @if (!dmsMode()) {
-                    <input
-                      type="number"
-                      step="0.000001"
-                      [(ngModel)]="point[0]"
-                      (input)="mapComponent?.setPoints(polygonPoints())"
-                      class="w-full text-xs font-mono font-bold outline-none bg-transparent"
-                    />
-                  } @else {
-                    <div class="flex gap-1 text-[10px] font-mono font-bold">
+                <div class="grid grid-cols-[30px_1fr] gap-y-3 items-center">
+                  <span class="text-[9px] font-black text-planora-basalt-300 uppercase">Lng</span>
+                  <div class="flex justify-end">
+                    @if (!dmsMode()) {
                       <input
                         type="number"
-                        [value]="dmsPoints()[$index].lng.degrees"
-                        (input)="onDmsChange($index, 'lng', 'degrees', $event)"
-                        class="w-8 bg-transparent outline-none text-right"
-                        placeholder="°"
+                        step="0.000001"
+                        [(ngModel)]="point[0]"
+                        (input)="mapComponent?.setPoints(polygonPoints())"
+                        class="w-full text-xs font-mono font-bold outline-none bg-transparent text-right"
                       />
-                      <span>°</span>
+                    } @else {
+                      <div
+                        class="flex items-center gap-1 text-[10px] font-mono font-bold text-planora-basalt-900"
+                      >
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lng.degrees"
+                          (input)="onDmsChange($index, 'lng', 'degrees', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">°</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lng.minutes"
+                          (input)="onDmsChange($index, 'lng', 'minutes', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">'</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lng.seconds"
+                          (input)="onDmsChange($index, 'lng', 'seconds', $event)"
+                          class="w-10 bg-transparent outline-none text-right"
+                          step="0.01"
+                        />
+                        <span class="text-planora-basalt-400">"</span>
+                        <span class="ml-1 text-planora-clay-600 w-3 text-center">{{
+                          dmsPoints()[$index].lng.direction
+                        }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="col-span-2 border-t border-planora-desert-50"></div>
+
+                  <span class="text-[9px] font-black text-planora-basalt-300 uppercase">Lat</span>
+                  <div class="flex justify-end">
+                    @if (!dmsMode()) {
                       <input
                         type="number"
-                        [value]="dmsPoints()[$index].lng.minutes"
-                        (input)="onDmsChange($index, 'lng', 'minutes', $event)"
-                        class="w-8 bg-transparent outline-none text-right"
-                        placeholder="'"
+                        step="0.000001"
+                        [(ngModel)]="point[1]"
+                        (input)="mapComponent?.setPoints(polygonPoints())"
+                        class="w-full text-xs font-mono font-bold outline-none bg-transparent text-right"
                       />
-                      <span>'</span>
-                      <input
-                        type="number"
-                        [value]="dmsPoints()[$index].lng.seconds"
-                        (input)="onDmsChange($index, 'lng', 'seconds', $event)"
-                        class="w-12 bg-transparent outline-none text-right"
-                        placeholder='"'
-                        step="0.01"
-                      />
-                      <span>"</span>
-                      <span class="text-planora-basalt-500">{{
-                        dmsPoints()[$index].lng.direction
-                      }}</span>
-                    </div>
-                  }
-                </div>
-                <div>
-                  <span class="text-[8px] font-black text-planora-basalt-300 uppercase">Lat</span>
-                  @if (!dmsMode()) {
-                    <input
-                      type="number"
-                      step="0.000001"
-                      [(ngModel)]="point[1]"
-                      (input)="mapComponent?.setPoints(polygonPoints())"
-                      class="w-full text-xs font-mono font-bold outline-none bg-transparent"
-                    />
-                  } @else {
-                    <div class="flex gap-1 text-[10px] font-mono font-bold">
-                      <input
-                        type="number"
-                        [value]="dmsPoints()[$index].lat.degrees"
-                        (input)="onDmsChange($index, 'lat', 'degrees', $event)"
-                        class="w-8 bg-transparent outline-none text-right"
-                        placeholder="°"
-                      />
-                      <span>°</span>
-                      <input
-                        type="number"
-                        [value]="dmsPoints()[$index].lat.minutes"
-                        (input)="onDmsChange($index, 'lat', 'minutes', $event)"
-                        class="w-8 bg-transparent outline-none text-right"
-                        placeholder="'"
-                      />
-                      <span>'</span>
-                      <input
-                        type="number"
-                        [value]="dmsPoints()[$index].lat.seconds"
-                        (input)="onDmsChange($index, 'lat', 'seconds', $event)"
-                        class="w-12 bg-transparent outline-none text-right"
-                        placeholder='"'
-                        step="0.01"
-                      />
-                      <span>"</span>
-                      <span class="text-planora-basalt-500">{{
-                        dmsPoints()[$index].lat.direction
-                      }}</span>
-                    </div>
-                  }
+                    } @else {
+                      <div
+                        class="flex items-center gap-1 text-[10px] font-mono font-bold text-planora-basalt-900"
+                      >
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lat.degrees"
+                          (input)="onDmsChange($index, 'lat', 'degrees', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">°</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lat.minutes"
+                          (input)="onDmsChange($index, 'lat', 'minutes', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">'</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lat.seconds"
+                          (input)="onDmsChange($index, 'lat', 'seconds', $event)"
+                          class="w-10 bg-transparent outline-none text-right"
+                          step="0.01"
+                        />
+                        <span class="text-planora-basalt-400">"</span>
+                        <span class="ml-1 text-planora-clay-600 w-3 text-center">{{
+                          dmsPoints()[$index].lat.direction
+                        }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
               <button

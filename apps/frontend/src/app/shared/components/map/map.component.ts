@@ -42,7 +42,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   // ── Points / labels inputs ──
   @Input() points: [number, number][] = [];
   @Input() showLabels = false;
-  @Input() highlightedIndex: number | null = null;
+  @Input() set highlightedIndex(value: number | null) {
+    this._highlightedIndex = value;
+    this.updateHighlightLayer();
+  }
 
   // ── Outputs ──
   @Output() mapReady = new EventEmitter<maplibregl.Map>();
@@ -57,6 +60,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private draw?: MapLibreGlDraw;
   private geocoder?: any;
   private labelMarkers: maplibregl.Marker[] = [];
+  private _highlightedIndex: number | null = null;
 
   private defaultStyle: maplibregl.StyleSpecification = {
     version: 8,
@@ -116,6 +120,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.resizeObserver?.disconnect();
     this.map?.remove();
+  }
+
+  get highlightedIndex(): number | null {
+    return this._highlightedIndex;
   }
 
   // ── Map initialisation ──
@@ -247,6 +255,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.labelMarkers = [];
     this.draw?.changeMode('draw_polygon');
     this.updateTrashButtonState();
+
+    const source = this.map?.getSource('point-highlight') as maplibregl.GeoJSONSource;
+    source?.setData({ type: 'FeatureCollection', features: [] });
   }
 
   addManualPoint() {
@@ -382,7 +393,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const source = this.map.getSource('point-highlight') as maplibregl.GeoJSONSource;
     if (!source) return;
 
-    const idx = this.highlightedIndex;
+    const idx = this._highlightedIndex;
     const pts = this.points;
     if (idx !== null && pts[idx]) {
       source.setData({
