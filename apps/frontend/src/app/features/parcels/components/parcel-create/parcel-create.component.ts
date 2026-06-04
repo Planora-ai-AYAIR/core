@@ -7,6 +7,8 @@ import { ROUTES, STORAGE_KEYS } from '../../../../shared/config/constants';
 import area from '@turf/area';
 import length from '@turf/length';
 import distance from '@turf/distance';
+import kinks from '@turf/kinks';
+import * as turf from '@turf/turf';
 
 @Component({
   selector: 'app-parcel-create',
@@ -27,6 +29,9 @@ export class ParcelCreateComponent {
   saving = signal(false);
   dmsMode = signal(false);
   highlightedIndex = signal<number | null>(null);
+
+  geoJsonError = signal<string | null>(null);
+  isGeoJsonLoading = signal(false);
 
   sidebarOpen = signal(false);
 
@@ -215,5 +220,163 @@ export class ParcelCreateComponent {
     let decimal = degrees + minutes / 60 + seconds / 3600;
     if (direction === 'S' || direction === 'W') decimal = -decimal;
     return decimal;
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.geoJsonError.set(null);
+    this.isGeoJsonLoading.set(true);
+
+    // 1. Validate extension
+    const name = file.name.toLowerCase();
+    if (!name.endsWith('.geojson') && !name.endsWith('.json')) {
+      this.geoJsonError.set('Invalid file type. Please upload a .geojson or .json file.');
+      this.isGeoJsonLoading.set(false);
+      input.value = ''; // reset
+      return;
+    }
+
+    // 2. Validate size (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.geoJsonError.set('File too large. Maximum size is 5 MB.');
+      this.isGeoJsonLoading.set(false);
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      try {
+        const text = e.target?.result as string;
+        const geojson = JSON.parse(text);
+
+        // 3. Check GeoJSON structure: must be a FeatureCollection or a single Feature
+        let geometry;
+        if (geojson.type === 'FeatureCollection') {
+          if (!geojson.features || geojson.features.length === 0) {
+            throw new Error('GeoJSON file contains no features.');
+          }
+          geometry = geojson.features[0].geometry;
+        } else if (geojson.type === 'Feature') {
+          geometry = geojson.geometry;
+        } else if (geojson.type === 'Polygon' || geojson.type === 'MultiPolygon') {
+          geometry = geojson;
+        } else {
+          throw new Error('GeoJSON must be a FeatureCollection, Feature, or Polygon geometry.');
+        }
+
+        // 4. Extract ring from geometry
+        const ring = geometry.coordinates[0] as any[];
+
+        // Convert all coordinates (they may be DMS strings)
+        let convertedCoords: [number, number][] = [];
+        try {
+          convertedCoords = ring.map((pair) => {
+            if (!Array.isArray(pair) || pair.length < 2) {
+              throw new Error('Invalid coordinate pair');
+            }
+            return [this.parseDMSCoordinate(pair[0]), this.parseDMSCoordinate(pair[1])] as [
+              number,
+              number,
+            ];
+          });
+        } catch (err: any) {
+          throw new Error(`Coordinate parsing failed: ${err.message}`);
+        }
+
+        // Handle ring closure (after conversion, so we can compare numbers)
+        let coords: [number, number][] = [];
+        if (convertedCoords.length >= 3) {
+          const first = convertedCoords[0];
+          const last = convertedCoords[convertedCoords.length - 1];
+          if (first[0] === last[0] && first[1] === last[1]) {
+            coords = convertedCoords.slice(0, -1); // closed ring – remove duplicate
+          } else {
+            coords = convertedCoords; // open ring – keep all
+          }
+        }
+
+        if (coords.length < 3) {
+          throw new Error('The polygon must have at least 3 vertices.');
+        }
+
+        // 5. Check for self-intersections using the converted coords
+        const poly = turf.polygon([[...coords, coords[0]]]);
+        const intersectionPoints = kinks(poly);
+        if (intersectionPoints.features.length > 0) {
+          throw new Error('The polygon is self-intersecting. Please fix the geometry.');
+        }
+
+        // Success: load the converted points
+        this.geoJsonError.set(null);
+        this.mapComponent?.setPoints(coords);
+        const bounds = this.calculateBounds(coords);
+        this.mapComponent?.map?.fitBounds(bounds, { padding: 50, duration: 1000 });
+
+        // Optionally set parcel name from file name
+        if (!this.parcelName()) {
+          const baseName = file.name.replace(/\.[^/.]+$/, '');
+          this.parcelName.set(baseName);
+        }
+      } catch (err: any) {
+        this.geoJsonError.set(err.message || 'Invalid GeoJSON file.');
+      } finally {
+        this.isGeoJsonLoading.set(false);
+        input.value = ''; // reset file input
+      }
+    };
+
+    reader.onerror = () => {
+      this.geoJsonError.set('Failed to read the file.');
+      this.isGeoJsonLoading.set(false);
+      input.value = '';
+    };
+
+    reader.readAsText(file);
+  }
+
+  private parseDMSCoordinate(value: any): number {
+    if (typeof value === 'number') return value;
+
+    if (typeof value !== 'string') {
+      throw new Error('Coordinate must be a number or a DMS string.');
+    }
+
+    const trimmed = value.trim();
+
+    // Check if it's a plain decimal number
+    const plainNumber = parseFloat(trimmed);
+    if (!isNaN(plainNumber) && /^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(trimmed)) {
+      return plainNumber;
+    }
+
+    // Standard DMS: 40°26'46"N
+    const dmsRegex = /^([+-]?\d+)\s*°\s*(\d+)\s*'\s*(\d+(?:\.\d+)?)\s*"\s*([NSEW])$/i;
+    const match = trimmed.match(dmsRegex);
+    if (match) {
+      return this.dmsToDecimal(
+        parseInt(match[1], 10),
+        parseInt(match[2], 10),
+        parseFloat(match[3]),
+        match[4].toUpperCase(),
+      );
+    }
+
+    // Alternative spacing: 40 26 46 N
+    const altRegex = /^(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)\s*([NSEW])$/i;
+    const altMatch = trimmed.match(altRegex);
+    if (altMatch) {
+      return this.dmsToDecimal(
+        parseInt(altMatch[1], 10),
+        parseInt(altMatch[2], 10),
+        parseFloat(altMatch[3]),
+        altMatch[4].toUpperCase(),
+      );
+    }
+
+    throw new Error(`Invalid DMS coordinate: "${value}"`);
   }
 }
