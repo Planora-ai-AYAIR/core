@@ -1,7 +1,6 @@
 using Planora.Application.Interfaces.Repositories;
-using Planora.Domain.Entities;
 using Planora.Infrastructure.Persistence.Contexts;
-
+using Planora.Domain.Common;
 namespace Planora.Infrastructure.Repositories;
 
 public sealed class AuditLogRepository : IAuditLogRepository
