@@ -6,24 +6,19 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Stage 2: Build with full context
+# Stage 2: Build
 # Initialize the .NET 8.0 SDK environment required to compile the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# 1. Copy all project definition (.csproj) files to leverage Docker layer caching for NuGet dependencies
-COPY ["apps/api-dotnet/src/Planora.API/Planora.Api.csproj", "apps/api-dotnet/src/Planora.API/"]
-COPY ["apps/api-dotnet/src/Planora.Application/Planora.Application.csproj", "apps/api-dotnet/src/Planora.Application/"]
-COPY ["apps/api-dotnet/src/Planora.Domain/Planora.Domain.csproj", "apps/api-dotnet/src/Planora.Domain/"]
-COPY ["apps/api-dotnet/src/Planora.Infrastructure/Planora.Infrastructure.csproj", "apps/api-dotnet/src/Planora.Infrastructure/"]
+# Copy the project definition file from the current directory context
+COPY ["Planora.Api.csproj", "."]
+RUN dotnet restore "./Planora.Api.csproj"
 
-# 2. Restore NuGet dependencies based on the primary API project entry point
-RUN dotnet restore "apps/api-dotnet/src/Planora.API/Planora.Api.csproj"
-
-# 3. Copy the remaining source code and build the API project using the defined configuration
+# Copy the remaining source code in the local directory
 COPY . .
-WORKDIR "/src/apps/api-dotnet/src/Planora.API"
+WORKDIR "/src/."
 RUN dotnet build "Planora.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Stage 3: Publish
