@@ -1,4 +1,3 @@
-using System.Net;
 using MediatR;
 using Planora.Application.Common.Helpers;
 using Planora.Application.Features.Auth;
@@ -14,32 +13,17 @@ public sealed class LoginHandler(
     IJwtService jwtService,
     IOtpService otpService,
     IEmailService emailService,
-    IAuditLogRepository auditLogRepository) : IRequestHandler<LoginCommand, Response<LoginResponse>>
+    IAuditLogRepository auditLogRepository) : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
-
-  public async Task<Response<LoginResponse>> Handle(LoginCommand request, CancellationToken ct)
+    public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken ct)
     {
-        var handler = new ResponseHandler();
-
         var user = await userRepository.FindByEmailAsync(request.Email, ct);
         if (user is null)
-        {
-            return new Response<LoginResponse>("Invalid credentials")
-            {
-                StatusCode = HttpStatusCode.Unauthorized,
-                Succeeded = false
-            };
-        }
+            return AuthErrors.InvalidCredentials;
 
         var passwordValid = await userRepository.CheckPasswordAsync(user.Id, request.Password, ct);
         if (!passwordValid)
-        {
-            return new Response<LoginResponse>("Invalid credentials")
-            {
-                StatusCode = HttpStatusCode.Unauthorized,
-                Succeeded = false
-            };
-        }
+            return AuthErrors.InvalidCredentials;
 
         var roles = await userRepository.GetRolesAsync(user.Id, ct);
         var role = roles.FirstOrDefault() ?? AuthRoles.Client;
@@ -50,19 +34,7 @@ public sealed class LoginHandler(
             var displayName = EmailDisplayNameHelper.GetDisplayName(user.FirstName, user.LastName, user.Email);
             await emailService.SendOtpAsync(user.Email, displayName, otp, "Verify your email", ct);
 
-            var pendingResponse = new LoginResponse(
-                user.Id,
-                user.Email,
-                user.PhoneNumber,
-                role,
-                false,
-                null,
-                null);
-
-            return new Response<LoginResponse>(pendingResponse, "Email not confirmed. OTP sent.")
-            {
-                StatusCode = HttpStatusCode.Found
-            };
+            return AuthErrors.EmailNotConfirmed;
         }
 
         var (accessToken, _) = jwtService.GenerateAccessToken(user.Id, user.Email, roles);
@@ -71,16 +43,6 @@ public sealed class LoginHandler(
 
         await auditLogRepository.LogAsync(user.Id, "Login", null, ct);
 
-        var response = new LoginResponse(
-            user.Id,
-            user.Email,
-            user.PhoneNumber,
-            role,
-            true,
-            accessToken,
-            refreshToken);
-
-        return handler.Success(response, "Login successful.");
+        return new LoginResponse(user.Id, user.Email, user.PhoneNumber, role, true, accessToken, refreshToken);
     }
-
 }
