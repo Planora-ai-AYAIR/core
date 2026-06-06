@@ -7,4 +7,4 @@ public sealed record ResetPasswordCommand(
     Guid UserId,
     string Otp,
     string NewPassword,
-    string ConfirmPassword) : IRequest<Response<ResetPasswordResponse>>;
+    string ConfirmPassword) : IRequest<Result<ResetPasswordResponse>>;

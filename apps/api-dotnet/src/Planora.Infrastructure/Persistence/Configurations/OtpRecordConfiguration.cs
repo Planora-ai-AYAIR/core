@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Planora.Domain.Entities;
+using Planora.Domain.Common;
 
 namespace Planora.Infrastructure.Persistence.Configurations;
 

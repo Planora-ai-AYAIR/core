@@ -10,12 +10,10 @@ namespace Planora.Application.Features.Auth.Commands.ForgotPassword;
 public sealed class ForgotPasswordHandler(
     IUserRepository userRepository,
     IOtpService otpService,
-    IEmailService emailService) : IRequestHandler<ForgotPasswordCommand, Response<ForgotPasswordResponse>>
+    IEmailService emailService) : IRequestHandler<ForgotPasswordCommand, Result<ForgotPasswordResponse>>
 {
-    public async Task<Response<ForgotPasswordResponse>> Handle(ForgotPasswordCommand request, CancellationToken ct)
+    public async Task<Result<ForgotPasswordResponse>> Handle(ForgotPasswordCommand request, CancellationToken ct)
     {
-        var handler = new ResponseHandler();
-
         var user = !string.IsNullOrWhiteSpace(request.Email)
             ? await userRepository.FindByEmailAsync(request.Email, ct)
             : null;
@@ -26,15 +24,13 @@ public sealed class ForgotPasswordHandler(
         }
 
         if (user is null)
-        {
-            return handler.NotFound<ForgotPasswordResponse>("User not found.");
-        }
+            return AuthErrors.UserNotFound; 
 
         var otp = await otpService.GenerateAsync(user.Id, OtpPurposes.PasswordReset, TimeSpan.FromMinutes(10), ct);
         var displayName = EmailDisplayNameHelper.GetDisplayName(user.FirstName, user.LastName, user.Email);
+
         await emailService.SendOtpAsync(user.Email, displayName, otp, "Reset your password", ct);
 
-        return handler.Success(new ForgotPasswordResponse(user.Id), "OTP sent.");
+        return new ForgotPasswordResponse(user.Id);
     }
-
 }

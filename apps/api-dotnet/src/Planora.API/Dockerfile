@@ -1,30 +1,27 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-
-
-# This stage is used to build the service project
+# Stage 1 — Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Planora.Api.csproj", "."]
-RUN dotnet restore "./Planora.Api.csproj"
+COPY ["Planora.API/Planora.Api.csproj", "Planora.API/"]
+COPY ["Planora.Application/Planora.Application.csproj", "Planora.Application/"]
+COPY ["Planora.Infrastructure/Planora.Infrastructure.csproj", "Planora.Infrastructure/"]
+COPY ["Planora.Domain/Planora.Domain.csproj", "Planora.Domain/"]
+RUN dotnet restore "Planora.API/Planora.Api.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./Planora.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Planora.API"
+RUN dotnet build "Planora.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
+# Stage 2 — Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Planora.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Planora.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+# Stage 3 — Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+USER $APP_UID
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Planora.dll"]
+# Fixed: DLL name matches Planora.Api.csproj — was incorrectly "Planora.dll"
+ENTRYPOINT ["dotnet", "Planora.Api.dll"]

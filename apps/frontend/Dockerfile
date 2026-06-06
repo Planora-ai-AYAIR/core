@@ -1,4 +1,5 @@
-FROM node:20-alpine AS build
+# Stage 1 — Build
+FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -9,10 +10,10 @@ COPY . .
 
 RUN npm run build
 
-# ── Stage 2: Serve ───────────────────────────────────────────────────────────
+# Stage 2 — Serve
 # Use a minimal nginx image to serve the compiled static files.
 # No Node.js runtime in production — just a lean static file server.
-FROM nginx:alpine AS runtime
+FROM nginx:1.27-alpine AS runtime
 
 COPY --from=build /app/dist/ /usr/share/nginx/html
 

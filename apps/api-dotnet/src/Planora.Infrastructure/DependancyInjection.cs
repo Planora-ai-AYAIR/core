@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
 using FluentEmail.Core;
 using FluentEmail.Smtp;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.Identity;
@@ -48,19 +49,24 @@ public static class DependancyInjection
     }
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionMode = configuration.GetValue<string>("ConnectionMode");
+        var connectionString = connectionMode == "Prod"
+            ? configuration.GetConnectionString("ProdCS")
+            : configuration.GetConnectionString("DevCS");
+
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        dataSourceBuilder.UseNetTopologySuite();
+        var dataSource = dataSourceBuilder.Build();
+
         services.AddDbContext<PlanoraDbContext>((sp, options) =>
         {
-            var connectionMode = configuration.GetValue<string>("ConnectionMode");
-            var connectionString = connectionMode == "Prod"
-                ? configuration.GetConnectionString("ProdCS")
-                : configuration.GetConnectionString("DevCS");
-            options
-                .UseNpgsql(
-                    connectionString,
-                    npgsqlOptions =>
-                    {
-                        npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
-                    })
+            options.UseNpgsql(
+                dataSource, 
+                npgsqlOptions =>
+                {
+                    npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
+                    npgsqlOptions.UseNetTopologySuite();
+                })
                 .UseSnakeCaseNamingConvention();
         });
 
