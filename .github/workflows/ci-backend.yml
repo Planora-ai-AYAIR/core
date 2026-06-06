@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/api-dotnet/**'
   push:
+    branches: [dev, main]
     paths:
       - 'apps/api-dotnet/**'
 
@@ -12,8 +13,31 @@ permissions:
   contents: read
 
 jobs:
-  backend-check:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: echo ".NET API CI placeholder"
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        working-directory: apps/api-dotnet/src
+        run: dotnet restore
+
+      - name: Build
+        working-directory: apps/api-dotnet/src
+        run: dotnet build --no-restore -c Release
+
+      - name: Run tests
+        working-directory: apps/api-dotnet/src
+        run: dotnet test --no-build -c Release --verbosity normal
+
+      - name: Docker build check
+        run: |
+          docker build \
+            -f apps/api-dotnet/src/Planora.API/Dockerfile \
+            -t planora-api:ci-check \
+            apps/api-dotnet/src

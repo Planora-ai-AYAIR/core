@@ -8,7 +8,7 @@ export const ROUTES = {
 
   dashboard: '/app/dashboard',
   newAnalysis: '/app/analyses',
-
+  newParcel: '/app/parcels/new',
 };
 
 export const REG_EXP = {
@@ -33,7 +33,6 @@ export const VALIDATION_CONFIG = {
   MIN_NAME_LENGTH: 3,
   MIN_PASSWORD_LENGTH: 8,
   MIN_AGE: 18,
-
 } as const;
 
 export const AUTH_MESSAGES = {

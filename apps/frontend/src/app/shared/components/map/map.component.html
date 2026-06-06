@@ -1,0 +1,13 @@
+<div
+  #mapContainer
+  style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%"
+></div>
+
+@if (showSatelliteToggle) {
+  <button
+    (click)="toggleSatellite()"
+    class="satellite-toggle absolute top-6 right-15 z-10 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg hover:bg-white transition"
+  >
+    {{ isSatelliteView ? '🗺 Map' : '🛰 Satellite' }}
+  </button>
+}
