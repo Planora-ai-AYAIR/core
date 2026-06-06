@@ -1,6 +1,6 @@
 using Planora.Domain.Shared.Abstractions;
 
-namespace Planora.Domain.Entities;
+namespace Planora.Domain.Common;
 
 public sealed class RefreshToken : AuditableEntity
 {

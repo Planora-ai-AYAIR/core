@@ -2,8 +2,8 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Repositories.DTOs;
-using Planora.Domain.Entities;
 using Planora.Infrastructure.Persistence.Contexts;
+using Planora.Domain.Common;
 
 namespace Planora.Infrastructure.Repositories;
 

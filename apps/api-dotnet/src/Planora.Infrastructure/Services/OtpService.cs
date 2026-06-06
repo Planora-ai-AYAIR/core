@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Planora.Application.Interfaces.Services;
-using Planora.Domain.Entities;
+using Planora.Domain.Common;
 using Planora.Infrastructure.Persistence.Contexts;
 
 namespace Planora.Infrastructure.Services;

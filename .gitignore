@@ -22,3 +22,6 @@ __pycache__/
 .idea/
 apps/api-dotnet/src/CLAUDE.md
 /apps/api-dotnet/src/CLAUDE.md
+**/.vs/
+*.user
+*.suo
