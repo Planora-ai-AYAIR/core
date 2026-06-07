@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Planora.Application.Features.Auth.Dtos;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Repositories.DTOs;
 using Planora.Infrastructure.Identity;
@@ -166,6 +167,10 @@ public sealed class UserRepository : IUserRepository
             user.PhoneNumber,
             user.FirstName,
             user.LastName,
-            user.EmailConfirmed);
+            user.CompanyName,
+            user.Role,
+            user.SubscriptionTier,
+            user.EmailConfirmed,
+            user.CreatedAt);
     }
 }
