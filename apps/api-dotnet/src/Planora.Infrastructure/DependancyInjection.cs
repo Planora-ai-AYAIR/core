@@ -12,6 +12,7 @@ using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
+using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
 
@@ -97,6 +98,7 @@ public static class DependancyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IParcelRepository, ParcelRepository>();
 
         return services;
     }
