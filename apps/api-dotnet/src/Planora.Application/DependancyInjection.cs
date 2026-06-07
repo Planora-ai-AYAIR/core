@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Planora.Application;
@@ -7,11 +8,21 @@ public static class DependancyInjection
 {
 	public static IServiceCollection AddApplicationServices(this IServiceCollection services)
 	{
-		var applicationAssembly = typeof(AssemblyMarker).Assembly;
+        var assembly = typeof(AssemblyMarker).Assembly;
 
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
-		services.AddValidatorsFromAssembly(applicationAssembly);
+        // 1. MediatR: scans for Handlers, Pre-processors (LoggingBehaviour), etc.
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(assembly);
 
-		return services;
+            // Open generic pipeline behaviors (FIFO order)
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            // cfg.AddOpenBehavior(typeof(PerformanceBehavior<,>)); // optional
+        });
+
+        // 2. FluentValidation: scans for all AbstractValidator<T> implementations
+        services.AddValidatorsFromAssembly(assembly);
+
+        return services;
 	}
 }
