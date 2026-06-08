@@ -29,9 +29,7 @@ jobs:
 
       - name: Lint with ruff
         working-directory: apps/ai-python
-        run: |
-          pip install ruff
-          ruff check src/
+        run: ruff check src/
 
       - name: Run tests
         working-directory: apps/ai-python
