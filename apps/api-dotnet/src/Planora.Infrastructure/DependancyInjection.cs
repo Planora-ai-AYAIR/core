@@ -1,9 +1,6 @@
-﻿using System.Net;
-using System.Net.Mail;
-using FluentEmail.Core;
-using FluentEmail.Smtp;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -15,6 +12,8 @@ using Planora.Infrastructure.Persistence.Contexts;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
+using System.Net;
+using System.Net.Mail;
 
 namespace Planora.Infrastructure;
 
@@ -27,7 +26,40 @@ public static class DependancyInjection
         // --- Configuration Options (bound from appsettings sections) ---
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
-        //services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
+        services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
+
+        var cacheOptions = configuration
+            .GetSection(CacheOptions.SectionName)
+            .Get<CacheOptions>()
+            ?? new CacheOptions();
+
+        var redisConn = configuration.GetConnectionString("RedisConnectionString");
+        if (!string.IsNullOrWhiteSpace(redisConn))
+        {
+            services.AddStackExchangeRedisCache(opts =>
+            {
+                opts.Configuration = redisConn;
+            });
+        }
+
+        services.AddHybridCache(options =>
+        {
+            if (cacheOptions.MaximumKeyLength.HasValue)
+            {
+                options.MaximumKeyLength = cacheOptions.MaximumKeyLength.Value;
+            }
+
+            if (cacheOptions.MaximumPayloadBytes.HasValue)
+            {
+                options.MaximumPayloadBytes = cacheOptions.MaximumPayloadBytes.Value;
+            }
+
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                Expiration = cacheOptions.DefaultExpiration,
+                LocalCacheExpiration = cacheOptions.DefaultLocalCacheExpiration
+            };
+        });
 
         var emailOptions = configuration.GetSection(EmailOptions.SectionName).Get<EmailOptions>()
             ?? new EmailOptions();
@@ -62,7 +94,7 @@ public static class DependancyInjection
         services.AddDbContext<PlanoraDbContext>((sp, options) =>
         {
             options.UseNpgsql(
-                dataSource, 
+                dataSource,
                 npgsqlOptions =>
                 {
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
@@ -98,6 +130,7 @@ public static class DependancyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
 
         return services;
