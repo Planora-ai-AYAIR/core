@@ -1,3 +1,5 @@
+using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Planora.Api;
 using Planora.Application;
@@ -42,6 +44,16 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHangfireDashboard("/jobs", new DashboardOptions
+    {
+        Authorization = [
+            new HangfireCustomBasicAuthenticationFilter{
+                User = app.Configuration.GetValue<string>("HangfireSettings:Username"),
+                Pass = app.Configuration.GetValue<string>("HangfireSettings:Password")
+            }
+        ],
+        DashboardTitle = "Planora"
+    });
 }
 
 app.UseHttpsRedirection();

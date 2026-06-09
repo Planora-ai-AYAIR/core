@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
@@ -74,7 +76,8 @@ public static class DependancyInjection
 
         services
             .AddDatabase(configuration)
-            .AddAuthConfig();
+            .AddAuthConfig()
+            .AddBackgroundJobsConfig(configuration);
 
 
 
@@ -133,6 +136,21 @@ public static class DependancyInjection
         services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
 
+        return services;
+    }
+
+    private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+
+
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UsePostgreSqlStorage(options =>
+                options.UseNpgsqlConnection(configuration.GetConnectionString("HangfireConnectionString"))));
+
+        services.AddHangfireServer();
         return services;
     }
 
