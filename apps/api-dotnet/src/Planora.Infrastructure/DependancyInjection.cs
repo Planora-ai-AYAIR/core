@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
@@ -6,16 +8,16 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Planora.Application.Interfaces.Jobs;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
+using Planora.Infrastructure.BackgroundJobs;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
-using System.Net;
-using System.Net.Mail;
 
 namespace Planora.Infrastructure;
 
@@ -135,6 +137,7 @@ public static class DependancyInjection
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
+        services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
 
         return services;
     }
