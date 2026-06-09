@@ -1,7 +1,5 @@
-﻿using System.Net;
-using System.Net.Mail;
-using FluentEmail.Core;
-using FluentEmail.Smtp;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +13,8 @@ using Planora.Infrastructure.Persistence.Contexts;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
+using System.Net;
+using System.Net.Mail;
 
 namespace Planora.Infrastructure;
 
@@ -42,7 +42,8 @@ public static class DependancyInjection
 
         services
             .AddDatabase(configuration)
-            .AddAuthConfig();
+            .AddAuthConfig()
+            .AddBackgroundJobsConfig(configuration);
 
 
 
@@ -62,7 +63,7 @@ public static class DependancyInjection
         services.AddDbContext<PlanoraDbContext>((sp, options) =>
         {
             options.UseNpgsql(
-                dataSource, 
+                dataSource,
                 npgsqlOptions =>
                 {
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
@@ -100,6 +101,21 @@ public static class DependancyInjection
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
 
+        return services;
+    }
+
+    private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+
+
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UsePostgreSqlStorage(options =>
+                options.UseNpgsqlConnection(configuration.GetConnectionString("HangfireConnectionString"))));
+
+        services.AddHangfireServer();
         return services;
     }
 
