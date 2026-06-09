@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Planora.Application.Common.Options;
-using Planora.Application.Features.Parcels.Dtos;
+using Planora.Application.Features.Parcels.Dtos.CreateParcel;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Parcels;
