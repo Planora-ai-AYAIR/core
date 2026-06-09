@@ -4,6 +4,9 @@ using Planora.Application;
 using Planora.Infrastructure;
 using Planora.Infrastructure.Persistence.Seeders;
 using Serilog;
+using System.Text.Json;
+using FluentValidation;
+using Planora.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,8 @@ builder.Services
     .AddPresentationServices(builder.Configuration);
 
 builder.Services.AddControllers();
+// Register IMiddleware implementation so it can be injected and used by UseMiddleware
+builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration)
 );
@@ -29,6 +34,9 @@ await AuthSeeder.SeedAsync(app.Services);
 // ──────────────────────────────────────────────
 
 app.UseSerilogRequestLogging();
+
+// Use the IMiddleware-based global exception handler (registered above)
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
