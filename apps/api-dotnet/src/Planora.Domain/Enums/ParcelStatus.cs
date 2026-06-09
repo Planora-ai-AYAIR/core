@@ -8,6 +8,7 @@ namespace Planora.Domain.Enums
 {
     public enum ParcelStatus { 
         Draft, 
+        Queued,
         Processing, 
         Completed, 
         Failed 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planora.Application.Features.Parcels.Dtos
+namespace Planora.Application.Features.Parcels.Dtos.CreateParcel
 {
     public sealed record BoundingBoxDto(
     double MinX,

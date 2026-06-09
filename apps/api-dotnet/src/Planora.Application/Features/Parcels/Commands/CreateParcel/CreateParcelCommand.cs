@@ -1,5 +1,5 @@
 using MediatR;
-using Planora.Application.Features.Parcels.Dtos;
+using Planora.Application.Features.Parcels.Dtos.CreateParcel;
 using Planora.Domain.Shared.Results;
 
 public sealed record CreateParcelCommand(

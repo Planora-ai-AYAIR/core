@@ -51,5 +51,20 @@ namespace Planora.Domain.Parcels
 
             return new Parcel(id, userId, name.Trim(), boundary, areaHectares, centroid, geojsonS3Key);
         }
+
+        public void MarkAsProcessing()
+        {
+            Status = ParcelStatus.Processing;
+        }
+
+        public void MarkAsCompleted()
+        {
+            Status = ParcelStatus.Completed;
+        }
+
+        public void MarkAsFailed()
+        {
+            Status = ParcelStatus.Failed;
+        }
     }
 }

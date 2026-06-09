@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Planora.Api.Helpers;
 using Planora.Application.Features.Parcels.Commands.CreateParcel;
-using Planora.Application.Features.Parcels.Dtos;
+using Planora.Application.Features.Parcels.Dtos.CreateParcel;
 using Planora.Domain.Shared.Results;
 
 namespace Planora.Api.Controllers;
