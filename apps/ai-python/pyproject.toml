@@ -20,4 +20,4 @@ dev = [
 
 [build-system]
 requires = ["setuptools>=72.0"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
