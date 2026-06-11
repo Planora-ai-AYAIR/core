@@ -10,7 +10,12 @@ public sealed class HybridCacheService : IHybridCacheService
 {
     private readonly HybridCache _cache;
     private readonly CacheOptions _options;
-
+    private static readonly HybridCacheEntryOptions _readOnlyOptions = new()
+    {
+        Flags = HybridCacheEntryFlags.DisableUnderlyingData |
+                HybridCacheEntryFlags.DisableLocalCacheWrite |
+                HybridCacheEntryFlags.DisableDistributedCacheWrite
+    };
     public HybridCacheService(HybridCache cache, IOptions<CacheOptions> options)
     {
         _cache = cache;
@@ -40,6 +45,20 @@ public sealed class HybridCacheService : IHybridCacheService
             entryOptions,
             tags,
             ct);
+    }
+    
+    public async Task<T?> GetAsync<T>(
+        string key,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+    
+        return await _cache.GetOrCreateAsync<T>(
+            key,
+            factory: null!,                   
+            options: _readOnlyOptions,
+            tags: null,
+            cancellationToken: ct);
     }
 
     public async Task SetAsync<T>(
