@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Planora.Application.Common.Behaviours;
 
 namespace Planora.Application;
 
@@ -17,6 +18,7 @@ public static class DependancyInjection
 
             // Open generic pipeline behaviors (FIFO order)
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
             // cfg.AddOpenBehavior(typeof(PerformanceBehavior<,>)); // optional
         });
 
