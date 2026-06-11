@@ -9,6 +9,7 @@ using Npgsql;
 using Planora.Application.Interfaces.Jobs;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
+using Planora.Infrastructure.API;
 using Planora.Infrastructure.BackgroundJobs;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
@@ -16,6 +17,7 @@ using Planora.Infrastructure.Persistence.Contexts;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
+using Refit;
 using System.Net;
 using System.Net.Mail;
 
@@ -80,6 +82,13 @@ public static class DependancyInjection
             .AddDatabase(configuration)
             .AddAuthConfig()
             .AddBackgroundJobsConfig(configuration);
+        
+        services.AddRefitClient<IAiApiClient>()
+        .ConfigureHttpClient((client) =>
+        {
+            client.BaseAddress = new Uri(configuration["AiApi:BaseUrl"]);
+        }
+);
 
 
 
