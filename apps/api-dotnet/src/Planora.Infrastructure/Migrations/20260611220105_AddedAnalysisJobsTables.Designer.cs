@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Planora.Infrastructure.Persistence.Contexts;
 namespace Planora.Infrastructure.Migrations
 {
     [DbContext(typeof(PlanoraDbContext))]
-    partial class PlanoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260611220105_AddedAnalysisJobsTables")]
+    partial class AddedAnalysisJobsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
