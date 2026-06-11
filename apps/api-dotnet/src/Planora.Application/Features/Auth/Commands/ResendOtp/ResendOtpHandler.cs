@@ -1,6 +1,5 @@
 using MediatR;
 using Planora.Application.Common.Helpers;
-using Planora.Application.Features.Auth;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Shared.Results;
@@ -10,7 +9,7 @@ namespace Planora.Application.Features.Auth.Commands.ResendOtp;
 public sealed class ResendOtpHandler(
     IUserRepository userRepository,
     IOtpService otpService,
-    IEmailService emailService) : IRequestHandler<ResendOtpCommand, Result<ResendOtpResponse>>
+    IBackgroundJobService backgroundJob) : IRequestHandler<ResendOtpCommand, Result<ResendOtpResponse>>
 {
     public async Task<Result<ResendOtpResponse>> Handle(ResendOtpCommand request, CancellationToken ct)
     {
@@ -24,7 +23,7 @@ public sealed class ResendOtpHandler(
         var otp = await otpService.GenerateAsync(user.Id, OtpPurposes.EmailVerification, TimeSpan.FromMinutes(10), ct);
         var displayName = EmailDisplayNameHelper.GetDisplayName(user.FirstName, user.LastName, user.Email);
 
-        await emailService.SendOtpAsync(user.Email, displayName, otp, "Verify your email", ct);
+        backgroundJob.Enqueue<IEmailService>(x => x.SendOtpAsync(user.Email, displayName, otp, "Verify your email", ct));
 
         return new ResendOtpResponse(user.Id, false);
     }

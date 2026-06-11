@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Mail;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +16,8 @@ using Planora.Infrastructure.Persistence.Contexts;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
+using System.Net;
+using System.Net.Mail;
 
 namespace Planora.Infrastructure;
 
@@ -135,6 +135,7 @@ public static class DependancyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IBackgroundJobService, BackgroundJobService>();
         services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();

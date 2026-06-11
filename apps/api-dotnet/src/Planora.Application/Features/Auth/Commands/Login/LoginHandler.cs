@@ -11,8 +11,8 @@ public sealed class LoginHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IJwtService jwtService,
     IOtpService otpService,
-    IEmailService emailService,
-    IAuditLogRepository auditLogRepository) : IRequestHandler<LoginCommand, Result<LoginResponse>>
+    IAuditLogRepository auditLogRepository,
+    IBackgroundJobService backgroundJob) : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken ct)
     {
@@ -31,7 +31,7 @@ public sealed class LoginHandler(
         {
             var otp = await otpService.GenerateAsync(user.Id, OtpPurposes.EmailVerification, TimeSpan.FromMinutes(10), ct);
             var displayName = EmailDisplayNameHelper.GetDisplayName(user.FirstName, user.LastName, user.Email);
-            await emailService.SendOtpAsync(user.Email, displayName, otp, "Verify your email", ct);
+            backgroundJob.Enqueue<IEmailService>(x => x.SendOtpAsync(user.Email, displayName, otp, "Verify your email", ct));
 
             return AuthErrors.EmailNotConfirmed(user.Id);
         }
