@@ -89,7 +89,8 @@ namespace Planora.Api.Controllers
                 // Example logic to extract field name if format is "Entity.Field.Error"
                 field = e.Type == ErrorKind.Validation ? ExtractFieldName(e.Code) : null,
                 code = ExtractErrorCode(e.Code),
-                message = e.Description
+                message = e.Description,
+                metaData = e.MetaData
             });
 
             return StatusCode(statusCode, new
