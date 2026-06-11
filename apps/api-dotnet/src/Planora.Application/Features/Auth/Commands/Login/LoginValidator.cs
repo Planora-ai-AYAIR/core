@@ -1,8 +1,9 @@
 using FluentValidation;
+using Planora.Application.Features.Auth.Dtos;
 
 namespace Planora.Application.Features.Auth.Commands.Login;
 
-public sealed class LoginValidator : AbstractValidator<LoginCommand>
+public sealed class LoginValidator : AbstractValidator<LoginRequest>
 {
     public LoginValidator()
     {

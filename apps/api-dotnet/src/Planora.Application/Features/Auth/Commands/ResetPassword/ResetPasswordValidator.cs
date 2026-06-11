@@ -1,8 +1,9 @@
 using FluentValidation;
+using Planora.Application.Features.Auth.Dtos;
 
 namespace Planora.Application.Features.Auth.Commands.ResetPassword;
 
-public sealed class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
+public sealed class ResetPasswordValidator : AbstractValidator<ResetPasswordRequest>
 {
     public ResetPasswordValidator()
     {
