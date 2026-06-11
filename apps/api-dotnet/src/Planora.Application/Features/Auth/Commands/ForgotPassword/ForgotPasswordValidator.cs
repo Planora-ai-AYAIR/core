@@ -1,8 +1,9 @@
 using FluentValidation;
+using Planora.Application.Features.Auth.Dtos;
 
 namespace Planora.Application.Features.Auth.Commands.ForgotPassword;
 
-public sealed class ForgotPasswordValidator : AbstractValidator<ForgotPasswordCommand>
+public sealed class ForgotPasswordValidator : AbstractValidator<ForgotPasswordRequest>
 {
     public ForgotPasswordValidator()
     {

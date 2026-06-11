@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using Planora.Domain.Enums;
 using Planora.Domain.Shared.Abstractions;
 using Planora.Domain.Shared.Results;
@@ -22,7 +17,7 @@ namespace Planora.Domain.Parcels
         public string? GeojsonKey { get; private set; }
         public ParcelStatus Status { get; private set; }
 
-        private Parcel() { } 
+        private Parcel() { }
 
         private Parcel(Guid id,
             Guid userId,

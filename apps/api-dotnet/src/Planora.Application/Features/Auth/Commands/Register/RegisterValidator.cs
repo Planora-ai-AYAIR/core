@@ -1,8 +1,9 @@
 using FluentValidation;
+using Planora.Application.Features.Auth.Dtos;
 
 namespace Planora.Application.Features.Auth.Commands.Register;
 
-public sealed class RegisterValidator : AbstractValidator<RegisterCommand>
+public sealed class RegisterValidator : AbstractValidator<RegisterRequest>
 {
     public RegisterValidator()
     {

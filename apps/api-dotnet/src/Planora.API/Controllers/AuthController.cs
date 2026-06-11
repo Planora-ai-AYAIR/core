@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Planora.Application.Features.Auth.Commands.ChangePassword;
 using Planora.Application.Features.Auth.Commands.ForgotPassword;
 using Planora.Application.Features.Auth.Commands.Login;
 using Planora.Application.Features.Auth.Commands.Logout;
@@ -10,8 +9,10 @@ using Planora.Application.Features.Auth.Commands.Register;
 using Planora.Application.Features.Auth.Commands.ResendOtp;
 using Planora.Application.Features.Auth.Commands.ResetPassword;
 using Planora.Application.Features.Auth.Commands.VerifyOtp;
+using Planora.Application.Features.Auth.Dtos;
 using Planora.Api.Helpers;
 using Planora.Domain.Shared.Results; // Added to access the Error class
+using ChangePasswordCommand = Planora.Application.Features.Auth.Commands.ChangePassword.ChangePasswordCommand;
 
 namespace Planora.Api.Controllers;
 
@@ -26,8 +27,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
+        var command = new LoginCommand(request.Email, request.Password);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
@@ -36,8 +38,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterCommand command, CancellationToken ct)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
+        var command = new RegisterCommand(request.Email, request.Password, request.PhoneNumber, request.FirstName, request.LastName);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
@@ -46,8 +49,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("verify-otp")]
-    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpCommand command, CancellationToken ct)
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request, CancellationToken ct)
     {
+        var command = new VerifyOtpCommand(request.UserId, request.Otp);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
@@ -56,8 +60,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("resend-otp")]
-    public async Task<IActionResult> ResendOtp([FromBody] ResendOtpCommand command, CancellationToken ct)
+    public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequest request, CancellationToken ct)
     {
+        var command = new ResendOtpCommand(request.UserId);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
@@ -66,8 +71,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken ct)
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct)
     {
+        var command = new ForgotPasswordCommand(request.Email, request.PhoneNumber);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
@@ -76,8 +82,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken ct)
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken ct)
     {
+        var command = new ResetPasswordCommand(request.UserId, request.Otp, request.NewPassword, request.ConfirmPassword);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
@@ -86,8 +93,9 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command, CancellationToken ct)
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken ct)
     {
+        var command = new RefreshTokenCommand(request.RefreshToken);
         var result = await _sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
