@@ -9,7 +9,10 @@ public interface IHybridCacheService
         Func<CancellationToken, Task<T>> factory,
         CacheEntryOptions? options = null,
         CancellationToken ct = default);
-
+     Task<T?> GetAsync<T>(
+        string key,
+        CancellationToken ct = default);
+    
     Task SetAsync<T>(
         string key,
         T value,
