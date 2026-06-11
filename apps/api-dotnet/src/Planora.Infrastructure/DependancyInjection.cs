@@ -136,7 +136,8 @@ public static class DependancyInjection
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<PlanoraDbContext>()
             .AddDefaultTokenProviders();
-
+        
+        // Repositories Registeration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -150,7 +151,10 @@ public static class DependancyInjection
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IBackgroundJobService, BackgroundJobService>();
         services.AddScoped<IHybridCacheService, HybridCacheService>();
-        services.AddScoped<IParcelRepository, ParcelRepository>();
+        services.AddScoped<IAiAnalysisService, AiAnalysisService>();
+        
+        
+        //Background jobs
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
 
         return services;

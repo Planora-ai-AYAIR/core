@@ -1,38 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.Extensions.Logging;
+using Planora.Application.Common.Dtos;
 using Planora.Application.Interfaces.Jobs;
+using Planora.Application.Interfaces.Repositories;
+using Planora.Application.Interfaces.Services;
+using Planora.Domain.AnalysisJob;
+using Planora.Domain.Shared.Results;
 
-namespace Planora.Infrastructure.BackgroundJobs
-{
-    public sealed class ProcessTopographyJob(
+namespace Planora.Infrastructure.BackgroundJobs;
+public sealed class ProcessTopographyJob(
     IBackgroundJobClient backgroundJobClient,
-    ILogger<ProcessTopographyJob> logger)
-    : IProcessTopographyJob
+    ILogger<ProcessTopographyJob> logger,
+    IAiAnalysisService aiAnalysis,
+    IAnalysisJobRepository analysisJobRepository)
+: IProcessTopographyJob
+{
+    public string Enqueue(ProccessTopographyJobAiRequest request, CancellationToken ct)
     {
-        public string Enqueue(Guid parcelId, CancellationToken ct)
-        {
-            var jobId =
-                backgroundJobClient.Enqueue<ProcessTopographyJob>(
-                    x => x.Execute(parcelId, ct));
+        var jobId =
+            backgroundJobClient.Enqueue<ProcessTopographyJob>(
+                x => x.Execute(request, ct));
+        
+        logger.LogInformation(
+            "Topography job enqueued for ParcelId {ParcelId} with HangfireJobId {JobId}",
+            request.ParcelId, jobId);
+        
+        return jobId;
+    }
 
-            return jobId;
+    private async Task<Result<Success>> Execute(ProccessTopographyJobAiRequest request, CancellationToken ct)
+    {
+        logger.LogInformation(
+            "Topography job started for ParcelId {ParcelId}",
+            request.ParcelId);
+
+        string pythonJobId;
+        
+        try
+        {
+            pythonJobId = await aiAnalysis.ProccessTopographyAsync(request, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "Topography job failed while calling AI service for ParcelId {ParcelId}",
+                request.ParcelId);
+            throw;
         }
 
-        public Task Execute(Guid parcelId, CancellationToken ct)
+        logger.LogInformation(
+            "AI service accepted topography job for ParcelId {ParcelId}, PythonJobId {PythonJobId}",
+            request.ParcelId, pythonJobId);
+
+        var result = AnalysisJob.Create(
+            id: Guid.NewGuid(),
+            parcelId: request.ParcelId,
+            pythonJobId: pythonJobId,
+            type: AnalysisType.Topography
+        );
+
+        if (result.IsError)
         {
-            logger.LogInformation(
-                "Processing topography for ParcelId {ParcelId}",
-                parcelId);
-
-            // User Story 8
-            // Call Python Service Here
-
-            return Task.CompletedTask;
+            logger.LogError(
+                "Failed to create AnalysisJob entity for ParcelId {ParcelId}, PythonJobId {PythonJobId}. Error: {Error}",
+                request.ParcelId, pythonJobId, result.TopError.Description);
+            
+            return result.TopError;
         }
+
+        await analysisJobRepository.AddAsync(result.Value, ct);
+
+        logger.LogInformation(
+            "Topography job completed for ParcelId {ParcelId}, PythonJobId {PythonJobId}, AnalysisJobId {AnalysisJobId}",
+            request.ParcelId, pythonJobId, result.Value.Id);
+
+        return Result.Success;
     }
 }
