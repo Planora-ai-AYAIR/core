@@ -14,16 +14,16 @@ namespace Planora.Infrastructure.BackgroundJobs
     ILogger<ProcessTopographyJob> logger)
     : IProcessTopographyJob
     {
-        public string Enqueue(Guid parcelId)
+        public string Enqueue(Guid parcelId, CancellationToken ct)
         {
             var jobId =
                 backgroundJobClient.Enqueue<ProcessTopographyJob>(
-                    x => x.Execute(parcelId));
+                    x => x.Execute(parcelId, ct));
 
             return jobId;
         }
 
-        public Task Execute(Guid parcelId)
+        public Task Execute(Guid parcelId, CancellationToken ct)
         {
             logger.LogInformation(
                 "Processing topography for ParcelId {ParcelId}",

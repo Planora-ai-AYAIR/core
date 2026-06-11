@@ -35,7 +35,7 @@ public sealed class SubmitTopographyJobHandler(
             return ParcelErrors.NotFound;
         }
 
-        var jobId = processTopographyJob.Enqueue(parcel.Id);
+        var jobId = processTopographyJob.Enqueue(parcel.Id, ct);
 
         await cacheService.SetAsync(
             $"parcel-status:{parcel.Id}",
