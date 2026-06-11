@@ -141,6 +141,10 @@ public static class DependancyInjection
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IParcelRepository, ParcelRepository>();
+        services.AddScoped<IAnalysisJobRepository, AnalysisJobRepository>();
+        
+        // Services Registeration
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IEmailService, EmailService>();
