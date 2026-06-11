@@ -33,7 +33,7 @@ public sealed class LoginHandler(
             var displayName = EmailDisplayNameHelper.GetDisplayName(user.FirstName, user.LastName, user.Email);
             await emailService.SendOtpAsync(user.Email, displayName, otp, "Verify your email", ct);
 
-            return AuthErrors.EmailNotConfirmed;
+            return AuthErrors.EmailNotConfirmed(user.Id);
         }
 
         var (accessToken, _) = jwtService.GenerateAccessToken(user.Id, user.Email, roles);
