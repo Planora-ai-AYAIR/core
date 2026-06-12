@@ -9,7 +9,7 @@ terraform {
   backend "s3" {
     bucket = "planora-tfstate"
     key    = "s3/terraform.tfstate"
-    region = "eu-south-1"
+    region = "us-east-1"
   }
 }
 
@@ -21,7 +21,7 @@ provider "aws" {
 variable "aws_region" {
   description = "AWS region to deploy the bucket"
   type        = string
-  default     = "eu-south-1"
+  default     = "us-east-1"
 }
 
 variable "environment" {
