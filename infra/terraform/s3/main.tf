@@ -6,15 +6,6 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "s3" {
-    bucket = "planora-tfstate"
-    key    = "s3/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
 }
 
 # ── Variables ────────────────────────────────────────────────────────────────
@@ -71,17 +62,19 @@ resource "aws_s3_bucket_versioning" "geosense" {
   }
 }
 
-# Lifecycle: move objects to Infrequent Access after 90 days to cut storage cost
+# Lifecycle: move objects to Intelligent-Tiering after 90 days to cut storage cost
 resource "aws_s3_bucket_lifecycle_configuration" "geosense" {
   bucket = aws_s3_bucket.geosense.id
 
   rule {
-    id     = "transition-to-ia"
+    id     = "transition-to-intelligent-tiering"
     status = "Enabled"
+
+    filter {}
 
     transition {
       days          = 90
-      storage_class = "STANDARD_IA"
+      storage_class = "INTELLIGENT_TIERING"
     }
   }
 }
@@ -93,7 +86,7 @@ resource "aws_s3_bucket_cors_configuration" "geosense" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET"]
-    allowed_origins = ["*"]   # tighten to your domain before go-live
+    allowed_origins = ["*"]   # tighten to domain before go-live
     max_age_seconds = 3600
   }
 }
