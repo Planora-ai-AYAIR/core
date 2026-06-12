@@ -47,7 +47,7 @@ export class ForgotPasswordComponent implements OnInit {
     }
 
     this.isLoading = true;
-    // Simulate API request – replace with real facade later
+    // Simulate API request - replace with real facade later
     setTimeout(() => {
       this.isLoading = false;
       this.router.navigate([ROUTES.verifyOtp], {

@@ -71,10 +71,10 @@ export class OtpInputComponent implements ControlValueAccessor, AfterViewInit {
       return;
     }
 
-    // Take last character (in case of multi‑char paste or weirdness)
+    // Take last character (in case of multi-char paste or weirdness)
     const digit = val[val.length - 1];
     this.updateDigit(index, digit);
-    // Auto‑advance to next input
+    // Auto-advance to next input
     if (index < 5) {
       this.inputs.get(index + 1)?.nativeElement?.focus();
     }

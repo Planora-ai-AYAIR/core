@@ -1,0 +1,99 @@
+<div class="space-y-4">
+  <!-- Engineering Flags -->
+  <div class="rounded-lg border border-red-200 bg-red-50 p-3">
+    <div class="mb-1.5 flex items-center gap-2">
+      <svg class="h-3.5 w-3.5 shrink-0 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-red-700">Hazard Alerts</span>
+    </div>
+    <div class="mt-1 flex items-start gap-1.5 text-[11px] leading-snug text-red-800">
+      <span class="mt-0.5 shrink-0 text-[8px]">●</span>
+      Seismic Zone II — moderate shaking expected; design per ECP 201.
+    </div>
+    <div class="mt-1 flex items-start gap-1.5 text-[11px] leading-snug text-red-800">
+      <span class="mt-0.5 shrink-0 text-[8px]">●</span>
+      Liquefaction potential rated Medium — ground improvement recommended.
+    </div>
+  </div>
+
+  <!-- Risk Summary Table -->
+  <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+    <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+      <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+        Hazard Assessment
+      </h3>
+    </div>
+    <div class="divide-y divide-planora-desert-100">
+      @for (hazard of hazards(); track hazard.label) {
+        <div class="flex items-center gap-3 p-3">
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+            [class.bg-green-100]="hazard.rating === 'Low' || hazard.rating === 'None'"
+            [class.text-green-700]="hazard.rating === 'Low' || hazard.rating === 'None'"
+            [class.bg-amber-100]="hazard.rating === 'Medium' || hazard.rating === 'Zone II'"
+            [class.text-amber-700]="hazard.rating === 'Medium' || hazard.rating === 'Zone II'"
+            [class.bg-red-100]="hazard.rating === 'High'"
+            [class.text-red-700]="hazard.rating === 'High'"
+          >
+            {{ hazard.icon }}
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-semibold text-planora-basalt-800">{{ hazard.label }}</div>
+            <div class="truncate text-[10px] text-planora-basalt-400">{{ hazard.description }}</div>
+          </div>
+          <span
+            class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
+            [class.bg-green-100]="hazard.rating === 'Low' || hazard.rating === 'None'"
+            [class.text-green-700]="hazard.rating === 'Low' || hazard.rating === 'None'"
+            [class.bg-amber-100]="hazard.rating === 'Medium' || hazard.rating === 'Zone II'"
+            [class.text-amber-700]="hazard.rating === 'Medium' || hazard.rating === 'Zone II'"
+            [class.bg-red-100]="hazard.rating === 'High'"
+            [class.text-red-700]="hazard.rating === 'High'"
+          >
+            {{ hazard.rating }}
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Map Overlays -->
+  <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+    <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+      <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+        Map Overlays
+      </h3>
+    </div>
+    @for (layer of mapLayers(); track layer.id) {
+      <app-layer-control
+        [layer]="layer"
+        (toggle)="onToggleLayer($event)"
+        (opacityChange)="onLayerOpacityChange(layer.id, $event)"
+      ></app-layer-control>
+    }
+    <div class="pb-1"></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="rounded-lg border border-planora-desert-200 bg-white p-3 shadow-sm">
+    <h4 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-500 mb-2">
+      Legend
+    </h4>
+    <div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+      @for (item of legend(); track item.label) {
+        <div class="flex items-center gap-1.5">
+          <span
+            class="inline-block h-2.5 w-2.5 rounded-sm"
+            [style.background-color]="item.color"
+          ></span>
+          <span class="text-[10px] text-planora-basalt-600">{{ item.label }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,149 @@
+<div
+  class="flex items-center gap-2.5 px-3 py-1.5 transition-colors hover:bg-planora-desert-50"
+  [class.opacity-50]="!layer.visible"
+>
+  <!-- Toggle switch -->
+  <button
+    role="switch"
+    [attr.aria-checked]="layer.visible"
+    (click)="toggle.emit(layer.id)"
+    class="relative h-4 w-7 shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-planora-clay-400 focus:ring-offset-1"
+    [class.bg-planora-clay-500]="layer.visible"
+    [class.bg-planora-desert-300]="!layer.visible"
+  >
+    <span
+      class="absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-all duration-200 ease-in-out"
+      [style.transform]="layer.visible ? 'translateX(0px)' : 'translateX(-12px)'"
+    ></span>
+  </button>
+
+  <!-- Layer thumbnail - covers all layer IDs -->
+  <svg width="20" height="10" class="shrink-0 overflow-hidden rounded-sm">
+    @switch (layer.id) {
+      <!-- Topography layers -->
+      @case ('elevation-heat') {
+        <defs>
+          <linearGradient id="g-heat">
+            <stop offset="0%" stop-color="#9BB88C" />
+            <stop offset="45%" stop-color="#C7A14D" />
+            <stop offset="75%" stop-color="#B86E3D" />
+            <stop offset="100%" stop-color="#5A2714" />
+          </linearGradient>
+        </defs>
+        <rect width="20" height="10" fill="url(#g-heat)" />
+      }
+      @case ('contour-lines') {
+        <line x1="0" y1="2" x2="20" y2="2" stroke="#374151" stroke-width="0.6" opacity="0.45" />
+        <line x1="0" y1="5" x2="20" y2="5" stroke="#374151" stroke-width="1.1" />
+        <line x1="0" y1="8" x2="20" y2="8" stroke="#374151" stroke-width="0.6" opacity="0.45" />
+      }
+      @case ('slope-fill') {
+        <rect x="0" y="0" width="5" height="10" fill="#9BB88C" opacity="0.85" />
+        <rect x="5" y="0" width="5" height="10" fill="#C7A14D" opacity="0.85" />
+        <rect x="10" y="0" width="5" height="10" fill="#B86E3D" opacity="0.85" />
+        <rect x="15" y="0" width="5" height="10" fill="#5A2714" opacity="0.85" />
+      }
+      @case ('ponding-zones') {
+        <ellipse
+          cx="10"
+          cy="5"
+          rx="8"
+          ry="3.5"
+          fill="#2563EB"
+          opacity="0.5"
+          stroke="#1D4ED8"
+          stroke-width="1"
+        />
+      }
+      <!-- Soil layers -->
+      @case ('soil-composition') {
+        <rect x="0" y="0" width="7" height="10" fill="#B86E3D" />
+        <rect x="7" y="0" width="6" height="10" fill="#6B7F5E" />
+        <rect x="13" y="0" width="7" height="10" fill="#E0BF6B" />
+      }
+      @case ('bearing-points') {
+        <circle cx="10" cy="5" r="3" fill="#C7A14D" stroke="#fff" stroke-width="1" />
+      }
+      @case ('water-table') {
+        <line
+          x1="0"
+          y1="5"
+          x2="20"
+          y2="5"
+          stroke="#2563EB"
+          stroke-width="1.2"
+          stroke-dasharray="2,1"
+        />
+      }
+      <!-- Risk layers -->
+      @case ('flood-zone') {
+        <rect x="0" y="0" width="10" height="10" fill="#A13E3A" opacity="0.7" />
+        <rect x="10" y="0" width="10" height="10" fill="#D97706" opacity="0.7" />
+      }
+      @case ('seismic-zone') {
+        <circle
+          cx="10"
+          cy="5"
+          r="4"
+          fill="#F59E0B"
+          opacity="0.5"
+          stroke="#B45309"
+          stroke-width="1"
+        />
+      }
+      @case ('liquefaction') {
+        <rect x="0" y="0" width="20" height="10" fill="#8B5CF6" opacity="0.7" />
+      }
+      <!-- Borehole layers -->
+      @case ('borehole-points') {
+        <circle cx="10" cy="5" r="3" fill="#B86E3D" stroke="#fff" stroke-width="1.5" />
+      }
+      @case ('depth-rings') {
+        <circle
+          cx="10"
+          cy="5"
+          r="4"
+          fill="#B86E3D"
+          opacity="0.2"
+          stroke="#B86E3D"
+          stroke-width="0.8"
+        />
+      }
+      @case ('optimal-area') {
+        <rect
+          x="0"
+          y="0"
+          width="20"
+          height="10"
+          fill="#10B981"
+          opacity="0.5"
+          stroke="#047857"
+          stroke-width="1"
+        />
+      }
+      @default {
+        <rect width="20" height="10" fill="#ccc" />
+      }
+    }
+  </svg>
+
+  <!-- Label -->
+  <span class="flex-1 text-xs text-planora-basalt-700">{{ layer.label }}</span>
+
+  <!-- Opacity slider -->
+  <div class="flex items-center gap-1">
+    <input
+      type="range"
+      min="0"
+      max="100"
+      step="1"
+      [value]="layer.opacity * 100"
+      [disabled]="!layer.visible"
+      (input)="onOpacityInput($event)"
+      class="h-1 w-16 accent-planora-clay-500 disabled:opacity-30 cursor-pointer"
+    />
+    <span class="w-7 text-right font-mono text-[10px] text-planora-basalt-400">
+      {{ (layer.opacity * 100).toFixed(0) }}%
+    </span>
+  </div>
+</div>

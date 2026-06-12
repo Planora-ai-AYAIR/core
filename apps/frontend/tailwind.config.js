@@ -19,7 +19,7 @@ module.exports = {
             300: '#CBB18E',
           },
           gypsum: '#FFFFFF',
-          // Primary accent – soil/clay
+          // Primary accent - soil/clay
           clay: {
             DEFAULT: '#B86E3D',
             50: '#FBF1EA',
@@ -33,7 +33,7 @@ module.exports = {
             800: '#5A2714',
             900: '#3A180B',
           },
-          // Secondary accent – silt/nature
+          // Secondary accent - silt/nature
           silt: {
             DEFAULT: '#6B7F5E',
             50: '#F2F6F0',
@@ -47,7 +47,7 @@ module.exports = {
             800: '#232A1C',
             900: '#11140D',
           },
-          // Tertiary highlight – surveyor gold
+          // Tertiary highlight - surveyor gold
           gold: {
             DEFAULT: '#C7A14D',
             100: '#FCF4E3',
@@ -75,7 +75,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        // Serif for English headings – feels like survey maps
+        // Serif for English headings - feels like survey maps
         display: ['Cormorant Garamond', 'Georgia', 'serif'],
         // Cairo for Arabic + Inter for body
         sans: ['Inter', 'Cairo', 'system-ui', 'sans-serif'],

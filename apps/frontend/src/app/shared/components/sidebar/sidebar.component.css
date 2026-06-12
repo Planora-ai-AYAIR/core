@@ -13,7 +13,7 @@
     left 0.3s ease-in-out;
 }
 
-/* Icon‑only mode (collapsed) */
+/* Icon-only mode (collapsed) */
 :host(.collapsed) {
   width: 75px;
 }
@@ -76,13 +76,4 @@
   .p-3.hidden.lg\\:block {
     display: none !important;
   }
-}
-
-/* Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e3d5c0;
-  border-radius: 10px;
 }
