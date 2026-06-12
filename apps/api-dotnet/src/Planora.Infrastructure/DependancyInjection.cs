@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.Mail;
+using Amazon.S3;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +30,18 @@ public static class DependancyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // --- AWS Setup ---
+        var awsOptions = configuration.GetAWSOptions();
+        var accessKey = configuration["AWS:AccessKey"];
+        var secretKey = configuration["AWS:SecretKey"];
+        if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+        {
+            awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+        }
+        services.AddDefaultAWSOptions(awsOptions);
+        services.AddAWSService<IAmazonS3>();
+        services.AddScoped<IStorageService, StorageService>();
+
         // --- Configuration Options (bound from appsettings sections) ---
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
@@ -138,6 +153,7 @@ public static class DependancyInjection
         services.AddScoped<IBackgroundJobService, BackgroundJobService>();
         services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
 
         return services;
