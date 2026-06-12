@@ -37,7 +37,7 @@ export class ParcelDetailComponent implements OnInit {
   readonly allModules = ['topography', 'soil', 'risk', 'bearing', 'boreholes', 'report'];
 
   ngOnInit(): void {
-    // Simulate API call – replace with HttpClient when backend is ready
+    // Simulate API call - replace with HttpClient when backend is ready
     setTimeout(() => {
       try {
         // Sample data matching the documented response

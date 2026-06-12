@@ -1,0 +1,191 @@
+<div class="space-y-5 mx-auto p-6 sm:p-8">
+  <!-- HEADER -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-display font-bold text-planora-basalt-900 tracking-tight">
+        Geotechnical Analyses
+      </h1>
+      <p class="text-sm text-planora-basalt-400 mt-1">
+        AI-driven site intelligence jobs for your parcels.
+      </p>
+    </div>
+    <a
+      routerLink="/app/analyses/new"
+      class="px-5 py-3 bg-planora-clay-500 text-white text-sm font-bold rounded-xl shadow-md shadow-planora-clay-500/10 hover:bg-planora-clay-600 hover:shadow-lg transition-all flex items-center gap-2"
+    >
+      <i class="pi pi-plus text-xs"></i> New Analysis
+    </a>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-5">
+    <!-- Total -->
+    <app-stat-card
+      icon="pi-database"
+      label="Total"
+      [value]="totalAnalyses()"
+      iconTextClass="text-planora-clay-600"
+    >
+    </app-stat-card>
+    <!-- Completed -->
+    <app-stat-card
+      icon="pi-check-circle"
+      label="Completed"
+      [value]="completedAnalyses()"
+      iconTextClass="text-planora-silt-600"
+    >
+    </app-stat-card>
+    <!-- Running -->
+    <app-stat-card
+      icon="pi-spin pi-spinner"
+      label="Running"
+      [value]="runningAnalyses()"
+      iconTextClass="text-planora-gold-600"
+    >
+    </app-stat-card>
+    <!-- Failed -->
+    <app-stat-card
+      icon="pi-exclamation-triangle"
+      label="Failed"
+      [value]="failedAnalyses()"
+      iconTextClass="text-planora-risk"
+    >
+    </app-stat-card>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="relative group">
+    <i
+      class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-planora-basalt-400 text-sm transition-colors group-focus-within:text-planora-clay-500"
+    ></i>
+    <input
+      type="text"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+      placeholder="Filter by parcel name or ID..."
+      class="w-full pl-12 pr-4 py-3.5 bg-white border border-planora-desert-200 rounded-2xl text-planora-basalt-800 placeholder:text-planora-basalt-400 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-planora-clay-500/20 focus:border-planora-clay-500 transition-all duration-200"
+    />
+  </div>
+
+  <!-- ANALYSES TABLE -->
+  <div class="space-y-3">
+    <!-- Column Headers (hidden on mobile) -->
+    <div
+      class="hidden md:grid grid-cols-12 gap-4 px-6 text-[10px] font-black text-planora-basalt-400 uppercase tracking-[0.15em]"
+    >
+      <div class="col-span-4">Parcel</div>
+      <div class="col-span-2">Status</div>
+      <div class="col-span-3">Modules</div>
+      <div class="col-span-2">Date</div>
+      <div class="col-span-1 text-right">Actions</div>
+    </div>
+
+    @for (analysis of filteredAnalyses(); track analysis.id) {
+      <div
+        class="analysis-strip bg-white border border-planora-desert-200 rounded-2xl px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center transition-all duration-200 relative overflow-hidden"
+      >
+        <!-- Status accent bar -->
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1"
+          [class.bg-green-500]="analysis.status === 'Completed'"
+          [class.bg-planora-gold-500]="analysis.status === 'Running'"
+          [class.bg-red-500]="analysis.status === 'Failed'"
+          [class.bg-planora-basalt-300]="analysis.status === 'Pending'"
+        ></div>
+
+        <div class="col-span-1 md:col-span-4 flex flex-col min-w-0">
+          <span class="text-sm font-bold text-planora-basalt-800 truncate">{{
+            analysis.parcelName
+          }}</span>
+          <span class="text-xs font-mono text-planora-basalt-400 mt-0.5">{{
+            analysis.parcelId
+          }}</span>
+        </div>
+
+        <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+          <span class="md:hidden text-xs font-bold uppercase text-planora-basalt-400 w-20"
+            >Status:</span
+          >
+          <span
+            class="px-2.5 py-1 rounded-full text-xs font-semibold"
+            [class.bg-planora-silt-100]="analysis.status === 'Completed'"
+            [class.text-planora-silt-700]="analysis.status === 'Completed'"
+            [class.bg-planora-gold-100]="analysis.status === 'Running'"
+            [class.text-planora-gold-700]="analysis.status === 'Running'"
+            [class.bg-planora-risk-100]="analysis.status === 'Failed'"
+            [class.text-planora-risk-700]="analysis.status === 'Failed'"
+            [class.bg-planora-desert-100]="analysis.status === 'Pending'"
+            [class.text-planora-basalt-700]="analysis.status === 'Pending'"
+            >{{ analysis.status }}</span
+          >
+        </div>
+
+        <div class="col-span-1 md:col-span-3 flex items-center gap-2">
+          <span class="md:hidden text-xs font-bold uppercase text-planora-basalt-400 w-20"
+            >Modules:</span
+          >
+          <div class="flex flex-wrap gap-1">
+            @for (mod of allModules; track mod) {
+              <span
+                class="text-[9px] px-1.5 py-0.5 rounded-full border"
+                [class.bg-planora-silt-100]="analysis.modulesCompleted.includes(mod)"
+                [class.border-planora-silt-300]="analysis.modulesCompleted.includes(mod)"
+                [class.text-planora-silt-700]="analysis.modulesCompleted.includes(mod)"
+                [class.bg-white]="!analysis.modulesCompleted.includes(mod)"
+                [class.border-planora-desert-200]="!analysis.modulesCompleted.includes(mod)"
+                [class.text-planora-basalt-400]="!analysis.modulesCompleted.includes(mod)"
+              >
+                {{ mod | titlecase }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+          <span class="md:hidden text-xs font-bold uppercase text-planora-basalt-400 w-20"
+            >Date:</span
+          >
+          <span class="text-sm text-planora-basalt-600 font-mono">{{
+            formatDate(analysis.createdAt)
+          }}</span>
+        </div>
+
+        <div
+          class="col-span-1 md:col-span-1 flex items-center justify-end gap-3 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-planora-desert-100 md:border-t-0"
+        >
+          <a
+            [routerLink]="['/app/analyses', analysis.id]"
+            class="w-8 h-8 rounded-lg bg-planora-limestone hover:bg-planora-clay-500 hover:text-white text-planora-basalt-600 text-xs font-bold flex items-center justify-center transition-all shadow-sm"
+            title="View Details"
+          >
+            <i class="pi pi-arrow-right"></i>
+          </a>
+          <button
+            (click)="$event.stopPropagation()"
+            class="w-8 h-8 rounded-lg border border-transparent hover:border-red-200 hover:bg-red-50/50 text-planora-basalt-400 hover:text-red-600 text-xs flex items-center justify-center transition-all"
+            title="Delete"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (filteredAnalyses().length === 0) {
+      <div
+        class="border border-dashed border-planora-desert-300 bg-white/50 rounded-2xl px-5 py-16 text-center text-planora-basalt-400 max-w-md mx-auto mt-8"
+      >
+        <div
+          class="w-12 h-12 rounded-full bg-planora-limestone flex items-center justify-center mx-auto mb-4 text-planora-basalt-400 shadow-inner"
+        >
+          <i class="pi pi-chart-line text-xl"></i>
+        </div>
+        <h3 class="font-bold text-planora-basalt-800 text-base">No Analyses Found</h3>
+        <p class="text-xs text-planora-basalt-400 mt-1 max-w-xs mx-auto">
+          Your search returned no results. Clear the filter or start a new analysis.
+        </p>
+      </div>
+    }
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { StatCardComponent } from '../../../../shared/components/stat-card/stat-card.component';
 
 // ── Backend matching interface ──
 interface BoundingBox {
@@ -37,7 +38,7 @@ interface GeotechParcel {
 @Component({
   selector: 'app-parcel-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, StatCardComponent],
   templateUrl: './parcel-list.component.html',
   styleUrls: ['./parcel-list.component.css'],
 })

@@ -1,0 +1,143 @@
+<div class="flex flex-col h-[calc(100vh-5rem)] bg-white font-sans">
+  <!-- Report header (cover) -->
+  <header class="bg-planora-basalt-900 text-white px-8 py-4 shrink-0">
+    <div class="max-w-7xl mx-auto flex items-end justify-between">
+      <div>
+        <p class="text-planora-gold-400 text-xs font-bold uppercase tracking-widest">
+          Geotechnical Site Intelligence Report
+        </p>
+        <h1 class="font-display text-xl md:text-3xl font-bold mt-1">
+          Talaat Moustafa Group - Industrial Sector B
+        </h1>
+        <p class="text-planora-desert-300 text-xs sm:text-sm mt-2 flex flex-wrap gap-x-2 gap-y-1">
+          <span>Project ID: PRJ-7702</span>
+          <span>|</span>
+          <span>Coordinates: 30.633°N, 31.942°E</span>
+          <span>|</span>
+          <span>Date: {{ today | date: 'longDate' }}</span>
+        </p>
+      </div>
+      <div class="hidden sm:block">
+        <span class="text-planora-gold-400 text-xs font-bold uppercase tracking-widest"
+          >Planora AI</span
+        >
+      </div>
+    </div>
+  </header>
+
+  <!-- Section navigation (tabs) - styled like chapter tabs -->
+  <nav
+    class="bg-planora-limestone border-b border-planora-desert-200 px-4 sm:px-8 flex gap-0 overflow-x-auto shadow-inner"
+  >
+    @for (tab of modules; track tab.id) {
+      <button
+        (click)="setActiveModule(tab.id)"
+        [class.border-b-2]="activeModule() === tab.id"
+        [class.border-planora-clay-500]="activeModule() === tab.id"
+        [class.bg-white]="activeModule() === tab.id"
+        [class.text-planora-clay-600]="activeModule() === tab.id"
+        class="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors whitespace-nowrap"
+        [class.text-planora-basalt-500]="activeModule() !== tab.id"
+        [class.border-transparent]="activeModule() !== tab.id"
+        [class.bg-transparent]="activeModule() !== tab.id"
+      >
+        {{ tab.label }}
+        <span
+          class="ml-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle"
+          [class.bg-emerald-500]="moduleStatus()[tab.id] === 'Completed'"
+          [class.bg-amber-400]="moduleStatus()[tab.id] === 'Processing'"
+          [class.bg-planora-desert-300]="
+            moduleStatus()[tab.id] === 'Queued' || moduleStatus()[tab.id] === 'Waiting'
+          "
+        ></span>
+      </button>
+    }
+  </nav>
+
+  <div class="flex flex-1 flex-col lg:flex-row min-h-0">
+    <div
+      class="flex-1 relative bg-white border-r border-planora-desert-100 h-64 lg:h-auto lg:flex"
+      [class.hidden]="!isActiveModuleCompleted()"
+    >
+      <app-map
+        [center]="[31.942, 30.633]"
+        [zoom]="17"
+        [pitch]="0"
+        [showSatelliteToggle]="!!true"
+        (mapReady)="onMapReady($event)"
+        class="h-full w-full"
+      ></app-map>
+      <p
+        class="absolute bottom-2 left-4 text-[10px] text-planora-basalt-400 font-medium z-10 bg-white/80 backdrop-blur px-2 py-0.5 rounded hidden sm:block"
+      >
+        Figure {{ activeModuleIndex() + 1 }}: {{ activeModuleLabel() }} - Site overview with
+        analytical overlays
+      </p>
+    </div>
+
+    <div
+      class="flex-1 overflow-y-auto bg-planora-limestone border-l border-planora-desert-200 lg:flex-none lg:w-md"
+    >
+      <div class="p-6">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 mb-4">
+          {{ activeModuleIndex() + 1 }}. {{ activeModuleLabel() }}
+        </h2>
+        <p class="text-sm text-planora-basalt-600 italic mb-6 leading-relaxed">
+          {{ activeModuleDescription() }}
+        </p>
+
+        <!-- Single active tab via @switch - no hidden divs, no inputs -->
+        @switch (activeModule()) {
+          @case ('topography') {
+            @if (moduleProgress()['topography']?.status === 'Completed') {
+              <app-topography-tab></app-topography-tab>
+            } @else {
+              <app-module-progress
+                moduleName="Topography"
+                [status]="moduleProgress()['topography'].status"
+                [estimatedSeconds]="moduleProgress()['topography'].estimatedSeconds"
+                (cancel)="cancelModule('topography')"
+              ></app-module-progress>
+            }
+          }
+          @case ('soil') {
+            @if (moduleProgress()['soil']?.status === 'Completed') {
+              <app-soil-tab></app-soil-tab>
+            } @else {
+              <app-module-progress
+                moduleName="Soil & Bearing"
+                [status]="moduleProgress()['soil'].status"
+                [estimatedSeconds]="moduleProgress()['soil'].estimatedSeconds"
+                (cancel)="cancelModule('soil')"
+              ></app-module-progress>
+            }
+          }
+          @case ('risk') {
+            @if (moduleProgress()['risk']?.status === 'Completed') {
+              <app-risk-tab></app-risk-tab>
+            } @else {
+              <app-module-progress
+                moduleName="Risk Assessment"
+                [status]="moduleProgress()['risk'].status"
+                [estimatedSeconds]="moduleProgress()['risk'].estimatedSeconds"
+                (cancel)="cancelModule('risk')"
+              ></app-module-progress>
+            }
+          }
+          @case ('borehole') {
+            @if (moduleProgress()['borehole']?.status === 'Completed') {
+              <app-borehole-tab></app-borehole-tab>
+            } @else {
+              <app-module-progress
+                moduleName="Borehole Analysis"
+                [status]="moduleProgress()['borehole'].status"
+                [estimatedSeconds]="moduleProgress()['borehole'].estimatedSeconds"
+                (cancel)="cancelModule('borehole')"
+              ></app-module-progress>
+            }
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

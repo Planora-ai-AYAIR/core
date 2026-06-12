@@ -5,7 +5,7 @@ body {
   @apply font-sans text-planora-basalt-800 bg-planora-limestone;
 }
 
-/* Stratigraphic contour lines – subtle */
+/* Stratigraphic contour lines - subtle */
 .bg-topographic {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 Q 50 70 100 100 T 200 100' fill='none' stroke='%234B5563' stroke-width='1.2'/%3E%3Cpath d='M0 120 Q 50 90 100 120 T 200 120' fill='none' stroke='%234B5563' stroke-width='0.8'/%3E%3Cpath d='M0 140 Q 50 110 100 140 T 200 140' fill='none' stroke='%234B5563' stroke-width='0.8'/%3E%3Cpath d='M0 80 Q 50 50 100 80 T 200 80' fill='none' stroke='%234B5563' stroke-width='0.8'/%3E%3C/svg%3E");
   background-repeat: repeat;
@@ -13,4 +13,36 @@ body {
 
 html {
   scroll-behavior: smooth;
+}
+
+/* ==========================================================================
+   GLOBAL CUSTOM SCROLLBAR
+   ========================================================================== */
+
+/* 1. WebKit Browsers (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+/* The track background behind the scrollbar handle */
+::-webkit-scrollbar-track {
+  background: transparen;
+}
+
+/* The actual scrollbar draggable handle */
+::-webkit-scrollbar-thumb {
+  background: #e2d1b9;
+  border-radius: 10px;
+}
+
+/* Highlight handle on interaction hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #d3bf9e;
+}
+
+/* 2. Modern Standard & Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #e2d1b9 transparent;
 }
