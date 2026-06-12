@@ -20,7 +20,7 @@ export class DashboardHomeComponent {
     { label: 'Avg Risk Index', value: 'Low (24)', icon: 'pi-shield' },
   ];
 
-  // The 6 Pillars of GeoSense AI [cite: 463, 467, 471, 475, 480, 484]
+  // The 6 Pillars of Planora AI [cite: 463, 467, 471, 475, 480, 484]
   modules = [
     {
       id: 1,

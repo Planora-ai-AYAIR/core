@@ -25,7 +25,7 @@ public class PlanoraDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
     public DbSet<AuthAuditLog> AuthAuditLogs { get; set; }
 
     // ==========================================
-    // 2. GeoSense AI Business Entities
+    // 2. Planora AI Business Entities
     // ==========================================
     public DbSet<Parcel> Parcels { get; set; }
     public DbSet<Report> Reports { get; set; }

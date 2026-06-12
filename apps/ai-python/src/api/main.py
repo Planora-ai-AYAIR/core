@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="GeoSense AI API Placeholder")
+app = FastAPI(title="Planora AI API Placeholder")
 
 
 @app.get("/health")
