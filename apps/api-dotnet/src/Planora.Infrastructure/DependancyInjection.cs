@@ -87,6 +87,7 @@ public static class DependancyInjection
         .ConfigureHttpClient((client) =>
         {
             client.BaseAddress = new Uri(configuration["AiApi:BaseUrl"]);
+            //TODO  : add the X-Api-Key header when agreed upon
         }
 );
 
