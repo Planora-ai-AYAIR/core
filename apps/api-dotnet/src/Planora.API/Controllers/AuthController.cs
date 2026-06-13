@@ -11,26 +11,21 @@ using Planora.Application.Features.Auth.Commands.ResetPassword;
 using Planora.Application.Features.Auth.Commands.VerifyOtp;
 using Planora.Application.Features.Auth.Dtos;
 using Planora.Api.Helpers;
-using Planora.Domain.Shared.Results; // Added to access the Error class
+using Planora.Domain.Shared.Results;
 using ChangePasswordCommand = Planora.Application.Features.Auth.Commands.ChangePassword.ChangePasswordCommand;
 
 namespace Planora.Api.Controllers;
 
 [Route("api/[controller]")]
-public sealed class AuthController : BaseApiController
+public sealed class AuthController(ISender sender) : BaseApiController
 {
-    private readonly ISender _sender;
+    private readonly ISender sender = sender;
 
-    public AuthController(ISender sender)
-    {
-        _sender = sender;
-    }
-
-    [HttpPost("login")]
+  [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
         var command = new LoginCommand(request.Email, request.Password);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -41,7 +36,7 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
         var command = new RegisterCommand(request.Email, request.Password, request.PhoneNumber, request.FirstName, request.LastName);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -52,7 +47,7 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request, CancellationToken ct)
     {
         var command = new VerifyOtpCommand(request.UserId, request.Otp);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -63,7 +58,7 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequest request, CancellationToken ct)
     {
         var command = new ResendOtpCommand(request.UserId);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -74,7 +69,7 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct)
     {
         var command = new ForgotPasswordCommand(request.Email, request.PhoneNumber);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -85,7 +80,7 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken ct)
     {
         var command = new ResetPasswordCommand(request.UserId, request.Otp, request.NewPassword, request.ConfirmPassword);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -96,7 +91,7 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken ct)
     {
         var command = new RefreshTokenCommand(request.RefreshToken);
-        var result = await _sender.Send(command, ct);
+        var result = await sender.Send(command, ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -114,7 +109,7 @@ public sealed class AuthController : BaseApiController
             return Problem([Error.Unauthorized("Auth.Unauthorized", "User is not authorized.")]);
         }
 
-        var result = await _sender.Send(new LogoutCommand(userId), ct);
+        var result = await sender.Send(new LogoutCommand(userId), ct);
 
         if (result.IsError) return Problem(result.Errors);
 
@@ -133,7 +128,7 @@ public sealed class AuthController : BaseApiController
             return Problem([Error.Unauthorized("Auth.Unauthorized", "User is not authorized.")]);
         }
 
-        var result = await _sender.Send(
+        var result = await sender.Send(
             new ChangePasswordCommand(userId, request.CurrentPassword, request.NewPassword, request.ConfirmNewPassword),
             ct);
 

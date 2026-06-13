@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Planora.Application.Common.Dtos;
+using Planora.Application.Common.Helpers;
 using Planora.Application.Features.Parcels.Dtos.SubmitTopographyJob;
 using Planora.Application.Interfaces.Jobs;
 using Planora.Application.Interfaces.Repositories;
@@ -34,8 +36,16 @@ public sealed class SubmitTopographyJobHandler(
         {
             return ParcelErrors.NotFound;
         }
+        
+        var proccessTopographyRequest = new ProccessTopographyJobAiRequest(
+            ParcelId : parcel.Id,
+            BoundaryGeoJson: parcel.Boundary.ToGeoJson(),
+            AreaHectares: parcel.AreaHectares,
+            CentroidLatitude: parcel.Centroid.Y,
+            CentroidLongitude: parcel.Centroid.X
+        );
 
-        var jobId = processTopographyJob.Enqueue(parcel.Id);
+        var jobId = processTopographyJob.Enqueue(proccessTopographyRequest, ct);
 
         await cacheService.SetAsync(
             $"parcel-status:{parcel.Id}",
