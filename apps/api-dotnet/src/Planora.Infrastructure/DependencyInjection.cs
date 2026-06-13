@@ -1,7 +1,10 @@
+using System.Net;
+using System.Net.Mail;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,16 +17,15 @@ using Planora.Infrastructure.BackgroundJobs;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
+using Planora.Infrastructure.Persistence.Interceptors;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
 using Refit;
-using System.Net;
-using System.Net.Mail;
 
 namespace Planora.Infrastructure;
 
-public static class DependancyInjection
+public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
@@ -105,8 +107,11 @@ public static class DependancyInjection
         dataSourceBuilder.UseNetTopologySuite();
         var dataSource = dataSourceBuilder.Build();
 
+        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+
         services.AddDbContext<PlanoraDbContext>((sp, options) =>
         {
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(
                 dataSource,
                 npgsqlOptions =>
