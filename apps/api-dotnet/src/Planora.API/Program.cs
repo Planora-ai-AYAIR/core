@@ -34,11 +34,12 @@ await AuthSeeder.SeedAsync(app.Services);
 // ──────────────────────────────────────────────
 //  HTTP Request Pipeline
 // ──────────────────────────────────────────────
-
 app.UseSerilogRequestLogging();
-
-// Use the IMiddleware-based global exception handler (registered above)
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments("/api/webhook"),
+    builder => builder.UseMiddleware<WebhookSignatureMiddleware>());
 
 if (app.Environment.IsDevelopment())
 {
@@ -60,7 +61,6 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-
 // ──────────────────────────────────────────────
 //  Endpoints
 // ──────────────────────────────────────────────

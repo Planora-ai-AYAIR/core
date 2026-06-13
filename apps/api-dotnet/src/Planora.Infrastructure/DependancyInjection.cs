@@ -33,6 +33,7 @@ public static class DependancyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
+        services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
 
         var cacheOptions = configuration
             .GetSection(CacheOptions.SectionName)
@@ -83,10 +84,13 @@ public static class DependancyInjection
             .AddAuthConfig()
             .AddBackgroundJobsConfig(configuration);
         
+        
+        var aiOptions = configuration.GetSection(AiOptions.SectionName).Get<AiOptions>()
+            ?? new AiOptions();
         services.AddRefitClient<IAiApiClient>()
         .ConfigureHttpClient((client) =>
         {
-            client.BaseAddress = new Uri(configuration["AiApi:BaseUrl"]);
+            client.BaseAddress = new Uri(aiOptions.BaseUrl);
             //TODO  : add the X-Api-Key header when agreed upon
         }
 );
