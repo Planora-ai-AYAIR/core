@@ -9,5 +9,4 @@ public interface IAnalysisJobRepository
     Task<IReadOnlyList<AnalysisJob>> GetByParcelIdAsync(Guid parcelId, CancellationToken ct);
     Task<IReadOnlyList<AnalysisJob>> GetPendingJobsAsync(CancellationToken ct);
     Task AddAsync(AnalysisJob job, CancellationToken ct);
-    Task SaveChangesAsync(CancellationToken ct);
 }

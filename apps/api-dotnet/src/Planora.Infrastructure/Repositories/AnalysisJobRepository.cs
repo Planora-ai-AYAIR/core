@@ -29,7 +29,5 @@ public sealed class AnalysisJobRepository(PlanoraDbContext context) : IAnalysisJ
         await context.AnalysisJobs.AddAsync(job, ct);
         await context.SaveChangesAsync(ct);
     }
-
-    public async Task SaveChangesAsync(CancellationToken ct) =>
-        await context.SaveChangesAsync(ct);
+    
 }

@@ -37,7 +37,7 @@ public sealed class SubmitTopographyJobHandler(
             return ParcelErrors.NotFound;
         }
         
-        var bjRequest = new ProccessTopographyJobAiRequest(
+        var proccessTopographyRequest = new ProccessTopographyJobAiRequest(
             ParcelId : parcel.Id,
             BoundaryGeoJson: parcel.Boundary.ToGeoJson(),
             AreaHectares: parcel.AreaHectares,
@@ -45,7 +45,7 @@ public sealed class SubmitTopographyJobHandler(
             CentroidLongitude: parcel.Centroid.X
         );
 
-        var jobId = processTopographyJob.Enqueue(bjRequest, ct);
+        var jobId = processTopographyJob.Enqueue(proccessTopographyRequest, ct);
 
         await cacheService.SetAsync(
             $"parcel-status:{parcel.Id}",

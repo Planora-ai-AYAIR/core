@@ -9,6 +9,6 @@ namespace Planora.Application.Interfaces.Jobs
 {
     public interface IProcessTopographyJob
     {
-        string Enqueue(ProccessTopographyJobAiRequest parcelId, CancellationToken ct);
+        string Enqueue(ProccessTopographyJobAiRequest request, CancellationToken ct);
     }
 }
