@@ -32,8 +32,10 @@ public static class DependancyInjection
     {
         // --- AWS Setup ---
         var awsOptions = configuration.GetAWSOptions();
-        var accessKey = configuration["AWS:AccessKey"];
-        var secretKey = configuration["AWS:SecretKey"];
+        var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")
+                        ?? configuration["AWS:AccessKey"];
+        var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")
+                        ?? configuration["AWS:SecretKey"];
         if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
         {
             awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);

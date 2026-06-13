@@ -10,7 +10,9 @@ public sealed class StorageService(
     IConfiguration configuration) : IStorageService
 {
     private readonly string _bucketName =
-        configuration["AWS:BucketName"] ?? "planora-dev-bucket";
+        Environment.GetEnvironmentVariable("AWS_BUCKET_NAME")
+        ?? configuration["AWS:BucketName"]
+        ?? "planora-ai-production";
 
     public async Task<string> GetPreSignedUrlAsync(string s3Key, TimeSpan expiry)
     {
