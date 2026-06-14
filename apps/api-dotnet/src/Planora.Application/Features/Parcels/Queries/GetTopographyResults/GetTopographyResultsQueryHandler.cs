@@ -41,7 +41,7 @@ public sealed class GetTopographyResultsQueryHandler(
         }
 
         // 2. Fetch from database
-        var report = await reportRepository.GetByParcelIdWithDetailsAsync(request.ParcelId, cancellationToken);
+        var report = await reportRepository.GetLatestCompletedReportByParcelIdAsync(request.ParcelId, cancellationToken);
 
         if (report is null)
         {

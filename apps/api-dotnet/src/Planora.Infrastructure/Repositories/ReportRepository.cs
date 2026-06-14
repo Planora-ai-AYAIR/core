@@ -8,7 +8,7 @@ namespace Planora.Infrastructure.Repositories;
 
 public sealed class ReportRepository(PlanoraDbContext context) : IReportRepository
 {
-    public async Task<Report?> GetByParcelIdWithDetailsAsync(Guid parcelId, CancellationToken cancellationToken = default)
+    public async Task<Report?> GetLatestCompletedReportByParcelIdAsync(Guid parcelId, CancellationToken cancellationToken = default)
     {
         return await context.Reports
             .Include(r => r.Modules)   // (contains OutputMetadata JSON)
