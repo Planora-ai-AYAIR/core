@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Planora.Domain.AnalysisJob;
 using Planora.Domain.Common;
 using Planora.Domain.Notifications;
 using Planora.Domain.Parcels;
@@ -25,9 +26,10 @@ public class PlanoraDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
     public DbSet<AuthAuditLog> AuthAuditLogs { get; set; }
 
     // ==========================================
-    // 2. GeoSense AI Business Entities
+    // 2. Planora AI Business Entities
     // ==========================================
     public DbSet<Parcel> Parcels { get; set; }
+    public DbSet<AnalysisJob> AnalysisJobs { get; set; }
     public DbSet<Report> Reports { get; set; }
     public DbSet<ReportModule> ReportModules { get; set; }
     public DbSet<ReportFile> ReportFiles { get; set; }

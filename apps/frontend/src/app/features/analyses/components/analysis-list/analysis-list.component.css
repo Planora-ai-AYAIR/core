@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+/* Card and strip base shadows */
+.kpi-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.analysis-strip {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  will-change: transform, box-shadow;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.analysis-strip:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 20px -8px rgba(184, 110, 61, 0.08);
+  border-color: rgba(184, 110, 61, 0.4);
+}

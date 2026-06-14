@@ -5,6 +5,7 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,19 +13,20 @@ using Npgsql;
 using Planora.Application.Interfaces.Jobs;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
+using Planora.Infrastructure.API;
 using Planora.Infrastructure.BackgroundJobs;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
+using Planora.Infrastructure.Persistence.Interceptors;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
-using System.Net;
-using System.Net.Mail;
+using Refit;
 
 namespace Planora.Infrastructure;
 
-public static class DependancyInjection
+public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
@@ -97,6 +99,13 @@ public static class DependancyInjection
             .AddDatabase(configuration)
             .AddAuthConfig()
             .AddBackgroundJobsConfig(configuration);
+        
+        services.AddRefitClient<IAiApiClient>()
+        .ConfigureHttpClient((client) =>
+        {
+            client.BaseAddress = new Uri(configuration["AiApi:BaseUrl"]);
+        }
+);
 
 
 
@@ -113,8 +122,11 @@ public static class DependancyInjection
         dataSourceBuilder.UseNetTopologySuite();
         var dataSource = dataSourceBuilder.Build();
 
+        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+
         services.AddDbContext<PlanoraDbContext>((sp, options) =>
         {
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(
                 dataSource,
                 npgsqlOptions =>
@@ -144,18 +156,26 @@ public static class DependancyInjection
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<PlanoraDbContext>()
             .AddDefaultTokenProviders();
-
+        
+        // Repositories Registeration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IParcelRepository, ParcelRepository>();
+        services.AddScoped<IAnalysisJobRepository, AnalysisJobRepository>();
+        
+        // Services Registeration
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IBackgroundJobService, BackgroundJobService>();
         services.AddScoped<IHybridCacheService, HybridCacheService>();
-        services.AddScoped<IParcelRepository, ParcelRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IAiAnalysisService, AiAnalysisService>();
+        
+        
+        //Background jobs
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
 
         return services;

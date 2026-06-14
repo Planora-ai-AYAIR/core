@@ -4,18 +4,6 @@
   width: 100%;
 }
 
-/* Custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2d1b9;
-  border-radius: 10px;
-}
-
 /* Node card hover */
 .group {
   cursor: pointer;

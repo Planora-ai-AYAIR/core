@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Planora.Infrastructure.Persistence.Contexts;
 namespace Planora.Infrastructure.Migrations
 {
     [DbContext(typeof(PlanoraDbContext))]
-    partial class PlanoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260611220105_AddedAnalysisJobsTables")]
+    partial class AddedAnalysisJobsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,6 +187,75 @@ namespace Planora.Infrastructure.Migrations
                         .HasName("pk_asp_net_user_tokens");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Planora.Domain.AnalysisJob.AnalysisJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("error_message");
+
+                    b.Property<Guid>("ParcelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parcel_id");
+
+                    b.Property<string>("PythonJobId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("python_job_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_analysis_jobs");
+
+                    b.HasIndex("ParcelId")
+                        .HasDatabaseName("ix_analysis_jobs_parcel_id");
+
+                    b.HasIndex("PythonJobId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_analysis_jobs_python_job_id");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_analysis_jobs_status");
+
+                    b.ToTable("AnalysisJobs", (string)null);
                 });
 
             modelBuilder.Entity("Planora.Domain.Common.AuthAuditLog", b =>
@@ -1019,6 +1091,16 @@ namespace Planora.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("Planora.Domain.AnalysisJob.AnalysisJob", b =>
+                {
+                    b.HasOne("Planora.Domain.Parcels.Parcel", null)
+                        .WithMany()
+                        .HasForeignKey("ParcelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_analysis_jobs_parcels_parcel_id");
                 });
 
             modelBuilder.Entity("Planora.Domain.Parcels.Parcel", b =>

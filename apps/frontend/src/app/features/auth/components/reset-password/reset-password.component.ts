@@ -81,7 +81,7 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     this.isLoading = true;
-    // Simulate password reset API call – replace with facade later
+    // Simulate password reset API call - replace with facade later
     setTimeout(() => {
       this.isLoading = false;
       // Redirect to sign-in on success

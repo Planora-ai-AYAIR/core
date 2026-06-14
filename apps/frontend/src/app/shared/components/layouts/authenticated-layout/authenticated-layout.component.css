@@ -16,18 +16,6 @@
   scroll-behavior: smooth;
 }
 
-/* ── Custom Scrollbar styling for Main Pane ── */
-.content-view-container::-webkit-scrollbar {
-  width: 6px;
-}
-.content-view-container::-webkit-scrollbar-thumb {
-  background-color: rgba(227, 213, 192, 0.6); /* Soft planora-desert integration */
-  border-radius: 20px;
-}
-.content-view-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 /* ── Heavy Animations: Mobile Backdrop Transition ── */
 .mobile-backdrop {
   background-color: rgba(26, 28, 30, 0.4); /* Deep basalt translucent blend */

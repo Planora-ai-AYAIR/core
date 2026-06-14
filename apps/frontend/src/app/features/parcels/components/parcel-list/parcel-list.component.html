@@ -20,59 +20,31 @@
   <!-- SUMMARY TILES -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
     <!-- Total Parcels -->
-    <div
-      class="kpi-card bg-white border border-planora-desert-200 p-5 rounded-2xl flex items-center gap-4"
+    <app-stat-card
+      icon="pi-map"
+      label="Total Registered"
+      [value]="totalParcels() + ' Parcels'"
+      iconTextClass="text-planora-clay-600"
     >
-      <div
-        class="w-11 h-11 rounded-xl bg-planora-limestone flex items-center justify-center text-planora-clay-600"
-      >
-        <i class="pi pi-map text-lg"></i>
-      </div>
-      <div>
-        <p class="text-[10px] font-bold text-planora-basalt-400 uppercase tracking-wider">
-          Total Registered
-        </p>
-        <p class="text-xl font-bold text-planora-basalt-900">{{ totalParcels() }} Parcels</p>
-      </div>
-    </div>
+    </app-stat-card>
 
     <!-- Total Area (m²) -->
-    <div
-      class="kpi-card bg-white border border-planora-desert-200 p-5 rounded-2xl flex items-center gap-4"
+    <app-stat-card
+      icon="pi-chart-line"
+      label="Surveyed Area"
+      [value]="(totalAreaM2() | number: '1.0-0') + ' m²'"
+      iconTextClass="text-planora-silt-600"
     >
-      <div
-        class="w-11 h-11 rounded-xl bg-planora-limestone flex items-center justify-center text-planora-silt-600"
-      >
-        <i class="pi pi-chart-line text-lg"></i>
-      </div>
-      <div>
-        <p class="text-[10px] font-bold text-planora-basalt-400 uppercase tracking-wider">
-          Surveyed Area
-        </p>
-        <p class="text-xl font-bold text-planora-basalt-900">
-          {{ totalAreaM2() | number: '1.0-0' }} m²
-        </p>
-      </div>
-    </div>
+    </app-stat-card>
 
     <!-- Geotechnical Analyses (modules completed) -->
-    <div
-      class="kpi-card bg-white border border-planora-desert-200 p-5 rounded-2xl flex items-center gap-4"
+    <app-stat-card
+      icon="pi-database"
+      label="Geotechnical Analyses"
+      [value]="totalModulesCompleted() + ' Layers'"
+      iconTextClass="text-planora-gold-600"
     >
-      <div
-        class="w-11 h-11 rounded-xl bg-planora-limestone flex items-center justify-center text-planora-gold-600"
-      >
-        <i class="pi pi-database text-lg"></i>
-      </div>
-      <div>
-        <p class="text-[10px] font-bold text-planora-basalt-400 uppercase tracking-wider">
-          Geotechnical Analyses
-        </p>
-        <p class="text-xl font-bold text-planora-basalt-900">
-          {{ totalModulesCompleted() }} Layers
-        </p>
-      </div>
-    </div>
+    </app-stat-card>
   </div>
 
   <!-- SEARCH BAR -->

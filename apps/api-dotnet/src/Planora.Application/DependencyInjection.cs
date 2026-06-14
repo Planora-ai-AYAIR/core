@@ -5,7 +5,7 @@ using Planora.Application.Common.Behaviours;
 
 namespace Planora.Application;
 
-public static class DependancyInjection
+public static class DependencyInjection
 {
 	public static IServiceCollection AddApplicationServices(this IServiceCollection services)
 	{
