@@ -12,6 +12,8 @@ using Planora.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true, reloadOnChange: true);
+
 // ──────────────────────────────────────────────
 //  Service Registration (Composition Root)
 // ──────────────────────────────────────────────
