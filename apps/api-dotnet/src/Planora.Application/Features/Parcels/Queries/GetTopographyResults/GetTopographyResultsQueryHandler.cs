@@ -30,7 +30,7 @@ public sealed class GetTopographyResultsQueryHandler(
         GetTopographyResultsQuery request,
         CancellationToken cancellationToken)
     {
-        var cacheKey = $"topography:{request.ParcelId}:tiles={request.IncludeTiles}";
+        var cacheKey = $"topography:{request.ParcelId}:tiles={request.IncludeTiles}:format={request.Format}";
 
         // 1. Fast path: Redis Cache
         var cached = await cacheService.GetAsync<TopographyResultsResponse>(cacheKey, cancellationToken);
