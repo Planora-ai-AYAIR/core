@@ -148,7 +148,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
-
+# feature/module1-terrain-soil-contourZones
+# py -3.13 -m uvicorn app.main:app --reload --port 8000
 # ── Run ───────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
