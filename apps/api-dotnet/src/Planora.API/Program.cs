@@ -9,6 +9,7 @@ using Serilog;
 using System.Text.Json;
 using FluentValidation;
 using Planora.Api.Middlewares;
+using Planora.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services
     .AddPresentationServices(builder.Configuration);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 // Register IMiddleware implementation so it can be injected and used by UseMiddleware
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Host.UseSerilog((context, configuration) =>
@@ -68,6 +70,7 @@ app.UseOutputCache();
 //  Endpoints
 // ──────────────────────────────────────────────
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = async (context, report) =>
