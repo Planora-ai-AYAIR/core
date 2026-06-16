@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Planora.Application.Common.Interfaces;
+using Planora.Application.Interfaces.Services;
 using Planora.Domain.Shared.Abstractions;
 
 namespace Planora.Infrastructure.Persistence.Interceptors;
