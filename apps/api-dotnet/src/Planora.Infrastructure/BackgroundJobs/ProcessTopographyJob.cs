@@ -15,11 +15,11 @@ public sealed class ProcessTopographyJob(
     IAnalysisJobRepository analysisJobRepository)
 : IProcessTopographyJob
 {
-    public string Enqueue(ProccessTopographyJobAiRequest request, CancellationToken ct)
+    public string Enqueue(ProccessTopographyJobAiRequest request)
     {
         var jobId =
             backgroundJobClient.Enqueue<ProcessTopographyJob>(
-                x => x.Execute(request, ct));
+                x => x.Execute(request));
         
         logger.LogInformation(
             "Topography job enqueued for ParcelId {ParcelId} with HangfireJobId {JobId}",
@@ -28,7 +28,7 @@ public sealed class ProcessTopographyJob(
         return jobId;
     }
 
-    private async Task<Result<Success>> Execute(ProccessTopographyJobAiRequest request, CancellationToken ct)
+    public async Task<Result<Success>> Execute(ProccessTopographyJobAiRequest request)
     {
         logger.LogInformation(
             "Topography job started for ParcelId {ParcelId}",
@@ -38,7 +38,7 @@ public sealed class ProcessTopographyJob(
         
         try
         {
-            pythonJobId = await aiAnalysis.ProccessTopographyAsync(request, ct);
+            pythonJobId = await aiAnalysis.ProccessTopographyAsync(request);
         }
         catch (Exception ex)
         {
@@ -68,7 +68,7 @@ public sealed class ProcessTopographyJob(
             return result.TopError;
         }
 
-        await analysisJobRepository.AddAsync(result.Value, ct);
+        await analysisJobRepository.AddAsync(result.Value);
 
         logger.LogInformation(
             "Topography job completed for ParcelId {ParcelId}, PythonJobId {PythonJobId}, AnalysisJobId {AnalysisJobId}",

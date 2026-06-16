@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +8,11 @@ using Planora.Domain.Shared.Results;
 namespace Planora.Api.Controllers;
 
 [ApiController]
-[Route("api/webhook")]
+[Route("api/webhooks")]
 [AllowAnonymous]
 public sealed class AiWebhookController(ISender sender) : BaseApiController
 {
-    [HttpPost("")]
+    [HttpPost("ai-events")]
     public async Task<IActionResult> Receive([FromBody] AiWebhookEnvelope envelope, CancellationToken ct)
     {
         Result<Success> result = envelope.EventType switch
