@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Planora.Application.Common.Interfaces;
+using Planora.Application.Interfaces.Services;
 using Planora.Domain.Shared.Abstractions;
 
 namespace Planora.Infrastructure.Persistence.Interceptors;
@@ -41,11 +41,11 @@ public class AuditableEntityInterceptor(IUser user, TimeProvider dateTime) : Sav
                 if (entry.State == EntityState.Added)
                 {
                     entry.Entity.CreatedBy = _user.Id;
-                    entry.Entity.CreatedAt = utcNow.DateTime;
+                    entry.Entity.CreatedAt = utcNow.UtcDateTime;
                 }
 
                 entry.Entity.UpdatedBy = _user.Id;
-                entry.Entity.UpdatedAt = utcNow.DateTime;
+                entry.Entity.UpdatedAt = utcNow.UtcDateTime;
 
                 foreach (var ownedEntry in entry.References)
                 {
@@ -54,11 +54,11 @@ public class AuditableEntityInterceptor(IUser user, TimeProvider dateTime) : Sav
                         if (ownedEntry.TargetEntry.State == EntityState.Added)
                         {
                             ownedEntity.CreatedBy = _user.Id;
-                            ownedEntity.CreatedAt = utcNow.DateTime;
+                            ownedEntity.CreatedAt = utcNow.UtcDateTime;
                         }
 
                         ownedEntity.UpdatedBy = _user.Id;
-                        ownedEntity.UpdatedAt = utcNow.DateTime;
+                        ownedEntity.UpdatedAt = utcNow.UtcDateTime;
                     }
                 }
             }

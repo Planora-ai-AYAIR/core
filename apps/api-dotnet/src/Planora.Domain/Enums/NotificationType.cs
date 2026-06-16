@@ -14,6 +14,8 @@ namespace Planora.Domain.Enums
         PaymentReceived, 
         PaymentRefunded, 
         AccountBanned, 
-        AccountActivated 
+        AccountActivated,
+        ModuleCompleted,
+        ModuleFailed
     }
 }

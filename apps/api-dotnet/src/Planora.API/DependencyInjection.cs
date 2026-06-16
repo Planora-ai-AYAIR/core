@@ -4,6 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Planora.Api.Filters;
+using Planora.Api.Services;
+using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.Options;
 
 namespace Planora.Api;
@@ -18,14 +21,20 @@ public static class DependencyInjection
             .AddApiDocumentation()
             .AddAppOutputCaching()
             .AddAppHealthChecks(configuration)
-            .AddJwtAuthentication(configuration);
+            .AddJwtAuthentication(configuration)
+            .AddIdentityInfrastructure();
 
         services.AddAuthorization();
+
+        services.Configure<WebhookOptions>(configuration.GetSection(WebhookOptions.SectionName));
+        services.AddScoped<HmacSignatureFilter>();
+
+        services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
         return services;
     }
 
-    private static IServiceCollection AddApiDocumentation(
+    public static IServiceCollection AddApiDocumentation(
         this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
@@ -64,7 +73,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddAppOutputCaching(
+    public static IServiceCollection AddAppOutputCaching(
         this IServiceCollection services)
     {
         services.AddOutputCache(options =>
@@ -81,7 +90,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddAppHealthChecks(
+    public static IServiceCollection AddAppHealthChecks(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -98,7 +107,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddJwtAuthentication(
+    public static IServiceCollection AddJwtAuthentication(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -130,8 +139,29 @@ public static class DependencyInjection
 
                         ClockSkew = TimeSpan.Zero
                     };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = ctx =>
+                    {
+                        var accessToken = ctx.Request.Query["access_token"];
+                        var path = ctx.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs"))
+                        {
+                            ctx.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
+        return services;
+    }
+    public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services)
+    {
+        services.AddScoped<IUser, CurrentUser>();
+        services.AddHttpContextAccessor();
         return services;
     }
 }
