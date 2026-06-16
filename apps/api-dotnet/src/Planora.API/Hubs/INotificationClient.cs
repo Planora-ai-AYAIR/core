@@ -1,6 +1,9 @@
-﻿namespace Planora.Api.Hubs
+﻿using Planora.Application.Features.Notifications.Dtos;
+
+namespace Planora.Api.Hubs
 {
-    public class INotificationClient
+    public interface INotificationClient
     {
+        Task NotificationReceived(NotificationDto notification);
     }
 }
