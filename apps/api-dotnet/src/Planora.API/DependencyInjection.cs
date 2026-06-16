@@ -25,6 +25,8 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
+        services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+
         return services;
     }
 
