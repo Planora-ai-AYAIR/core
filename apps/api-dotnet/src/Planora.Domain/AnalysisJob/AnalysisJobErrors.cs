@@ -11,4 +11,5 @@ public static class AnalysisJobErrors
     public static readonly Error InvalidParcelId = Error.Validation("AnalysisJob.InvalidParcelId", "Parcel ID is invalid.");
     public static readonly Error InvalidPythonJobId = Error.Validation("AnalysisJob.InvalidPythonJobId", "Python job ID cannot be empty.");
     public static readonly Error InvalidErrorMessage = Error.Validation("AnalysisJob.InvalidErrorMessage", "Error message cannot be empty.");
+    public static readonly Error UnsupportedEventType = Error.Validation("AnalysisJob.UnsupportedEventType", "Unsupported webhook event type.");
 }
