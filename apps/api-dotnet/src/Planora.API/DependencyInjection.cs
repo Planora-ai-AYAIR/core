@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Planora.Api.Filters;
 using Planora.Api.Services;
 using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.Options;
@@ -24,6 +25,9 @@ public static class DependencyInjection
             .AddIdentityInfrastructure();
 
         services.AddAuthorization();
+
+        services.Configure<WebhookOptions>(configuration.GetSection(WebhookOptions.SectionName));
+        services.AddScoped<HmacSignatureFilter>();
 
         services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
