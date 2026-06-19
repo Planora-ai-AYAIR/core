@@ -1,0 +1,28 @@
+<div class="relative w-40 h-40 mx-auto">
+  <svg viewBox="0 0 40 40" class="w-full h-full transform -rotate-90">
+    <circle cx="20" cy="20" r="15.915" fill="transparent" stroke="#e5e7eb" stroke-width="4" />
+    @for (segment of segments; track segment.type) {
+      <circle
+        cx="20"
+        cy="20"
+        r="15.915"
+        fill="transparent"
+        [attr.stroke]="segment.color"
+        stroke-width="4"
+        [attr.stroke-dasharray]="segment.dashArray"
+        [attr.stroke-dashoffset]="segment.dashOffset"
+      />
+    }
+  </svg>
+  <div class="absolute inset-0 flex items-center justify-center">
+    <span class="text-sm font-bold text-planora-basalt-800">{{ primaryType }}</span>
+  </div>
+</div>
+<div class="flex justify-center gap-4 mt-3">
+  @for (seg of segments; track seg.type) {
+    <div class="flex items-center gap-1.5 text-xs">
+      <span class="w-2.5 h-2.5 rounded-sm" [style.background-color]="seg.color"></span>
+      {{ seg.type }} {{ seg.percent }}%
+    </div>
+  }
+</div>

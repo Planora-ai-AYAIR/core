@@ -6,7 +6,7 @@ import { MapComponent } from '../../../../shared/components/map/map.component';
 import { MapLayerService } from '../../services/map-layer.service';
 import { BoreholeTabComponent } from '../../components/analysis-detail/borehole-tab/borehole-tab.component';
 import { RiskTabComponent } from '../../components/analysis-detail/risk-tab/risk-tab.component';
-import { SoilTabComponent } from '../../components/analysis-detail/soil-tab/soil-tab.component';
+import { SoilTabComponent } from '../../components/analysis-detail/soil/soil-tab/soil-tab.component';
 import { TopographyTabComponent } from '../../components/analysis-detail/topography-tab/topography-tab.component';
 import { MapLayerItem } from '../../interfaces/map-layer-item';
 import { TopographyMapInitialiser } from '../../services/topography-map-initialiser.service';
@@ -17,6 +17,8 @@ import { AnalysisDetailFacadeService } from '../../services/analysis-detail-faca
 import { ModuleProgressComponent } from '../../components/analysis-detail/module-progress/module-progress.component';
 import maplibregl from 'maplibre-gl';
 import { ModuleStatus } from '../../interfaces/module-status';
+import { BearingMapInitialiser } from '../../services/bearing-map-initialiser.service';
+import { BearingTabComponent } from '../../components/analysis-detail/bearing-tab/bearing-tab.component';
 
 @Component({
   selector: 'app-analysis-detail',
@@ -28,6 +30,7 @@ import { ModuleStatus } from '../../interfaces/module-status';
     MapComponent,
     TopographyTabComponent,
     SoilTabComponent,
+    BearingTabComponent,
     RiskTabComponent,
     BoreholeTabComponent,
     ModuleProgressComponent,
@@ -42,6 +45,7 @@ export class AnalysisDetailComponent {
   private _soilInit = inject(SoilMapInitialiser);
   private _riskInit = inject(RiskMapInitialiser);
   private _boreholeInit = inject(BoreholeMapInitialiser);
+  private _bearingInit = inject(BearingMapInitialiser);
 
   map = signal<maplibregl.Map | undefined>(undefined);
   activeModule = signal('topography');
@@ -49,7 +53,8 @@ export class AnalysisDetailComponent {
   readonly today = new Date();
   modules = [
     { id: 'topography', label: 'Topography', status: 'ready' },
-    { id: 'soil', label: 'Soil & Bearing', status: 'ready' },
+    { id: 'soil', label: 'Soil Composition', status: 'ready' },
+    { id: 'bearing', label: 'Bearing Capacity', status: 'ready' },
     { id: 'risk', label: 'Construction Risk', status: 'loading' },
     { id: 'borehole', label: 'Drilling Plan', status: 'pending' },
   ];
@@ -101,6 +106,7 @@ export class AnalysisDetailComponent {
 
       const topoData = this._analysisFacade.topographyData();
       const soilData = this._analysisFacade.soilData();
+      const bearingData = this._analysisFacade.bearingData();
       const riskData = this._analysisFacade.riskData();
       const boreholeData = this._analysisFacade.boreholeData();
 
@@ -110,6 +116,8 @@ export class AnalysisDetailComponent {
         this._topographyInit.addLayers(map, topoData);
       if (progress['soil']?.status === 'Completed' && soilData)
         this._soilInit.addLayers(map, soilData);
+      if (progress['bearing']?.status === 'Completed' && bearingData)
+        this._bearingInit.addLayers(map, bearingData);
       if (progress['risk']?.status === 'Completed' && riskData)
         this._riskInit.addLayers(map, riskData);
       if (progress['borehole']?.status === 'Completed' && boreholeData)
@@ -164,11 +172,29 @@ export class AnalysisDetailComponent {
           setOpacity: (m, o) => m.setPaintProperty('soil-composition', 'fill-opacity', o),
         },
         {
+          id: 'soil-heatmap',
+          label: 'Soil Heatmap',
+          visible: true,
+          opacity: 0.7,
+          group: 'soil',
+        },
+        ...Object.keys(soilData?.heatmapUrls ?? {}).map((depth) => ({
+          id: `soil-heatmap-${depth}`,
+          label: `Soil Heatmap (${depth})`,
+          visible: false,
+          opacity: 0.7,
+          group: 'soil',
+          hidden: true,
+          setOpacity: (m: maplibregl.Map, o: number) =>
+            m.setPaintProperty(`soil-heatmap-${depth}`, 'raster-opacity', o),
+        })),
+        // bearing
+        {
           id: 'bearing-points',
           label: 'Bearing Capacity',
           visible: true,
           opacity: 1.0,
-          group: 'soil',
+          group: 'bearing',
           setOpacity: (m, o) => m.setPaintProperty('bearing-points', 'circle-opacity', o),
         },
         {
@@ -176,7 +202,7 @@ export class AnalysisDetailComponent {
           label: 'Water Table Depth',
           visible: false,
           opacity: 0.5,
-          group: 'soil',
+          group: 'bearing',
           setOpacity: (m, o) => m.setPaintProperty('water-table', 'line-opacity', o),
         },
         // risk
@@ -248,7 +274,8 @@ export class AnalysisDetailComponent {
 
   moduleProgress = signal<Record<string, { status: ModuleStatus; estimatedSeconds: number }>>({
     topography: { status: 'Completed', estimatedSeconds: 0 },
-    soil: { status: 'Processing', estimatedSeconds: 15 },
+    soil: { status: 'Completed', estimatedSeconds: 0 },
+    bearing: { status: 'Completed', estimatedSeconds: 0 },
     risk: { status: 'Queued', estimatedSeconds: 40 },
     borehole: { status: 'Waiting', estimatedSeconds: 90 },
   });
@@ -259,6 +286,7 @@ export class AnalysisDetailComponent {
     return {
       topography: progress['topography']?.status ?? 'pending',
       soil: progress['soil']?.status ?? 'pending',
+      bearing: progress['bearing']?.status ?? 'pending',
       risk: progress['risk']?.status ?? 'pending',
       borehole: progress['borehole']?.status ?? 'pending',
     } as Record<string, string>; // allow indexing with any string

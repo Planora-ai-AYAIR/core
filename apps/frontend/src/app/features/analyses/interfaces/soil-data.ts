@@ -1,11 +1,21 @@
+export interface SoilDepthData {
+  depthRange: string;
+  sandPercent: number;
+  siltPercent: number;
+  clayPercent: number;
+  classification: string;
+  color: string;
+}
+
 export interface SoilData {
-  bearingCapacity: number;
-  plasticityIndex: number;
-  organicContent: number;
-  cohesion: number;
+  bulkDensity: number;
+  organicCarbon: number;
+  pH: number;
+  classification: string;
+  confidence: number;
   composition: { type: string; percent: number; color: string }[];
-  // Map layers
-  soilCompositionGeoJSON: any; // FeatureCollection
-  bearingPoints: { lng: number; lat: number; capacity: number; depth: number }[];
-  waterTableLines: any[]; // Feature[]
+  soilCompositionGeoJSON: any;
+  depthProfiles: SoilDepthData[];
+  heatmapUrls: Record<string, string>;
+  heatmapLegend: { color: string; label: string }[];
 }

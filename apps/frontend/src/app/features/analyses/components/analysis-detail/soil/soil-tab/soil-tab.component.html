@@ -1,0 +1,103 @@
+<div class="space-y-4">
+  <!-- Soil Composition Summary -->
+  @if (soilComposition().length) {
+    <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+      <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+        <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+          Soil Composition
+        </h3>
+      </div>
+      <div class="p-4 flex flex-col sm:flex-row items-center gap-6">
+        <app-soil-pie-chart [composition]="soilComposition()" />
+        <div class="flex-1 space-y-3 w-full">
+          @for (soil of soilComposition(); track soil.type) {
+            <div>
+              <div class="mb-1 flex items-center justify-between">
+                <span class="flex items-center gap-2 text-xs text-planora-basalt-600">
+                  <span
+                    class="inline-block h-2.5 w-2.5 rounded-sm"
+                    [style.background-color]="soil.color"
+                  ></span>
+                  {{ soil.type }}
+                </span>
+                <span class="font-mono text-xs font-bold text-planora-basalt-800"
+                  >{{ soil.percent }}%</span
+                >
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-planora-desert-100">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  [style.width.%]="soil.percent"
+                  [style.background-color]="soil.color"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="flex flex-col sm:flex-row gap-4">
+    @if (classificationData(); as cls) {
+      <app-soil-classification-badge
+        [classification]="cls.classification"
+        [confidence]="cls.confidence"
+      />
+    }
+    @if (soilProperties(); as props) {
+      <div class="flex-1">
+        <app-soil-properties-table
+          [bulkDensity]="props.bulkDensity"
+          [organicCarbon]="props.organicCarbon"
+          [pH]="props.pH"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Depth Selector -->
+  <app-depth-selector [selected]="selectedDepth()" (select)="onDepthChange($event)" />
+
+  <!-- Soil Profile Cards -->
+  <app-soil-profile
+    [profiles]="depthProfiles()"
+    [viewMode]="profileViewMode()"
+    (toggleViewMode)="onToggleViewMode($event)"
+    (exportCSV)="onExportCSV()"
+  />
+
+  <!-- Map Overlays -->
+  <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+    <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+      <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+        Map Overlays
+      </h3>
+    </div>
+    @for (layer of mapLayers(); track layer.id) {
+      <app-layer-control
+        [layer]="layer"
+        (toggle)="onToggleLayer($event)"
+        (opacityChange)="onLayerOpacityChange(layer.id, $event)"
+      />
+    }
+    <div class="pb-1"></div>
+  </div>
+
+  <!-- Legend -->
+  @if (heatmapLegend().length) {
+    <div class="rounded-lg border border-planora-desert-200 bg-white p-3 shadow-sm">
+      <h4 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-500 mb-2">
+        Legend
+      </h4>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+        @for (item of heatmapLegend(); track item.label) {
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm" [style.background-color]="item.color"></span>
+            <span class="text-[10px] text-planora-basalt-600">{{ item.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

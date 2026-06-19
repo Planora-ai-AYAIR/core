@@ -105,10 +105,22 @@
               <app-soil-tab></app-soil-tab>
             } @else {
               <app-module-progress
-                moduleName="Soil & Bearing"
+                moduleName="Soil Composition"
                 [status]="moduleProgress()['soil'].status"
                 [estimatedSeconds]="moduleProgress()['soil'].estimatedSeconds"
                 (cancel)="cancelModule('soil')"
+              ></app-module-progress>
+            }
+          }
+          @case ('bearing') {
+            @if (moduleProgress()['bearing']?.status === 'Completed') {
+              <app-bearing-tab></app-bearing-tab>
+            } @else {
+              <app-module-progress
+                moduleName="Bearing Capacity"
+                [status]="moduleProgress()['bearing'].status"
+                [estimatedSeconds]="moduleProgress()['bearing'].estimatedSeconds"
+                (cancel)="cancelModule('bearing')"
               ></app-module-progress>
             }
           }

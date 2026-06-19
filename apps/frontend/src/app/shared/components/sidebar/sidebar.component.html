@@ -2,13 +2,23 @@
   class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-planora-clay-500 via-planora-gold-500 to-planora-silt-500 z-50"
 ></div>
 
-<div [class]="collapsed ? 'flex items-center h-20 overflow-hidden' : 'flex items-center h-20 px-6 overflow-hidden'">
+<div
+  [class]="
+    collapsed
+      ? 'flex items-center h-20 overflow-hidden'
+      : 'flex items-center h-20 px-6 overflow-hidden'
+  "
+>
   <div class="flex items-center min-w-max">
     <a [routerLink]="ROUTES.home" class="flex items-center gap-2 group">
       <img
-        [src]= "collapsed ? '/assets/images/logo/logo_tiny.png' : '/assets/images/logo/logo.png'"
+        [src]="collapsed ? '/assets/images/logo/logo_tiny.webp' : '/assets/images/logo/logo.webp'"
         alt="Planora Logo"
-        class="h-16 w-auto lg:h-20 transition-transform duration-300 group-hover:scale-105"
+        class="h-20 w-auto transition-transform duration-300 group-hover:scale-105"
+        [ngClass]="{
+          'lg:h-16 pl-4': collapsed,
+          'lg:h-26': !collapsed,
+        }"
       />
     </a>
   </div>
@@ -31,11 +41,9 @@
 </nav>
 
 <div class="p-4 border-t border-planora-desert-200">
-  <div
-    class="flex items-center gap-3 px-2 py-2 rounded-xl bg-planora-limestone-100/50"
-  >
+  <div class="flex items-center gap-3 px-2 py-2 rounded-xl bg-planora-limestone-100/50">
     <div
-      class="w-8 h-8 rounded-full bg-planora-clay-500 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
+      class="w-8 h-8 rounded-full bg-planora-clay-500 shrink-0 flex items-center justify-center text-white text-xs font-bold"
     >
       AM
     </div>
