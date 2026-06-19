@@ -1,0 +1,80 @@
+<div class="cta-section py-20 lg:py-28">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <!-- Left: Interactive map simulation -->
+      <div class="animate-fade-up">
+        <div class="mini-map relative">
+          <div class="parcel-demo"></div>
+          <div class="scan-line"></div>
+          <!-- Small marker -->
+          <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-planora-clay-500 rounded-full shadow-lg shadow-planora-clay-300/60"
+          >
+            <div
+              class="absolute inset-0 bg-planora-clay-500 rounded-full animate-ping opacity-30"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: CTA content -->
+      <div class="animate-fade-up" style="animation-delay: 0.15s">
+        <span
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-semibold tracking-widest uppercase bg-planora-basalt-800 text-planora-limestone mb-4"
+        >
+          <span class="w-1.5 h-1.5 bg-planora-gold-400 rotate-45"></span>
+          Ready to start?
+        </span>
+        <h2
+          class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-planora-basalt-900 mb-4 tracking-tight"
+        >
+          Draw your land.<br />
+          <span class="text-planora-clay-500">Get answers in hours.</span>
+        </h2>
+        <p class="text-base sm:text-lg text-planora-basalt-600 mb-8 leading-relaxed max-w-xl">
+          Select any plot in Egypt or Africa — Planora instantly analyses topography, soil, bearing
+          capacity, risks, and recommends the optimal borehole plan. No field crews. No weeks of
+          waiting.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-6 sm:gap-4">
+          <app-button
+            variant="primary"
+            size="lg"
+            [routerLink]="ROUTES.newAnalysis"
+            [fullWidth]="true"
+            class="cta-pulse relative z-10 w-full sm:w-auto"
+          >
+            <i class="pi pi-map mr-2"></i> Analyse Your Land
+          </app-button>
+
+          <app-button
+            variant="outline"
+            size="lg"
+            href="#demo"
+            [fullWidth]="true"
+            class="w-full sm:w-auto"
+          >
+            <i class="pi pi-play-circle mr-2"></i> Watch Demo (5 min)
+          </app-button>
+        </div>
+
+        <!-- Trust indicators -->
+        <div
+          class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-planora-basalt-600 font-medium"
+        >
+          <div class="flex items-center gap-1">
+            <i class="pi pi-check-circle text-planora-silt-500"></i> 60% cost reduction
+          </div>
+          <div class="flex items-center gap-1">
+            <i class="pi pi-check-circle text-planora-silt-500"></i> Report in 2-6 hours
+          </div>
+          <div class="flex items-center gap-1">
+            <i class="pi pi-check-circle text-planora-silt-500"></i> African soil data
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

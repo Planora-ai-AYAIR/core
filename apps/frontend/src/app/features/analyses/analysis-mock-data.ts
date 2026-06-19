@@ -1,0 +1,323 @@
+import { BoreholeData } from "./interfaces/borehole-data";
+import { RiskData } from "./interfaces/risk-data";
+import { SoilData } from "./interfaces/soil-data";
+import { TopographyData } from "./interfaces/topography-data";
+
+// ---------- Helper functions (extracted from TopographyMapInitialiser) ----------
+function buildElevationGrid(): { lng: number; lat: number; elev: number }[] {
+  const cx = 31.942,
+    cy = 30.633,
+    cols = 14,
+    rows = 12;
+  const pts: { lng: number; lat: number; elev: number }[] = [];
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      const dx = -0.0007 + (i / (cols - 1)) * 0.0014,
+        dy = -0.0005 + (j / (rows - 1)) * 0.001;
+      const nx = dx / 0.0014,
+        ny = dy / 0.001;
+      let elev =
+        33.9 +
+        nx * 16 +
+        ny * 5 +
+        4.5 * Math.exp(-((nx - 0.28) ** 2 + (ny + 0.22) ** 2) * 18) -
+        3.0 * Math.exp(-((nx + 0.32) ** 2 + (ny - 0.28) ** 2) * 22) +
+        1.5 * Math.sin(nx * Math.PI) * Math.cos(ny * Math.PI);
+      pts.push({
+        lng: cx + dx,
+        lat: cy + dy,
+        elev: Math.round(Math.max(22, Math.min(46, elev)) * 10) / 10,
+      });
+    }
+  }
+  return pts;
+}
+
+function buildContourLines(): any[] {
+  const cx = 31.942,
+    cy = 30.633;
+  const levels = [24, 27, 30, 33, 36, 39, 42];
+
+  return levels.map((elev, idx) => {
+    const t = idx / (levels.length - 1);
+    const ox = cx + t * 0.00042;
+    const oy = cy + t * 0.00021;
+    const a = 0.00062 - t * 0.00048;
+    const b = 0.00046 - t * 0.00036;
+    const rot = -0.52;
+
+    const coords: [number, number][] = [];
+    for (let deg = 0; deg <= 360; deg += 6) {
+      const r = (deg * Math.PI) / 180;
+      const x = a * Math.cos(r),
+        y = b * Math.sin(r);
+      coords.push([
+        ox + x * Math.cos(rot) - y * Math.sin(rot),
+        oy + x * Math.sin(rot) + y * Math.cos(rot),
+      ]);
+    }
+
+    return {
+      type: 'Feature',
+      properties: { elevation: elev },
+      geometry: { type: 'LineString', coordinates: coords },
+    };
+  });
+}
+
+function buildSlopePolygons(): any[] {
+  const SW: [number, number] = [31.941933, 30.633079];
+  const NW: [number, number] = [31.942059, 30.63315];
+  const NE: [number, number] = [31.942183, 30.632954];
+  const SE: [number, number] = [31.942048, 30.632878];
+
+  const lerp = (a: [number, number], b: [number, number], t: number): [number, number] => [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+  ];
+
+  const mSW_NW = lerp(SW, NW, 0.5);
+  const mNW_NE = lerp(NW, NE, 0.5);
+  const mNE_SE = lerp(NE, SE, 0.5);
+  const mSE_SW = lerp(SE, SW, 0.5);
+  const ctr = lerp(lerp(SW, NE, 0.5), lerp(NW, SE, 0.5), 0.5);
+
+  return [
+    { slope: 'flat', ring: [SW, mSW_NW, ctr, mSE_SW, SW] },
+    { slope: 'gentle', ring: [mSW_NW, NW, mNW_NE, ctr, mSW_NW] },
+    { slope: 'moderate', ring: [mSE_SW, ctr, mNE_SE, SE, mSE_SW] },
+    { slope: 'steep', ring: [ctr, mNW_NE, NE, mNE_SE, ctr] },
+  ].map(({ slope, ring }) => ({
+    type: 'Feature',
+    properties: { slope },
+    geometry: { type: 'Polygon', coordinates: [ring] },
+  }));
+}
+
+function buildPondingPolygons(): any[] {
+  const z1: [number, number][] = [
+    [31.94183, 30.6331],
+    [31.94192, 30.63316],
+    [31.94202, 30.63312],
+    [31.94206, 30.63304],
+    [31.942, 30.63296],
+    [31.94188, 30.63294],
+    [31.94181, 30.63302],
+    [31.94183, 30.6331],
+  ];
+  const z2: [number, number][] = [
+    [31.942, 30.63288],
+    [31.94214, 30.63295],
+    [31.94225, 30.63292],
+    [31.94229, 30.63282],
+    [31.94222, 30.63271],
+    [31.94207, 30.63268],
+    [31.94198, 30.63276],
+    [31.942, 30.63288],
+  ];
+
+  return [
+    { area: 120, risk: 'Low', ring: z1 },
+    { area: 350, risk: 'Moderate', ring: z2 },
+  ].map(({ area, risk, ring }) => ({
+    type: 'Feature',
+    properties: { area, risk },
+    geometry: { type: 'Polygon', coordinates: [ring] },
+  }));
+}
+
+// ---------- Topography mock ----------
+export const MOCK_TOPOGRAPHY_DATA: TopographyData = {
+  minElevation: 22.5,
+  maxElevation: 45.3,
+  meanElevation: 33.9,
+  cutFill: 1450,
+  slopeDistribution: [
+    { name: 'Flat (<2%)', value: 40 },
+    { name: 'Gentle (2-5%)', value: 30 },
+    { name: 'Moderate (5-15%)', value: 20 },
+    { name: 'Steep (>15%)', value: 10 },
+  ],
+  pondingZones: [
+    { id: 1, lat: 30.63305, lng: 31.94188, area: 120, risk: 'Low' },
+    { id: 2, lat: 30.6328, lng: 31.94213, area: 350, risk: 'Moderate' },
+  ],
+  engineeringFlags: [
+    { text: 'High elevation delta across parcel: 22.8 m — significant grading work expected.' },
+    { text: '2 ponding risk zones detected (470 m² combined) — drainage design required.' },
+  ],
+  elevationGrid: buildElevationGrid(),
+  contourLines: buildContourLines(),
+  slopePolygons: buildSlopePolygons(),
+  pondingPolygons: buildPondingPolygons(),
+};
+
+// ---------- Soil mock ----------
+export const MOCK_SOIL_DATA: SoilData = {
+  bearingCapacity: 245,
+  plasticityIndex: 18,
+  organicContent: 2.3,
+  cohesion: 12,
+  composition: [
+    { type: 'Clay', percent: 45, color: '#B86E3D' },
+    { type: 'Silt', percent: 35, color: '#6B7F5E' },
+    { type: 'Sand', percent: 20, color: '#E0BF6B' },
+  ],
+  soilCompositionGeoJSON: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: { type: 'Clay' },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [31.9418, 30.633],
+              [31.942, 30.633],
+              [31.942, 30.6332],
+              [31.9418, 30.6332],
+              [31.9418, 30.633],
+            ],
+          ],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: { type: 'Silt' },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [31.942, 30.633],
+              [31.9422, 30.633],
+              [31.9422, 30.6332],
+              [31.942, 30.6332],
+              [31.942, 30.633],
+            ],
+          ],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: { type: 'Sand' },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [31.9418, 30.6328],
+              [31.9422, 30.6328],
+              [31.9422, 30.633],
+              [31.9418, 30.633],
+              [31.9418, 30.6328],
+            ],
+          ],
+        },
+      },
+    ],
+  },
+  bearingPoints: [
+    { lng: 31.942, lat: 30.6331, capacity: 245, depth: 5 },
+    { lng: 31.9419, lat: 30.633, capacity: 210, depth: 4 },
+    { lng: 31.9421, lat: 30.6329, capacity: 270, depth: 6 },
+  ],
+  waterTableLines: (() => {
+    const waterLines: any[] = [];
+    for (let d = 3; d <= 8; d += 2) {
+      const coords: [number, number][] = [];
+      for (let a = 0; a <= 360; a += 30) {
+        const rad = (a * Math.PI) / 180;
+        coords.push([31.942 + 0.0001 * d * Math.cos(rad), 30.633 + 0.0001 * d * Math.sin(rad)]);
+      }
+      waterLines.push({
+        type: 'Feature',
+        properties: { depth: d },
+        geometry: { type: 'LineString', coordinates: coords },
+      });
+    }
+    return waterLines;
+  })(),
+};
+
+// ---------- Risk mock ----------
+export const MOCK_RISK_DATA: RiskData = {
+  floodRisk: 'Low',
+  seismicZone: 'Zone II',
+  liquefactionPotential: 'Medium',
+  landslideRisk: 'None',
+  hazards: [
+    {
+      label: 'Flood Risk',
+      rating: 'Low',
+      description: '0.5 m above 100-year floodplain',
+      icon: '💧',
+    },
+    {
+      label: 'Seismic Zone',
+      rating: 'Zone II',
+      description: 'Peak ground acceleration 0.15 g',
+      icon: '🌍',
+    },
+    {
+      label: 'Liquefaction',
+      rating: 'Medium',
+      description: 'Sandy silt at 4-6 m depth',
+      icon: '⏳',
+    },
+    {
+      label: 'Landslide',
+      rating: 'None',
+      description: 'Slope < 5% — no risk detected',
+      icon: '⛰️',
+    },
+  ],
+  floodFeatures: [
+    {
+      risk: 'High',
+      coords: [
+        [31.9418, 30.633],
+        [31.942, 30.633],
+        [31.942, 30.6331],
+        [31.9418, 30.6331],
+        [31.9418, 30.633],
+      ],
+    },
+    {
+      risk: 'Medium',
+      coords: [
+        [31.942, 30.633],
+        [31.9422, 30.633],
+        [31.9422, 30.6331],
+        [31.942, 30.6331],
+        [31.942, 30.633],
+      ],
+    },
+  ],
+  seismicPoint: [31.942, 30.633],
+  liquefactionPolygon: [
+    [31.9419, 30.6329],
+    [31.9421, 30.6329],
+    [31.9421, 30.6331],
+    [31.9419, 30.6331],
+    [31.9419, 30.6329],
+  ],
+};
+
+// ---------- Borehole mock ----------
+export const MOCK_BOREHOLE_DATA: BoreholeData = {
+  points: [
+    { id: 'BH-1', lng: 31.942, lat: 30.633, depth: 15, cost: 4500 },
+    { id: 'BH-2', lng: 31.9419, lat: 30.6329, depth: 12, cost: 3800 },
+    { id: 'BH-3', lng: 31.9421, lat: 30.6331, depth: 18, cost: 5000 },
+  ],
+  optimalArea: [
+    [31.9418, 30.6328],
+    [31.9422, 30.6328],
+    [31.9422, 30.6332],
+    [31.9418, 30.6332],
+    [31.9418, 30.6328],
+  ],
+  estimatedCost: 13300,
+  drillingCost: 9000,
+  testingCost: 4300,
+};

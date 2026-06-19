@@ -1,0 +1,55 @@
+<div class="space-y-6">
+  <!-- Heading -->
+  <div class="text-center">
+    <h1 class="font-display text-3xl font-bold text-planora-basalt-900">Verify OTP</h1>
+    <p class="text-sm text-planora-basalt-500 mt-1">
+      We sent a 6-digit code to <strong>{{ email() }}</strong>
+    </p>
+  </div>
+
+  <!-- OTP form -->
+  <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="space-y-5">
+    <app-otp-input formControlName="otp"></app-otp-input>
+
+    <app-button
+      type="submit"
+      variant="primary"
+      [fullWidth]="true"
+      [disabled]="otpForm.invalid"
+      [isLoading]="isLoading"
+      loadingText="Verifying..."
+    >
+      Verify Code
+      <i class="pi pi-shield ml-2"></i>
+    </app-button>
+  </form>
+
+  <!-- Resend & Sign-in links -->
+  <div class="text-center text-sm space-y-2 mt-4">
+    <p class="text-planora-basalt-500">
+      Didn't receive the code?
+      <button
+        type="button"
+        (click)="resendOtp()"
+        [disabled]="!canResend() || isResending"
+        class="text-planora-clay-600 hover:text-planora-clay-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (isResending) {
+          Resending...
+        } @else if (countdown() > 0) {
+          Resend in {{ countdown() }}s
+        } @else {
+          Resend
+        }
+      </button>
+    </p>
+    <p class="text-planora-basalt-500">
+      <a
+        [routerLink]="[ROUTES.signIn]"
+        class="text-planora-clay-600 hover:text-planora-clay-500 font-semibold transition-colors"
+      >
+        Back to Sign In
+      </a>
+    </p>
+  </div>
+</div>

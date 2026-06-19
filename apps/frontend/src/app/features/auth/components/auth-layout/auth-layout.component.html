@@ -1,0 +1,88 @@
+<div class="min-h-screen flex bg-planora-limestone overflow-hidden">
+  <!-- Left panel: dark side -->
+  <aside class="hidden lg:flex flex-1 items-center justify-center bg-planora-basalt-900 relative">
+    <div class="absolute inset-0 opacity-10 topo-pattern"></div>
+
+    <div class="relative z-10 max-w-lg p-12 animate-fade-up">
+      <a [routerLink]="ROUTES.home" class="flex items-center">
+        <img
+          src="/assets/images/logo/logo.png"
+          alt="Planora Logo"
+          class="h-16 w-auto lg:h-28 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"
+        />
+      </a>
+
+      <h2 class="font-display text-5xl leading-tight font-bold text-white mb-8">
+        The future of site intelligence <span class="text-planora-clay-400">lies beneath.</span>
+      </h2>
+
+      <ul class="space-y-5 text-planora-desert-100 mb-10">
+        <li class="flex items-center gap-4">
+          <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+            <i class="pi pi-bolt text-planora-gold-400"></i>
+          </div>
+          <span class="text-base lg:text-lg">Instant Geotechnical pre-qualification.</span>
+        </li>
+        <li class="flex items-center gap-4">
+          <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+            <i class="pi pi-database text-planora-silt-400"></i>
+          </div>
+          <span class="text-base lg:text-lg">AI-powered African soil analysis.</span>
+        </li>
+      </ul>
+
+      <div class="bg-white/5 border-l-4 border-planora-clay-500 p-6 backdrop-blur-sm">
+        <p class="text-sm text-planora-desert-200 italic leading-relaxed">
+          "Planora transformed our site feasibility workflow from weeks into a single morning."
+        </p>
+        <p class="text-xs font-bold text-white mt-4 uppercase tracking-widest">
+          — Lead Engineer, Giza
+        </p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right panel: light side -->
+  <main
+    class="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative overflow-hidden"
+  >
+    <!-- Watermark -->
+    <div class="absolute -right-5 -bottom-20 pointer-events-none select-none opacity-[0.06]">
+      <img src="/assets/images/logo/logo.png" alt="Planora" class="w-150 grayscale" />
+    </div>
+
+    <!-- Card -->
+    <div class="w-full max-w-150 animate-fade-up" style="animation-delay: 0.1s">
+      <div
+        class="bg-white rounded-3xl p-8 sm:p-12 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] border border-planora-desert-200 relative overflow-hidden"
+      >
+        <!-- Gradient top bar (clipped by overflow-hidden) -->
+        <div
+          class="absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r from-planora-clay-500 via-planora-gold-500 to-planora-silt-500"
+        ></div>
+
+        <ng-content></ng-content>
+        <router-outlet></router-outlet>
+      </div>
+
+      <!-- Footer links -->
+      <div class="mt-2 flex justify-center gap-6 text-xs text-planora-basalt-500 font-medium">
+        <a
+          routerLink="/help"
+          class="hover:text-planora-clay-500 hover:underline underline-offset-2 transition-colors"
+          >Help Center</a
+        >
+        <a
+          routerLink="/privacy"
+          class="hover:text-planora-clay-500 hover:underline underline-offset-2 transition-colors"
+          >Privacy</a
+        >
+        <a
+          routerLink="/terms"
+          class="hover:text-planora-clay-500 hover:underline underline-offset-2 transition-colors"
+          >Terms</a
+        >
+      </div>
+    </div>
+  </main>
+</div>

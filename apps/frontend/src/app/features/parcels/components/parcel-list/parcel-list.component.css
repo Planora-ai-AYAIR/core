@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.kpi-card,
+.parcel-strip {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 2px 4px -1px rgba(0, 0, 0, 0.01);
+}
+
+.parcel-strip {
+  will-change: transform, box-shadow;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.parcel-strip:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 20px -8px rgba(184, 110, 61, 0.08);
+}
+
+th,
+.tracking-wider {
+  letter-spacing: 0.08em;
+}

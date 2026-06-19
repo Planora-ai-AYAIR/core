@@ -1,0 +1,297 @@
+<section
+  class="relative min-h-screen flex items-center bg-planora-limestone overflow-hidden"
+  #sceneContainer
+  (mouseenter)="onSceneMouseEnter()"
+  (mouseleave)="onSceneMouseLeave()"
+>
+  <div
+    class="absolute left-0 top-0 h-full w-1/3 lg:w-1/4 flex flex-col opacity-30 pointer-events-none parallax-drift"
+  >
+    <div class="h-1/5 bg-planora-desert-300"></div>
+    <div class="h-1/6 bg-planora-gold-300"></div>
+    <div class="h-1/6 bg-planora-clay-300"></div>
+    <div class="h-1/4 bg-planora-silt-300"></div>
+    <div class="flex-1 bg-planora-basalt-700"></div>
+  </div>
+
+  <div class="absolute inset-0 opacity-10 bg-topographic pointer-events-none parallax-slow"></div>
+
+  <div
+    class="relative max-w-7xl mx-auto px-6 lg:px-12 py-20 grid lg:grid-cols-5 gap-12 items-center"
+  >
+    <div class="lg:col-span-3">
+      <span
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-semibold tracking-widest uppercase bg-planora-basalt-800 text-planora-limestone mb-6 animate-fade-up"
+      >
+        <span class="w-1.5 h-1.5 bg-planora-gold-400 rotate-45"></span>
+        Geotechnical Intelligence
+      </span>
+
+      <h1
+        class="text-4xl sm:text-5xl lg:text-7xl font-display font-bold text-planora-basalt-900 leading-none mb-6 animate-fade-up delay-100"
+      >
+        Turn land data<br />
+        <span class="text-planora-clay-500">into building confidence.</span>
+      </h1>
+
+      <p
+        class="text-lg text-planora-basalt-600 max-w-xl leading-relaxed mb-8 animate-fade-up delay-200"
+      >
+        Select any site. Planora analyzes topography, soil composition, bearing capacity, flood and
+        seismic risks, then recommends the optimal building height—all in hours, not weeks.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 animate-fade-up delay-300">
+        <app-button
+          variant="primary"
+          size="lg"
+          [routerLink]="ROUTES.newAnalysis"
+          [fullWidth]="true"
+          class="w-full sm:w-auto"
+        >
+          Analyse Your Land
+          <i class="pi pi-arrow-right text-sm ml-2"></i>
+        </app-button>
+        <app-button
+          variant="outline"
+          size="lg"
+          href="#demo"
+          [fullWidth]="true"
+          class="w-full sm:w-auto"
+        >
+          <i class="pi pi-play-circle mr-2"></i>
+          Watch Demo
+        </app-button>
+      </div>
+
+      <div
+        class="mt-7 flex flex-wrap gap-x-8 gap-y-3 text-sm text-planora-basalt-700 font-medium animate-fade-up delay-400"
+      >
+        <div class="flex items-center gap-2">
+          <span class="w-1 h-1 bg-planora-silt-500 rotate-45"></span>
+          60% lower survey cost
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-1 h-1 bg-planora-silt-500 rotate-45"></span>
+          Reports in 2-6 hours
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-1 h-1 bg-planora-silt-500 rotate-45"></span>
+          AI trained on African soils
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="lg:col-span-2 hidden lg:flex flex-col items-center justify-center min-h-[600px] gap-8"
+    >
+      <!-- 3D Scene Container -->
+      <div class="relative w-full max-w-md aspect-square perspective-1000" #sceneContainer>
+        <div
+          class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none"
+        >
+          <svg class="w-full h-full scale-105" viewBox="0 0 200 200">
+            <circle
+              cx="100"
+              cy="100"
+              r="95"
+              fill="none"
+              stroke="#2B2D31"
+              stroke-width="0.6"
+              stroke-dasharray="4 4"
+            />
+            <circle cx="100" cy="100" r="65" fill="none" stroke="#2B2D31" stroke-width="0.3" />
+            <line x1="100" y1="5" x2="100" y2="195" stroke="#2B2D31" stroke-width="0.4" />
+            <line x1="5" y1="100" x2="195" y2="100" stroke="#2B2D31" stroke-width="0.4" />
+          </svg>
+        </div>
+
+        <div
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 scene-block"
+          [style.transform]="
+            'rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) rotateZ(' + rotateZ + 'deg)'
+          "
+        >
+          <!-- Top Surface: Topographic Map -->
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-planora-desert-200 to-planora-gold-200 border border-planora-basalt-800/30 face face-top shadow-lg overflow-hidden"
+          >
+            <svg class="w-full h-full opacity-40" viewBox="0 0 100 100">
+              <!-- Topographic contour lines -->
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#8B6F47" stroke-width="0.5" />
+              <circle cx="50" cy="50" r="30" fill="none" stroke="#8B6F47" stroke-width="0.5" />
+              <circle cx="50" cy="50" r="20" fill="none" stroke="#8B6F47" stroke-width="0.5" />
+              <circle cx="50" cy="50" r="10" fill="none" stroke="#8B6F47" stroke-width="0.5" />
+            </svg>
+            <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-20">
+              <div class="border-l border-b border-planora-basalt-800/30"></div>
+              <div class="border-b border-planora-basalt-800/30"></div>
+              <div class="border-r border-b border-planora-basalt-800/30"></div>
+              <div class="border-l border-planora-basalt-800/30"></div>
+              <div class="border-planora-basalt-800/30"></div>
+              <div class="border-r border-planora-basalt-800/30"></div>
+              <div class="border-l border-t border-planora-basalt-800/30"></div>
+              <div class="border-t border-planora-basalt-800/30"></div>
+              <div class="border-r border-t border-planora-basalt-800/30"></div>
+            </div>
+            <div
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-planora-clay-600/40 animate-pulse-soft"
+            ></div>
+            <span class="absolute bottom-2 right-2 text-xs font-mono text-planora-basalt-600/60">
+              Topography
+            </span>
+          </div>
+
+          <!-- Front Face: Soil Profile Cross-Section -->
+          <div
+            class="absolute left-0 bottom-0 w-full h-20 border border-planora-basalt-800/30 face face-front flex flex-col bg-white/5"
+          >
+            <div class="h-[15%] soil-topsoil border-b border-planora-basalt-800/10"></div>
+            <div class="h-[25%] soil-clay border-b border-planora-basalt-800/10 relative">
+              <span class="absolute left-2 top-0.5 text-[6px] font-mono text-planora-basalt-600/50">
+                Clay
+              </span>
+            </div>
+            <div class="h-[20%] soil-gold border-b border-planora-basalt-800/10 relative">
+              <span class="absolute left-2 top-0.5 text-[6px] font-mono text-planora-basalt-600/50">
+                Silt
+              </span>
+            </div>
+            <div class="h-[20%] soil-silt border-b border-planora-basalt-800/10 relative">
+              <span class="absolute left-2 top-0.5 text-[6px] font-mono text-planora-basalt-600/50">
+                Sand
+              </span>
+            </div>
+            <div class="h-[20%] soil-bedrock relative">
+              <span class="absolute left-2 top-0.5 text-[6px] font-mono text-planora-basalt-600/50">
+                Bedrock
+              </span>
+            </div>
+          </div>
+
+          <!-- Right Face: Depth Scale -->
+          <div
+            class="absolute right-0 bottom-0 w-full h-20 border border-planora-basalt-800/30 face face-right flex flex-col bg-white/5"
+          >
+            <div class="h-[15%] relative flex items-center justify-end pr-2">
+              <span class="text-[6px] font-mono text-planora-basalt-600/70">0m</span>
+            </div>
+            <div
+              class="h-[25%] soil-clay relative flex items-center justify-end pr-2 border-b border-planora-basalt-800/10"
+            >
+              <span class="text-[6px] font-mono text-planora-basalt-600/70">5m</span>
+              <div class="absolute bottom-0 left-0 w-full h-1.5 water-table"></div>
+            </div>
+            <div
+              class="h-[20%] soil-gold relative flex items-center justify-end pr-2 border-b border-planora-basalt-800/10"
+            >
+              <span class="text-[6px] font-mono text-planora-basalt-600/70">10m</span>
+            </div>
+            <div
+              class="h-[20%] soil-silt relative flex items-center justify-end pr-2 border-b border-planora-basalt-800/10"
+            >
+              <span class="text-[6px] font-mono text-planora-basalt-600/70">15m</span>
+            </div>
+            <div class="h-[20%] soil-bedrock relative flex items-center justify-end pr-2">
+              <span class="text-[6px] font-mono text-planora-basalt-600/70">20m</span>
+            </div>
+          </div>
+
+          <!-- Left & Back Faces -->
+          <div class="absolute left-0 bottom-0 w-full h-20 face face-left">
+            <div
+              class="w-full h-full bg-gradient-to-b from-planora-basalt-900/5 to-planora-basalt-900/30"
+            ></div>
+          </div>
+          <div class="absolute left-0 top-0 w-full h-20 face face-back">
+            <div
+              class="w-full h-full bg-gradient-to-b from-planora-basalt-900/5 to-planora-basalt-900/20"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Elevation Analysis -->
+        <div class="absolute top-16 right-0 animate-float-badge" style="animation-delay: 0s">
+          <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold bg-planora-gold-500 text-white rounded-sm shadow-md"
+          >
+            <i class="pi pi-arrow-up text-sm leading-none"></i> Elevation Analysis
+          </span>
+        </div>
+
+        <!-- Water Table -->
+        <div class="absolute bottom-20 left-0 animate-float-badge" style="animation-delay: 0.2s">
+          <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold bg-blue-500 text-white rounded-sm shadow-md"
+          >
+            <!-- Droplet -->
+            <svg
+              class="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+            </svg>
+            Water Table 5m
+          </span>
+        </div>
+
+        <!-- Bedrock -->
+        <div class="absolute bottom-8 right-2 animate-float-badge" style="animation-delay: 0.4s">
+          <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold bg-planora-basalt-800 text-planora-limestone rounded-sm shadow-md"
+          >
+            <i class="pi pi-cog text-sm leading-none"></i> Bedrock 20m
+          </span>
+        </div>
+      </div>
+
+      <!-- Analysis Metrics Grid -->
+      <div class="w-full grid grid-cols-2 gap-3">
+        @for (metric of metrics; track metric.id) {
+          <button
+            (mouseenter)="onMetricHover(metric.id)"
+            [class.active-metric]="activeMetric() === metric.id"
+            class="group px-4 py-3 rounded-lg border border-planora-basalt-200 bg-white hover:border-planora-clay-500 hover:shadow-md transition-all duration-200 text-left"
+          >
+            <div class="flex items-center gap-2">
+              @if (metric.id === 'flood') {
+                <svg
+                  class="w-5 h-5 flex-shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2563EB"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                </svg>
+              } @else {
+                <i
+                  [class]="'pi ' + metric.iconClass + ' text-lg flex-shrink-0'"
+                  [style.color]="metric.iconColor"
+                ></i>
+              }
+
+              <div class="flex-1 min-w-0">
+                <p
+                  class="text-[11px] font-semibold text-planora-basalt-600 uppercase tracking-wide"
+                >
+                  {{ metric.label }}
+                </p>
+                <p [class]="'text-sm font-bold ' + metric.color">
+                  {{ metric.value }}
+                </p>
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+<div
+  class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-planora-clay-500 via-planora-gold-500 to-planora-silt-500 z-50"
+></div>
+
+<div [class]="collapsed ? 'flex items-center h-20 overflow-hidden' : 'flex items-center h-20 px-6 overflow-hidden'">
+  <div class="flex items-center min-w-max">
+    <a [routerLink]="ROUTES.home" class="flex items-center gap-2 group">
+      <img
+        [src]= "collapsed ? '/assets/images/logo/logo_tiny.png' : '/assets/images/logo/logo.png'"
+        alt="Planora Logo"
+        class="h-16 w-auto lg:h-20 transition-transform duration-300 group-hover:scale-105"
+      />
+    </a>
+  </div>
+</div>
+
+<nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden">
+  @for (item of navItems; track item.id) {
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active-link"
+      [routerLinkActiveOptions]="{ exact: item.route === '/app/dashboard' }"
+      (click)="closeMobileDrawer()"
+      class="group relative flex items-center gap-4 px-4 py-3 rounded-xl text-planora-basalt-600 font-medium transition-all duration-200 hover:bg-white hover:text-planora-clay-600"
+    >
+      <div class="active-indicator"></div>
+      <i class="pi {{ item.icon }} text-lg transition-colors group-hover:text-planora-clay-500"></i>
+      <span class="nav-label truncate whitespace-nowrap">{{ item.label }}</span>
+    </a>
+  }
+</nav>
+
+<div class="p-4 border-t border-planora-desert-200">
+  <div
+    class="flex items-center gap-3 px-2 py-2 rounded-xl bg-planora-limestone-100/50"
+  >
+    <div
+      class="w-8 h-8 rounded-full bg-planora-clay-500 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
+    >
+      AM
+    </div>
+    <div class="nav-label flex-1 min-w-0">
+      <p class="text-xs font-bold text-planora-basalt-900 truncate">Ahmed Mahmoud</p>
+      <p class="text-[10px] text-planora-basalt-400 truncate">Pro Account</p>
+    </div>
+  </div>
+</div>
+
+<!-- Collapse/expand button (desktop only) -->
+<div class="p-3 hidden lg:block">
+  <button
+    (click)="toggleCollapse()"
+    class="w-full flex items-center justify-center h-10 rounded-lg border border-planora-desert-200 text-planora-basalt-400 hover:bg-white hover:text-planora-clay-600 transition-all shadow-sm"
+    [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+  >
+    <i [class]="collapsed ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"></i>
+  </button>
+</div>

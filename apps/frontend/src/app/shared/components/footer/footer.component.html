@@ -1,0 +1,79 @@
+<footer class="bg-planora-limestone text-planora-basalt-700 mt-auto">
+  <div
+    class="h-1 bg-gradient-to-r from-planora-clay-500 via-planora-gold-400 to-planora-silt-500"
+  ></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 items-start">
+      <div class="footer-animate lg:col-span-2 flex flex-col pt-1">
+        <a [routerLink]="ROUTES.home" class="flex items-center">
+          <img
+            src="/assets/images/logo/logo.png"
+            alt="Planora Logo"
+            class="h-16 w-auto lg:h-24 transition-transform duration-300 group-hover:scale-105"
+          />
+        </a>
+        <p class="text-sm text-planora-basalt-600 leading-relaxed mb-6 max-w-xs">
+          AI-powered site pre-qualification for Egypt & Africa. From satellite data to geotechnical
+          intelligence in hours, not weeks.
+        </p>
+
+        <!-- Social Icons Container -->
+        <div class="flex gap-3">
+          @for (social of socialLinks; track social.label) {
+            <a
+              [href]="social.href"
+              class="w-9 h-9 flex items-center justify-center rounded-full border border-planora-desert-300 text-planora-basalt-600 hover:text-planora-clay-500 hover:border-planora-clay-400 hover:bg-planora-desert-100/50 transition-all duration-200 active:scale-95"
+              [attr.aria-label]="social.label"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i [class]="social.icon" class="text-base"></i>
+            </a>
+          }
+        </div>
+      </div>
+
+      @for (col of footerColumns; track col.title; let idx = $index) {
+        <div class="footer-animate pt-1" [style.animation-delay]="idx * 0.05 + 's'">
+          <h4
+            class="font-sans text-xs font-bold text-planora-basalt-900 uppercase tracking-widest mb-5 h-8 flex items-center"
+          >
+            {{ col.title }}
+          </h4>
+          <ul class="space-y-3">
+            @for (link of col.links; track link.label) {
+              <li>
+                <a
+                  [routerLink]="link.route"
+                  class="footer-link text-sm text-planora-basalt-600 hover:text-planora-clay-500 inline-block"
+                >
+                  {{ link.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="border-t border-planora-desert-200/60">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-planora-basalt-500"
+    >
+      <p>© {{ currentYear }} Planora. All rights reserved.</p>
+      <div class="flex gap-6">
+        <a routerLink="/privacy" class="hover:text-planora-clay-500 transition-colors"
+          >Privacy Policy</a
+        >
+        <a routerLink="/terms" class="hover:text-planora-clay-500 transition-colors"
+          >Terms of Service</a
+        >
+        <a routerLink="/cookies" class="hover:text-planora-clay-500 transition-colors"
+          >Cookie Policy</a
+        >
+      </div>
+    </div>
+  </div>
+</footer>
