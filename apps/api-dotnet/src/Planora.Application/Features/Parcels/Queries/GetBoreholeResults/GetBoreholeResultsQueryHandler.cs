@@ -27,14 +27,18 @@ public sealed class GetBoreholeResultsQueryHandler(
         var cached = await cacheService.GetAsync<BoreholeResultsResponse>(cacheKey, ct);
         if (cached is not null)
         {
+            logger.LogDebug("Cache hit for borehole results. ParcelId: {ParcelId}", request.ParcelId);
             return cached;
         }
+
+        logger.LogInformation("Fetching borehole results for ParcelId: {ParcelId}", request.ParcelId);
 
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
         var boreholeJob = jobs.FirstOrDefault(j => j.Type == AnalysisType.Borehole && j.Status == AnalysisJobStatus.Completed);
 
         if (boreholeJob is null)
         {
+            logger.LogWarning("No completed borehole analysis job found for ParcelId: {ParcelId}", request.ParcelId);
             return ReportErrors.NotReady;
         }
 
@@ -42,6 +46,7 @@ public sealed class GetBoreholeResultsQueryHandler(
 
         if (boreholeResult is null)
         {
+            logger.LogError("Borehole result entity missing for AnalysisJobId: {AnalysisJobId}, ParcelId: {ParcelId}", boreholeJob.Id, request.ParcelId);
             return ReportErrors.MetadataCorrupted;
         }
 
@@ -75,6 +80,8 @@ public sealed class GetBoreholeResultsQueryHandler(
             LocalCacheExpiration = TimeSpan.FromMinutes(5),
             Tags = ["borehole", $"parcel:{request.ParcelId}"]
         }, ct);
+
+        logger.LogInformation("Borehole results assembled and cached for ParcelId: {ParcelId}", request.ParcelId);
 
         return response;
     }

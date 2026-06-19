@@ -27,18 +27,23 @@ public sealed class GetPdfReportQueryHandler(
         var cached = await cacheService.GetAsync<PdfReportResponse>(cacheKey, ct);
         if (cached is not null)
         {
+            logger.LogDebug("Cache hit for PDF report. ParcelId: {ParcelId}", request.ParcelId);
             return cached;
         }
+
+        logger.LogInformation("Fetching PDF report for ParcelId: {ParcelId}", request.ParcelId);
 
         var report = await reportRepository.GetLatestCompletedReportByParcelIdAsync(request.ParcelId, ct);
 
         if (report is null)
         {
+            logger.LogWarning("No report found for ParcelId: {ParcelId}", request.ParcelId);
             return ReportErrors.NotFound;
         }
 
         if (report.Status != ReportStatus.Completed)
         {
+            logger.LogInformation("Report for ParcelId {ParcelId} is not ready yet. Status: {Status}", request.ParcelId, report.Status);
             return ReportErrors.NotReady;
         }
 
@@ -46,6 +51,7 @@ public sealed class GetPdfReportQueryHandler(
 
         if (pdfModule is null || string.IsNullOrWhiteSpace(pdfModule.OutputS3Key))
         {
+            logger.LogError("PDF module missing or has no S3 key. ReportId: {ReportId}, ParcelId: {ParcelId}", report.Id, request.ParcelId);
             return ReportErrors.PdfModuleMissing;
         }
 
@@ -65,6 +71,8 @@ public sealed class GetPdfReportQueryHandler(
             LocalCacheExpiration = TimeSpan.FromMinutes(5),
             Tags = ["pdf-report", $"parcel:{request.ParcelId}"]
         }, ct);
+
+        logger.LogInformation("PDF report URL generated and cached for ParcelId: {ParcelId}", request.ParcelId);
 
         return response;
     }

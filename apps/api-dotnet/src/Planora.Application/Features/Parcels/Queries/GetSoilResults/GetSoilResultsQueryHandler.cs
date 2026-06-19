@@ -27,8 +27,11 @@ public sealed class GetSoilResultsQueryHandler(
         var cached = await cacheService.GetAsync<SoilResultsResponse>(cacheKey, ct);
         if (cached is not null)
         {
+            logger.LogDebug("Cache hit for soil results. ParcelId: {ParcelId}", request.ParcelId);
             return cached;
         }
+
+        logger.LogInformation("Fetching soil results for ParcelId: {ParcelId}", request.ParcelId);
 
         // Find the completed soil analysis job for this parcel
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
@@ -36,6 +39,7 @@ public sealed class GetSoilResultsQueryHandler(
 
         if (soilJob is null)
         {
+            logger.LogWarning("No completed soil analysis job found for ParcelId: {ParcelId}", request.ParcelId);
             return ReportErrors.NotReady;
         }
 
@@ -43,6 +47,7 @@ public sealed class GetSoilResultsQueryHandler(
 
         if (soilResult is null)
         {
+            logger.LogError("Soil result entity missing for AnalysisJobId: {AnalysisJobId}, ParcelId: {ParcelId}", soilJob.Id, request.ParcelId);
             return ReportErrors.MetadataCorrupted;
         }
 
@@ -75,6 +80,8 @@ public sealed class GetSoilResultsQueryHandler(
             LocalCacheExpiration = TimeSpan.FromMinutes(5),
             Tags = ["soil", $"parcel:{request.ParcelId}"]
         }, ct);
+
+        logger.LogInformation("Soil results assembled and cached for ParcelId: {ParcelId}", request.ParcelId);
 
         return response;
     }

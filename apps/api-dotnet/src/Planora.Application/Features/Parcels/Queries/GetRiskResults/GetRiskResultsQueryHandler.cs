@@ -27,14 +27,18 @@ public sealed class GetRiskResultsQueryHandler(
         var cached = await cacheService.GetAsync<RiskResultsResponse>(cacheKey, ct);
         if (cached is not null)
         {
+            logger.LogDebug("Cache hit for risk results. ParcelId: {ParcelId}", request.ParcelId);
             return cached;
         }
+
+        logger.LogInformation("Fetching risk results for ParcelId: {ParcelId}", request.ParcelId);
 
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
         var riskJob = jobs.FirstOrDefault(j => j.Type == AnalysisType.Risk && j.Status == AnalysisJobStatus.Completed);
 
         if (riskJob is null)
         {
+            logger.LogWarning("No completed risk analysis job found for ParcelId: {ParcelId}", request.ParcelId);
             return ReportErrors.NotReady;
         }
 
@@ -42,6 +46,7 @@ public sealed class GetRiskResultsQueryHandler(
 
         if (riskResult is null)
         {
+            logger.LogError("Risk result entity missing for AnalysisJobId: {AnalysisJobId}, ParcelId: {ParcelId}", riskJob.Id, request.ParcelId);
             return ReportErrors.MetadataCorrupted;
         }
 
@@ -84,6 +89,8 @@ public sealed class GetRiskResultsQueryHandler(
             LocalCacheExpiration = TimeSpan.FromMinutes(5),
             Tags = ["risk", $"parcel:{request.ParcelId}"]
         }, ct);
+
+        logger.LogInformation("Risk results assembled and cached for ParcelId: {ParcelId}", request.ParcelId);
 
         return response;
     }
