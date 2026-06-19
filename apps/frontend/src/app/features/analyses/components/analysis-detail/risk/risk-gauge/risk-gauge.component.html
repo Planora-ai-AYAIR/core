@@ -1,0 +1,27 @@
+<div class="relative w-44 h-44 mx-auto">
+  <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+    <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8" />
+    <circle
+      cx="50"
+      cy="50"
+      r="45"
+      fill="none"
+      [attr.stroke]="gaugeColor"
+      stroke-width="8"
+      stroke-linecap="round"
+      [attr.stroke-dasharray]="animatedDashArray"
+      [attr.stroke-dashoffset]="0"
+    />
+  </svg>
+  <div class="absolute inset-0 flex flex-col items-center justify-center">
+    <span class="text-3xl font-bold text-planora-basalt-800">{{ score }}</span>
+    <span class="text-xs text-planora-basalt-500">/ 100</span>
+    <span class="text-sm font-semibold mt-1" [style.color]="gaugeColor">{{ level }}</span>
+  </div>
+</div>
+<p class="text-center text-sm text-planora-basalt-600 mt-2">
+  {{ description }}
+</p>
+<p class="text-center text-xs text-planora-basalt-400 mt-1">
+  {{ benchmark }}
+</p>

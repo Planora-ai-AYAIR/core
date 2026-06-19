@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { MapComponent } from '../../../../shared/components/map/map.component';
 import { MapLayerService } from '../../services/map-layer.service';
 import { BoreholeTabComponent } from '../../components/analysis-detail/borehole-tab/borehole-tab.component';
-import { RiskTabComponent } from '../../components/analysis-detail/risk-tab/risk-tab.component';
 import { SoilTabComponent } from '../../components/analysis-detail/soil/soil-tab/soil-tab.component';
 import { TopographyTabComponent } from '../../components/analysis-detail/topography-tab/topography-tab.component';
 import { MapLayerItem } from '../../interfaces/map-layer-item';
@@ -15,10 +14,11 @@ import { RiskMapInitialiser } from '../../services/risk-map-initialiser.service'
 import { BoreholeMapInitialiser } from '../../services/borehole-map-initialiser.service';
 import { AnalysisDetailFacadeService } from '../../services/analysis-detail-facade.service';
 import { ModuleProgressComponent } from '../../components/analysis-detail/module-progress/module-progress.component';
-import maplibregl from 'maplibre-gl';
 import { ModuleStatus } from '../../interfaces/module-status';
 import { BearingMapInitialiser } from '../../services/bearing-map-initialiser.service';
 import { BearingTabComponent } from '../../components/analysis-detail/bearing-tab/bearing-tab.component';
+import { RiskTabComponent } from '../../components/analysis-detail/risk/risk-tab/risk-tab.component';
+import maplibregl from 'maplibre-gl';
 
 @Component({
   selector: 'app-analysis-detail',
@@ -216,16 +216,24 @@ export class AnalysisDetailComponent {
         },
         {
           id: 'seismic-zone',
-          label: 'Seismic Hazard',
+          label: 'Seismic Zones',
           visible: true,
           opacity: 0.4,
           group: 'risk',
           setOpacity: (m, o) => m.setPaintProperty('seismic-zone', 'circle-opacity', o),
         },
         {
+          id: 'expansive-soil',
+          label: 'Expansive Soil Zones',
+          visible: true,
+          opacity: 0.5,
+          group: 'risk',
+          setOpacity: (m, o) => m.setPaintProperty('expansive-soil', 'fill-opacity', o),
+        },
+        {
           id: 'liquefaction',
-          label: 'Liquefaction Areas',
-          visible: false,
+          label: 'Liquefaction Zones',
+          visible: true,
           opacity: 0.6,
           group: 'risk',
           setOpacity: (m, o) => m.setPaintProperty('liquefaction', 'fill-opacity', o),
@@ -276,7 +284,7 @@ export class AnalysisDetailComponent {
     topography: { status: 'Completed', estimatedSeconds: 0 },
     soil: { status: 'Completed', estimatedSeconds: 0 },
     bearing: { status: 'Completed', estimatedSeconds: 0 },
-    risk: { status: 'Queued', estimatedSeconds: 40 },
+    risk: { status: 'Completed', estimatedSeconds: 0 },
     borehole: { status: 'Waiting', estimatedSeconds: 90 },
   });
 

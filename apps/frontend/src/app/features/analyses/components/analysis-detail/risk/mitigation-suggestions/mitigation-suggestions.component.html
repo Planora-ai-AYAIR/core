@@ -1,0 +1,16 @@
+<div class="space-y-2">
+  @for (item of mitigations; track item.risk) {
+    <div class="bg-white rounded-lg border border-planora-desert-200 p-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-planora-basalt-800">{{ item.risk }}</span>
+        <span
+          class="text-[10px] px-2 py-0.5 rounded-full bg-planora-desert-100 text-planora-basalt-600"
+        >
+          {{ item.feasibility }} feasibility
+        </span>
+      </div>
+      <p class="text-xs text-planora-basalt-600 mt-1">{{ item.suggestion }}</p>
+      <p class="text-[10px] text-planora-basalt-400 mt-1">Cost impact: {{ item.costImpact }}</p>
+    </div>
+  }
+</div>
