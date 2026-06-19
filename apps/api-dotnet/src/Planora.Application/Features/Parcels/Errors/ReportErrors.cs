@@ -13,6 +13,9 @@ public static class ReportErrors
     public static readonly Error TopographyModuleMissing =
         Error.NotFound("Report.TopographyModuleMissing", "The topography module data is missing from this report.");
 
+    public static readonly Error PdfModuleMissing =
+        Error.NotFound("Report.PdfModuleMissing", "The PDF report module data is missing from this report.");
+
     public static readonly Error MetadataCorrupted =
         Error.Failure("Report.MetadataCorrupted", "The topography metadata could not be read. Please contact support.");
 }
