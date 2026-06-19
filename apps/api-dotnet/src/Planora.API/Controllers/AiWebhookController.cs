@@ -1,23 +1,62 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Planora.Application.Features.Analysis.Webhooks;
+using Planora.Application.Features.Analysis.Webhooks.Payloads;
 using Planora.Application.Features.Parcels.Dtos.Webhook;
 using Planora.Domain.AnalysisJob;
-using Planora.Domain.Shared.Results;
+using System.Text.Json;
 
 namespace Planora.Api.Controllers;
 
 [ApiController]
 [Route("api/webhooks")]
 [AllowAnonymous]
-public sealed class AiWebhookController(ISender sender) : BaseApiController
+public sealed class AiWebhookController(ISender mediator) : BaseApiController
 {
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
     [HttpPost("ai-events")]
     public async Task<IActionResult> Receive([FromBody] AiWebhookEnvelope envelope, CancellationToken ct)
     {
-        Result<Success> result = envelope.EventType switch
+        var result = envelope.EventType switch
         {
-            // TODO : handle the events with meditr
+            AiWebhookEventTypes.TopographyCompleted => await mediator.Send(
+                new TopographyCompletedCommand{
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<TopographyResultPayload>(JsonOptions)!},
+                ct),
+
+            AiWebhookEventTypes.AnalysisFailed => await mediator.Send(
+                new AnalysisFailedCommand{
+                    PythonJobId = envelope.JobId,
+                    Reason = envelope.Data.Deserialize<AnalysisFailurePayload>(JsonOptions)!.Reason},
+                ct),
+
+            AiWebhookEventTypes.SoilCompleted => await mediator.Send(
+                new SoilCompletedCommand{
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<SoilResultPayload>(JsonOptions)!},
+                ct),
+
+            AiWebhookEventTypes.RiskCompleted => await mediator.Send(
+                new RiskCompletedCommand{
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<RiskResultPayload>(JsonOptions)!},
+                ct),
+
+            AiWebhookEventTypes.BoreholeCompleted => await mediator.Send(
+                new BoreholeCompletedCommand{
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<BoreholeResultPayload>(JsonOptions)!},
+                ct),
+
+            AiWebhookEventTypes.PdfCompleted => await mediator.Send(
+                new PdfCompletedCommand{
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<PdfResultPayload>(JsonOptions)!},
+                ct),
+
             _ => AnalysisJobErrors.UnsupportedEventType
         };
 
@@ -25,5 +64,4 @@ public sealed class AiWebhookController(ISender sender) : BaseApiController
 
         return OkEnvelope(result.Value, "Event Handled");
     }
-
 }
