@@ -30,7 +30,13 @@ def _flood_score(terrain: Optional[dict]) -> dict:
     factors.append("Proximity to drainage basin")
 
     level = _score_to_level(score)
-    return {"score": score, "level": level, "factors": factors}
+    return {
+        "score": score,
+        "level": level,
+        "factors": factors,
+        # §3.3.2: flood zones raster/vector artifact (S3 signed URL in prod).
+        "zonesGeoJson": "s3://bucket/flood.geojson",
+    }
 
 
 def _seismic_score() -> dict:
@@ -40,6 +46,8 @@ def _seismic_score() -> dict:
         "level": "Low",
         "factors": ["NCSR zone classification: Low", "Far from active fault lines"],
         "source": "USGS/Egypt NCSR",
+        # §3.3.2: NCSR seismic zone classification.
+        "zone": "NCSR-Low",
     }
 
 

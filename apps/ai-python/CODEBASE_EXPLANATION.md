@@ -4,6 +4,64 @@
 > **التقنية:** FastAPI + Google Earth Engine (GEE)  
 > **النطاق (Day 1):** مصادقة GEE + تصدير DEM (نموذج الارتفاع الرقمي)
 
+> ⚠️ **ملاحظة:** الأقسام التفصيلية بالأسفل تصف حالة Day-1 (topography فقط) تاريخياً.
+> القسم التالي يلخّص **السطح الكامل الحالي** للـ API بعد مطابقته لعقد
+> `GeoSense_AI_API_Contract_Report.pdf`.
+
+---
+
+## السطح الكامل للـ API (مطابق للعقد §2 + §3)
+
+التطبيق (`app.main:app`) بيعرض دلوقتي الجزئين بتوع العقد، وكلهم بيرجعوا الـ
+**unified envelope** `{statusCode, message, errors, data}` (§1):
+
+### §3 — Internal AI Engine (prefix `/api/v1/...`)
+الـ endpoints اللي بتناديها .NET Hangfire workers. كل واحدة POST (202 + `pythonJobId`)
+و GET للـ polling:
+
+| Module | Endpoints |
+|--------|-----------|
+| Topography §3.1 | `POST/GET /api/v1/topography/jobs[/{pythonJobId}]` |
+| Soil §3.2 | `POST/GET /api/v1/soil/jobs[/{pythonJobId}]` |
+| Risk §3.3 | `POST/GET /api/v1/risks/jobs[/{pythonJobId}]` |
+| Borehole §3.4 | `POST/GET /api/v1/boreholes/jobs[/{pythonJobId}]` |
+| Reports §3.5 | `POST/GET /api/v1/reports/jobs[/{pythonJobId}]` |
+
+### §2 — Client-Facing API (prefix `/api/...`) — مُنفّذ كـ mocks
+معروف في العقد إنه .NET، لكن مُنفّذ هنا كـ Python mocks مطابقة لأمثلة العقد عشان
+السطح يبقى قابل للتصفّح end-to-end من غير GEE credentials:
+
+| القسم | Endpoints |
+|-------|-----------|
+| Parcels §2.1 | `POST /api/parcels` (201) · `GET /api/parcels/{parcelId}` |
+| Topography §2.2 | `POST /api/topography/jobs` · `GET /api/topography/{parcelId}` |
+| Soil §2.3 | `POST /api/soil/jobs` · `GET /api/soil/{parcelId}` |
+| Bearing §2.4 | `POST /api/bearing/jobs` · `GET /api/bearing/{parcelId}` |
+| Risk §2.5 | `POST /api/risks/jobs` · `GET /api/risks/{parcelId}` |
+| Borehole §2.6 | `POST /api/boreholes/jobs` · `GET /api/boreholes/{parcelId}` |
+| Reports §2.7 | `POST /api/reports/jobs` · `GET /api/reports/{parcelId}/pdf` (binary) |
+| Jobs §2.8 | `GET /api/jobs/{jobId}/status` |
+
+> §2.9 (SignalR hub `/hubs/job-status`) خاص بـ .NET — **خارج النطاق** هنا.
+
+### مكوّنات المطابقة
+- **`response_model`**: كل route متوصّلة بـ `Envelope[T]` (في [common.py](app/schemas/common.py)) →
+  `/docs` بيعكس العقد بالظبط والـ responses بتتحقق/تتفلتر.
+- **أكواد الأخطاء**: `ErrorCode` enum بكل أكواد §4 (`PARCEL_TOO_SMALL`, `JOB_NOT_FOUND`,
+  `JOB_NOT_COMPLETED`, `REPORT_NOT_READY`, `INTERNAL_ERROR`, …).
+- **§2 store/mocks**: [store.py](app/services/store.py) (parcels/jobs/results in-memory) +
+  [client_mocks.py](app/services/client_mocks.py) (نتايج بشكل العقد). الـ routers في
+  [app/routers/client/](app/routers/client/).
+
+### التشغيل والنشر
+```bash
+py -3.13 run.py                      # شغّل محلياً → http://localhost:8000/docs
+py -3.13 scripts/export_openapi.py   # ولّد shared/openapi/swagger.json
+docker build -t geosense-ai .        # نشر: Dockerfile (uvicorn app.main:app :8000)
+```
+الـ Kubernetes manifests في [infra/k8s/ai-python/deployment.yaml](../../infra/k8s/ai-python/deployment.yaml)
+(Deployment + Service + ConfigMap + probes على `/api/v1/health`).
+
 ---
 
 ## هيكل المشروع

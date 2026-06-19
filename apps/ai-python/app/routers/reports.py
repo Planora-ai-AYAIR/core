@@ -8,10 +8,12 @@ import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 
-from app.schemas.reports import ReportJobRequest
+from app.schemas.reports import ReportJobRequest, ReportJobData
 from app.schemas.common import (
+    Envelope,
+    ErrorCode,
+    JobAccepted,
     accepted_response,
     error_response,
     success_response,
@@ -26,7 +28,7 @@ _jobs: dict = {}
 
 
 # ── POST /api/v1/reports/jobs ─────────────────────────────────
-@router.post("/jobs", status_code=202)
+@router.post("/jobs", status_code=202, response_model=Envelope[JobAccepted])
 async def submit_report_job(req: ReportJobRequest, bg: BackgroundTasks):
     """Submit a PDF report generation job (§3.5.1)."""
     python_job_id = f"pyjob_pdf_{uuid.uuid4().hex[:12]}"
@@ -41,21 +43,18 @@ async def submit_report_job(req: ReportJobRequest, bg: BackgroundTasks):
 
     bg.add_task(_run_report_pipeline, python_job_id, req)
 
-    return JSONResponse(
-        status_code=202,
-        content=accepted_response(
-            data={
-                "pythonJobId": python_job_id,
-                "status": "queued",
-                "acceptedAt": accepted_at,
-            },
-            message="Python report job queued",
-        ),
+    return accepted_response(
+        data={
+            "pythonJobId": python_job_id,
+            "status": "queued",
+            "acceptedAt": accepted_at,
+        },
+        message="Python report job queued",
     )
 
 
 # ── GET /api/v1/reports/jobs/{pythonJobId} ────────────────────
-@router.get("/jobs/{pythonJobId}")
+@router.get("/jobs/{pythonJobId}", response_model=Envelope[ReportJobData])
 async def get_report_status(pythonJobId: str):
     """Poll report job status (§3.5.2)."""
     job = _jobs.get(pythonJobId)
@@ -65,10 +64,10 @@ async def get_report_status(pythonJobId: str):
             status_code=404,
             detail=error_response(
                 status_code=404,
-                message="Report not found or still generating",
+                message="Job not found",
                 errors=[{
                     "field": "pythonJobId",
-                    "code": "REPORT_NOT_READY",
+                    "code": ErrorCode.JOB_NOT_FOUND.value,
                     "message": f"No report job found with id {pythonJobId}",
                 }],
             ),
@@ -81,16 +80,13 @@ async def get_report_status(pythonJobId: str):
         "failed": "Job failed",
     }.get(job["status"], "Unknown")
 
-    return JSONResponse(
-        status_code=200,
-        content=success_response(
-            data={
-                "pythonJobId": job["pythonJobId"],
-                "status": job["status"],
-                "results": job.get("results"),
-            },
-            message=msg,
-        ),
+    return success_response(
+        data={
+            "pythonJobId": job["pythonJobId"],
+            "status": job["status"],
+            "results": job.get("results"),
+        },
+        message=msg,
     )
 
 
@@ -121,5 +117,5 @@ async def _run_report_pipeline(python_job_id: str, req: ReportJobRequest):
         logger.error(f"Report pipeline failed for {python_job_id}: {e}", exc_info=True)
         _jobs[python_job_id].update({
             "status": "failed",
-            "error": {"code": "PROCESSING_ERROR", "message": str(e)},
+            "error": {"code": ErrorCode.INTERNAL_ERROR.value, "message": str(e)},
         })

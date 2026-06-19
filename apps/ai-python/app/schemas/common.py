@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -22,6 +22,28 @@ class JobStatus(str, Enum):
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class ErrorCode(str, Enum):
+    """Machine-readable error codes — API Contract §4 (Error Codes Reference).
+
+    Each code maps to a specific HTTP status used consistently across the
+    .NET client-facing API (§2) and the Python AI engine (§3).
+    """
+    INVALID_GEOMETRY = "INVALID_GEOMETRY"            # 400
+    PARCEL_TOO_SMALL = "PARCEL_TOO_SMALL"            # 400
+    INVALID_CLIENT_NAME = "INVALID_CLIENT_NAME"      # 400
+    INVALID_UNIT = "INVALID_UNIT"                    # 400
+    PARCEL_NOT_FOUND = "PARCEL_NOT_FOUND"            # 404
+    JOB_NOT_FOUND = "JOB_NOT_FOUND"                  # 404
+    JOB_NOT_COMPLETED = "JOB_NOT_COMPLETED"          # 409
+    MODULE_NOT_AVAILABLE = "MODULE_NOT_AVAILABLE"    # 422
+    GEE_RATE_LIMIT = "GEE_RATE_LIMIT"                # 429
+    PROCESSING_TIMEOUT = "PROCESSING_TIMEOUT"        # 504
+    INTERNAL_ERROR = "INTERNAL_ERROR"                # 500
+    REPORT_NOT_READY = "REPORT_NOT_READY"            # 404
+    INVALID_TOKEN = "INVALID_TOKEN"                  # 401
+    INSUFFICIENT_PERMISSIONS = "INSUFFICIENT_PERMISSIONS"  # 403
 
 
 class RiskLevel(str, Enum):
@@ -105,6 +127,29 @@ class UnifiedResponse(BaseModel):
     message: str
     errors: Optional[list[ErrorDetail]] = None
     data: Optional[Any] = None
+
+
+T = TypeVar("T")
+
+
+class Envelope(BaseModel, Generic[T]):
+    """Typed unified envelope (§1) used as ``response_model`` on routes.
+
+    Parameterising ``data`` (e.g. ``Envelope[TopographyJobData]``) makes the
+    OpenAPI schema — and therefore ``/docs`` — match the API Contract exactly,
+    and validates/filters outgoing responses to the contracted shape.
+    """
+    statusCode: int
+    message: str
+    errors: Optional[list[ErrorDetail]] = None
+    data: Optional[T] = None
+
+
+class JobAccepted(BaseModel):
+    """202 Accepted payload for internal AI-engine job submission (§3.x.1)."""
+    pythonJobId: str
+    status: JobStatus = JobStatus.QUEUED
+    acceptedAt: str
 
 
 # ── Helper Factories ─────────────────────────────────────────

@@ -8,10 +8,12 @@ import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 
-from app.schemas.soil import SoilJobRequest
+from app.schemas.soil import SoilJobRequest, SoilJobData
 from app.schemas.common import (
+    Envelope,
+    ErrorCode,
+    JobAccepted,
     accepted_response,
     error_response,
     success_response,
@@ -27,7 +29,7 @@ _jobs: dict = {}
 
 
 # ── POST /api/v1/soil/jobs ────────────────────────────────────
-@router.post("/jobs", status_code=202)
+@router.post("/jobs", status_code=202, response_model=Envelope[JobAccepted])
 async def submit_soil_job(req: SoilJobRequest, bg: BackgroundTasks):
     """Submit a soil analysis job (§3.2.1)."""
     python_job_id = f"pyjob_soil_{uuid.uuid4().hex[:12]}"
@@ -42,21 +44,18 @@ async def submit_soil_job(req: SoilJobRequest, bg: BackgroundTasks):
 
     bg.add_task(_run_soil_pipeline, python_job_id, req)
 
-    return JSONResponse(
-        status_code=202,
-        content=accepted_response(
-            data={
-                "pythonJobId": python_job_id,
-                "status": "queued",
-                "acceptedAt": accepted_at,
-            },
-            message="Python soil job queued",
-        ),
+    return accepted_response(
+        data={
+            "pythonJobId": python_job_id,
+            "status": "queued",
+            "acceptedAt": accepted_at,
+        },
+        message="Python soil job queued",
     )
 
 
 # ── GET /api/v1/soil/jobs/{pythonJobId} ───────────────────────
-@router.get("/jobs/{pythonJobId}")
+@router.get("/jobs/{pythonJobId}", response_model=Envelope[SoilJobData])
 async def get_soil_status(pythonJobId: str):
     """Poll soil job status (§3.2.2)."""
     job = _jobs.get(pythonJobId)
@@ -69,7 +68,7 @@ async def get_soil_status(pythonJobId: str):
                 message="Job not found",
                 errors=[{
                     "field": "pythonJobId",
-                    "code": "JOB_NOT_FOUND",
+                    "code": ErrorCode.JOB_NOT_FOUND.value,
                     "message": f"No job found with id {pythonJobId}",
                 }],
             ),
@@ -82,16 +81,13 @@ async def get_soil_status(pythonJobId: str):
         "failed": "Job failed",
     }.get(job["status"], "Unknown")
 
-    return JSONResponse(
-        status_code=200,
-        content=success_response(
-            data={
-                "pythonJobId": job["pythonJobId"],
-                "status": job["status"],
-                "results": job.get("results"),
-            },
-            message=msg,
-        ),
+    return success_response(
+        data={
+            "pythonJobId": job["pythonJobId"],
+            "status": job["status"],
+            "results": job.get("results"),
+        },
+        message=msg,
     )
 
 
@@ -172,5 +168,5 @@ async def _run_soil_pipeline(python_job_id: str, req: SoilJobRequest):
         logger.error(f"Soil pipeline failed for {python_job_id}: {e}", exc_info=True)
         _jobs[python_job_id].update({
             "status": "failed",
-            "error": {"code": "PROCESSING_ERROR", "message": str(e)},
+            "error": {"code": ErrorCode.INTERNAL_ERROR.value, "message": str(e)},
         })

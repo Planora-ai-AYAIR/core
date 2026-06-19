@@ -11,14 +11,17 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 
 from app.schemas.topography import (
     TopographyJobRequest,
+    TopographyJobData,
     TopographyOptions,
     TopographyRequest as LegacyRequest,
 )
 from app.schemas.common import (
+    Envelope,
+    ErrorCode,
+    JobAccepted,
     accepted_response,
     error_response,
     success_response,
@@ -55,7 +58,7 @@ def _get_model_b() -> dict | None:
 
 
 # ── POST /api/v1/topography/jobs ──────────────────────────────
-@router.post("/jobs", status_code=202)
+@router.post("/jobs", status_code=202, response_model=Envelope[JobAccepted])
 async def submit_topography_job(
     req: TopographyJobRequest,
     bg: BackgroundTasks,
@@ -71,7 +74,7 @@ async def submit_topography_job(
                 message="Request validation failed",
                 errors=[{
                     "field": "bbox",
-                    "code": "INVALID_GEOMETRY",
+                    "code": ErrorCode.INVALID_GEOMETRY.value,
                     "message": "Parcel must be within Egypt bounds [24-37°E, 22-32°N]",
                 }],
             ),
@@ -93,21 +96,18 @@ async def submit_topography_job(
 
     bg.add_task(_run_pipeline, python_job_id, req)
 
-    return JSONResponse(
-        status_code=202,
-        content=accepted_response(
-            data={
-                "pythonJobId": python_job_id,
-                "status": "queued",
-                "acceptedAt": accepted_at,
-            },
-            message="Python topography job queued",
-        ),
+    return accepted_response(
+        data={
+            "pythonJobId": python_job_id,
+            "status": "queued",
+            "acceptedAt": accepted_at,
+        },
+        message="Python topography job queued",
     )
 
 
 # ── GET /api/v1/topography/jobs/{pythonJobId} ─────────────────
-@router.get("/jobs/{pythonJobId}")
+@router.get("/jobs/{pythonJobId}", response_model=Envelope[TopographyJobData])
 async def get_topography_status(pythonJobId: str):
     """Poll topography job status (§3.1.2)."""
     job = _jobs.get(pythonJobId)
@@ -120,45 +120,39 @@ async def get_topography_status(pythonJobId: str):
                 message="Job not found",
                 errors=[{
                     "field": "pythonJobId",
-                    "code": "JOB_NOT_FOUND",
+                    "code": ErrorCode.JOB_NOT_FOUND.value,
                     "message": f"No job found with id {pythonJobId}",
                 }],
             ),
         )
 
     if job.get("status") == "failed":
-        return JSONResponse(
-            status_code=200,
-            content=success_response(
-                data={
-                    "pythonJobId": job["pythonJobId"],
-                    "status": "failed",
-                    "progressPercentage": 0,
-                    "currentStage": None,
-                    "stageDetails": job.get("error", {}).get("message"),
-                },
-                message="Job failed",
-            ),
+        return success_response(
+            data={
+                "pythonJobId": job["pythonJobId"],
+                "status": "failed",
+                "progressPercentage": 0,
+                "currentStage": None,
+                "stageDetails": (job.get("error") or {}).get("message"),
+            },
+            message="Job failed",
         )
 
     msg = "Job in progress" if job["status"] == "processing" else (
         "Job completed" if job["status"] == "completed" else "Job queued"
     )
 
-    return JSONResponse(
-        status_code=200,
-        content=success_response(
-            data={
-                "pythonJobId": job["pythonJobId"],
-                "status": job["status"],
-                "progressPercentage": job["progressPercentage"],
-                "currentStage": job.get("currentStage"),
-                "stageDetails": job.get("stageDetails"),
-                "results": job.get("results"),
-                "completedAt": job.get("completedAt"),
-            },
-            message=msg,
-        ),
+    return success_response(
+        data={
+            "pythonJobId": job["pythonJobId"],
+            "status": job["status"],
+            "progressPercentage": job["progressPercentage"],
+            "currentStage": job.get("currentStage"),
+            "stageDetails": job.get("stageDetails"),
+            "results": job.get("results"),
+            "completedAt": job.get("completedAt"),
+        },
+        message=msg,
     )
 
 
@@ -259,6 +253,6 @@ async def _run_pipeline(python_job_id: str, req: TopographyJobRequest):
     except Exception as e:
         logger.error(f"Pipeline failed for {python_job_id}: {e}", exc_info=True)
         upd("failed", 0, error={
-            "code": "PROCESSING_ERROR",
+            "code": ErrorCode.INTERNAL_ERROR.value,
             "message": str(e),
         })

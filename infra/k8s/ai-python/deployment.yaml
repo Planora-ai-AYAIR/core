@@ -1,6 +1,102 @@
+# GeoSense AI — Internal AI Engine (Python FastAPI) Kubernetes manifests.
+# Implements the §3 service from the API Contract. Called by the .NET Hangfire
+# workers; not exposed publicly (ClusterIP Service).
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ai-python-placeholder
+  name: ai-python-config
+  labels:
+    app: ai-python
 data:
-  status: "pending"
+  REDIS_URL: "redis://redis:6379"
+  LOCAL_OUT_DIR: "/tmp/geosense"
+  EGYPT_BBOX: "[24.0, 22.0, 37.0, 32.0]"
+  API_TITLE: "GeoSense AI Engine"
+  API_VERSION: "1.0.0"
+  GEE_PROJECT: "planora-497015"
+  GEE_SERVICE_ACCOUNT_EMAIL: "planora@planora-497015.iam.gserviceaccount.com"
+  # Path where the GEE service-account key is mounted (see secret volume below).
+  GEE_SERVICE_ACCOUNT_KEY: "/app/secrets/planora_gee.json"
+---
+# Placeholder Secret — populate the GEE service-account JSON out-of-band
+# (e.g. `kubectl create secret generic ai-python-gee --from-file=...`).
+# Do NOT commit real credentials.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-python-gee
+  labels:
+    app: ai-python
+type: Opaque
+stringData:
+  planora_gee.json: "{}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-python
+  labels:
+    app: ai-python
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-python
+  template:
+    metadata:
+      labels:
+        app: ai-python
+    spec:
+      containers:
+        - name: ai-python
+          image: geosense/ai-python:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ai-python-config
+          volumeMounts:
+            - name: gee-key
+              mountPath: /app/secrets
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+      volumes:
+        - name: gee-key
+          secret:
+            secretName: ai-python-gee
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-python
+  labels:
+    app: ai-python
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-python
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000

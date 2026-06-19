@@ -14,6 +14,16 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.services.gee_service import init_gee
 from app.routers import topography, analyze, soil, risks, boreholes, reports
+from app.routers.client import (
+    parcels as client_parcels,
+    topography as client_topography,
+    soil as client_soil,
+    bearing as client_bearing,
+    risks as client_risks,
+    boreholes as client_boreholes,
+    reports as client_reports,
+    jobs as client_jobs,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -67,12 +77,24 @@ app.add_middleware(
     allow_headers      = ["*"],
 )
 
-# ── Module routers (API Contract §3) ─────────────────────────
+# ── Internal AI Engine routers (API Contract §3) ─────────────
 app.include_router(topography.router)
 app.include_router(soil.router)
 app.include_router(risks.router)
 app.include_router(boreholes.router)
 app.include_router(reports.router)
+
+# ── Client-Facing API routers (API Contract §2) ──────────────
+# Exposed in the Python engine as coherent mocks so the full §2 surface is
+# browsable end-to-end. (§2.9 SignalR hub is .NET-specific and out of scope.)
+app.include_router(client_parcels.router)
+app.include_router(client_topography.router)
+app.include_router(client_soil.router)
+app.include_router(client_bearing.router)
+app.include_router(client_risks.router)
+app.include_router(client_boreholes.router)
+app.include_router(client_reports.router)
+app.include_router(client_jobs.router)
 
 # ── Debug / demo router ──────────────────────────────────────
 app.include_router(analyze.router)

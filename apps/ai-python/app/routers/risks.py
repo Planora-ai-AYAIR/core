@@ -8,10 +8,12 @@ import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 
-from app.schemas.risks import RiskJobRequest
+from app.schemas.risks import RiskJobRequest, RiskJobData
 from app.schemas.common import (
+    Envelope,
+    ErrorCode,
+    JobAccepted,
     accepted_response,
     error_response,
     success_response,
@@ -28,7 +30,7 @@ _jobs: dict = {}
 
 
 # ── POST /api/v1/risks/jobs ───────────────────────────────────
-@router.post("/jobs", status_code=202)
+@router.post("/jobs", status_code=202, response_model=Envelope[JobAccepted])
 async def submit_risk_job(req: RiskJobRequest, bg: BackgroundTasks):
     """Submit a risk assessment job (§3.3.1)."""
     python_job_id = f"pyjob_risk_{uuid.uuid4().hex[:12]}"
@@ -43,21 +45,18 @@ async def submit_risk_job(req: RiskJobRequest, bg: BackgroundTasks):
 
     bg.add_task(_run_risk_pipeline, python_job_id, req)
 
-    return JSONResponse(
-        status_code=202,
-        content=accepted_response(
-            data={
-                "pythonJobId": python_job_id,
-                "status": "queued",
-                "acceptedAt": accepted_at,
-            },
-            message="Python risk job queued",
-        ),
+    return accepted_response(
+        data={
+            "pythonJobId": python_job_id,
+            "status": "queued",
+            "acceptedAt": accepted_at,
+        },
+        message="Python risk job queued",
     )
 
 
 # ── GET /api/v1/risks/jobs/{pythonJobId} ──────────────────────
-@router.get("/jobs/{pythonJobId}")
+@router.get("/jobs/{pythonJobId}", response_model=Envelope[RiskJobData])
 async def get_risk_status(pythonJobId: str):
     """Poll risk job status (§3.3.2)."""
     job = _jobs.get(pythonJobId)
@@ -70,7 +69,7 @@ async def get_risk_status(pythonJobId: str):
                 message="Job not found",
                 errors=[{
                     "field": "pythonJobId",
-                    "code": "JOB_NOT_FOUND",
+                    "code": ErrorCode.JOB_NOT_FOUND.value,
                     "message": f"No job found with id {pythonJobId}",
                 }],
             ),
@@ -83,16 +82,13 @@ async def get_risk_status(pythonJobId: str):
         "failed": "Job failed",
     }.get(job["status"], "Unknown")
 
-    return JSONResponse(
-        status_code=200,
-        content=success_response(
-            data={
-                "pythonJobId": job["pythonJobId"],
-                "status": job["status"],
-                "results": job.get("results"),
-            },
-            message=msg,
-        ),
+    return success_response(
+        data={
+            "pythonJobId": job["pythonJobId"],
+            "status": job["status"],
+            "results": job.get("results"),
+        },
+        message=msg,
     )
 
 
@@ -130,5 +126,5 @@ async def _run_risk_pipeline(python_job_id: str, req: RiskJobRequest):
         logger.error(f"Risk pipeline failed for {python_job_id}: {e}", exc_info=True)
         _jobs[python_job_id].update({
             "status": "failed",
-            "error": {"code": "PROCESSING_ERROR", "message": str(e)},
+            "error": {"code": ErrorCode.INTERNAL_ERROR.value, "message": str(e)},
         })
