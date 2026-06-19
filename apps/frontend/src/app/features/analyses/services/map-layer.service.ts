@@ -9,6 +9,8 @@ export class MapLayerService {
   private layers = signal<MapLayerItem[]>([]);
   private activeGroup = signal<string>('topography');
 
+  readonly isMapReady = computed(() => !!this.map());
+
   layersByGroup = (group: string) => computed(() => this.layers().filter((l) => l.group === group));
 
   init(map: maplibregl.Map) {
@@ -80,5 +82,15 @@ export class MapLayerService {
   refreshVisibility() {
     const m = this.map();
     if (m) this.applyVisibility(m);
+  }
+
+  setLayerVisible(layerId: string, visible: boolean): void {
+    const m = this.map();
+    if (!m || !m.getLayer(layerId)) return;
+
+    this.layers.update((list) => list.map((l) => (l.id === layerId ? { ...l, visible } : l)));
+
+    const layoutVal = visible ? 'visible' : 'none';
+    m.setLayoutProperty(layerId, 'visibility', layoutVal);
   }
 }

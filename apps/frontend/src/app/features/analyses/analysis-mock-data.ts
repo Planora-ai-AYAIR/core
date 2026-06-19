@@ -1,7 +1,8 @@
-import { BoreholeData } from "./interfaces/borehole-data";
-import { RiskData } from "./interfaces/risk-data";
-import { SoilData } from "./interfaces/soil-data";
-import { TopographyData } from "./interfaces/topography-data";
+import { BearingData } from './interfaces/bearing-data';
+import { BoreholeData } from './interfaces/borehole-data';
+import { RiskData } from './interfaces/risk-data';
+import { SoilData } from './interfaces/soil-data';
+import { TopographyData } from './interfaces/topography-data';
 
 // ---------- Helper functions (extracted from TopographyMapInitialiser) ----------
 function buildElevationGrid(): { lng: number; lat: number; elev: number }[] {
@@ -154,14 +155,62 @@ export const MOCK_TOPOGRAPHY_DATA: TopographyData = {
 
 // ---------- Soil mock ----------
 export const MOCK_SOIL_DATA: SoilData = {
-  bearingCapacity: 245,
-  plasticityIndex: 18,
-  organicContent: 2.3,
-  cohesion: 12,
+  bulkDensity: 1.45,
+  organicCarbon: 2.3,
+  pH: 6.8,
+  classification: 'Sandy Loam',
+  confidence: 0.92,
+  depthProfiles: [
+    {
+      depthRange: '0-20cm',
+      sandPercent: 55,
+      siltPercent: 30,
+      clayPercent: 15,
+      classification: 'Sandy Loam',
+      color: '#F4D03F',
+    },
+    {
+      depthRange: '20-50cm',
+      sandPercent: 45,
+      siltPercent: 35,
+      clayPercent: 20,
+      classification: 'Sandy Clay Loam',
+      color: '#D9A23A',
+    },
+    {
+      depthRange: '50-100cm',
+      sandPercent: 30,
+      siltPercent: 35,
+      clayPercent: 35,
+      classification: 'Clay Loam',
+      color: '#BD7434',
+    },
+    {
+      depthRange: '100-200cm',
+      sandPercent: 20,
+      siltPercent: 30,
+      clayPercent: 50,
+      classification: 'Clay',
+      color: '#C0392B',
+    },
+  ],
+  heatmapUrls: {
+    '0-20cm': 'https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
+    '20-50cm': 'https://b.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png',
+    '50-100cm': 'https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
+    '100-200cm': 'https://b.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png',
+  },
+  // Colors match the AI engine's tile palette (sand/silt/clay) so the legend
+  // stays accurate once real S3 heatmap tiles are wired in.
+  heatmapLegend: [
+    { color: '#F4D03F', label: 'Sand' },
+    { color: '#A0522D', label: 'Silt' },
+    { color: '#C0392B', label: 'Clay' },
+  ],
   composition: [
-    { type: 'Clay', percent: 45, color: '#B86E3D' },
-    { type: 'Silt', percent: 35, color: '#6B7F5E' },
-    { type: 'Sand', percent: 20, color: '#E0BF6B' },
+    { type: 'Clay', percent: 45, color: '#C0392B' },
+    { type: 'Silt', percent: 35, color: '#A0522D' },
+    { type: 'Sand', percent: 20, color: '#F4D03F' },
   ],
   soilCompositionGeoJSON: {
     type: 'FeatureCollection',
@@ -216,6 +265,19 @@ export const MOCK_SOIL_DATA: SoilData = {
       },
     ],
   },
+};
+
+// ---------- Bearing mock ----------
+export const MOCK_BEARING_DATA: BearingData = {
+  bearingCapacity: 245,
+  plasticityIndex: 18,
+  organicContent: 2.3,
+  cohesion: 12,
+  moistureIndex: 0.32,
+  waterTableDepth: 8.5,
+  terrainSlope: 3.2,
+  clayPercent: 45,
+  sandPercent: 20,
   bearingPoints: [
     { lng: 31.942, lat: 30.6331, capacity: 245, depth: 5 },
     { lng: 31.9419, lat: 30.633, capacity: 210, depth: 4 },
