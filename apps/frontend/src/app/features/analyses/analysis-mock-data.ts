@@ -268,16 +268,70 @@ export const MOCK_SOIL_DATA: SoilData = {
 };
 
 // ---------- Bearing mock ----------
+// TODO(backend integration): replace with BearingController response (US32-35).
+// floorCountCategory / maxFloorsWithoutDeepFoundation / foundationType / uncertaintyRangeKpa
+// are expected to come directly from the .NET API once wired in.
+const BEARING_CAPACITY = 245;
+
 export const MOCK_BEARING_DATA: BearingData = {
-  bearingCapacity: 245,
-  plasticityIndex: 18,
-  organicContent: 2.3,
-  cohesion: 12,
-  moistureIndex: 0.32,
-  waterTableDepth: 8.5,
-  terrainSlope: 3.2,
-  clayPercent: 45,
-  sandPercent: 20,
+  bearingCapacity: BEARING_CAPACITY,
+  uncertaintyRangeKpa: {
+    min: Math.round(BEARING_CAPACITY * 0.7),
+    max: Math.round(BEARING_CAPACITY * 1.3),
+  },
+  capacityClass: 'High',
+  isUnreliableEstimate: false,
+
+  floorCountCategory: '6-10 floors',
+  maxFloorsWithoutDeepFoundation: 10,
+  foundationType: 'Shallow',
+
+  factors: {
+    clayPercent: {
+      value: 45,
+      unit: '%',
+      safeThreshold: 50,
+      source: 'Soil module',
+      tooltip: 'Higher clay content reduces drainage and can lower long-term bearing capacity.',
+    },
+    sandPercent: {
+      value: 20,
+      unit: '%',
+      safeThreshold: 60,
+      source: 'Soil module',
+      tooltip: 'Sand improves load-bearing strength but offers less cohesion than clay.',
+    },
+    moistureIndex: {
+      value: 0.32,
+      unit: '',
+      safeThreshold: 0.4,
+      source: 'Sentinel-2 NDMI',
+      tooltip: 'Elevated soil moisture can reduce effective bearing capacity and increase settlement risk.',
+    },
+    waterTableDepth: {
+      value: 8.5,
+      unit: 'm',
+      safeThreshold: 5,
+      source: 'SoilGrids',
+      tooltip: 'A shallower water table increases the risk of liquefaction and reduces usable bearing capacity.',
+    },
+    terrainSlope: {
+      value: 3.2,
+      unit: '%',
+      safeThreshold: 5,
+      source: 'Topography module',
+      tooltip: 'Steeper terrain increases grading costs and can affect foundation uniformity.',
+    },
+  },
+
+  // TODO(structural team): placeholder loads only — typical RC structure ~10-12 kPa/floor.
+  buildingLoadReferences: [
+    { floorCategory: '1-2 floors', typicalLoadKpa: 11, supported: true },
+    { floorCategory: '3-5 floors', typicalLoadKpa: 11, supported: true },
+    { floorCategory: '6-10 floors', typicalLoadKpa: 11, supported: BEARING_CAPACITY >= 11 * 10 },
+    { floorCategory: '10+ floors', typicalLoadKpa: 11, supported: BEARING_CAPACITY >= 11 * 12 },
+  ],
+
   bearingPoints: [
     { lng: 31.942, lat: 30.6331, capacity: 245, depth: 5 },
     { lng: 31.9419, lat: 30.633, capacity: 210, depth: 4 },
