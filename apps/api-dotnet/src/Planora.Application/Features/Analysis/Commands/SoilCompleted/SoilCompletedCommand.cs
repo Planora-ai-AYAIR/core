@@ -2,7 +2,7 @@ using MediatR;
 using Planora.Application.Features.Analysis.Dtos;
 using Planora.Domain.Shared.Results;
 
-namespace Planora.Application.Features.Analysis.Commands;
+namespace Planora.Application.Features.Analysis.Commands.SoilCompleted;
 
 public sealed record SoilCompletedCommand : IRequest<Result<AnalysisJobProcessedResponse>>
 {

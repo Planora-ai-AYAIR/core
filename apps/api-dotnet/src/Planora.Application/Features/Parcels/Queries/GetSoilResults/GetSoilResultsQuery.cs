@@ -1,4 +1,5 @@
 using MediatR;
+using Planora.Application.Features.Parcels.Dtos.SoilResults;
 using Planora.Application.Features.Parcels.Errors;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Domain.Shared.Results;

@@ -12,7 +12,7 @@ using Planora.Domain.Shared.Results;
 using System.Text.Json;
 using INotificationPublisher = Planora.Application.Interfaces.Services.INotificationPublisher;
 
-namespace Planora.Application.Features.Analysis.Commands;
+namespace Planora.Application.Features.Analysis.Commands.RiskCompleted;
 
 public sealed class RiskCompletedHandler(
     IAnalysisJobRepository analysisJobRepository,

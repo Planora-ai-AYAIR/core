@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Options;
+using Planora.Application.Features.Parcels.Dtos.SoilResults;
 using Planora.Application.Features.Parcels.Errors;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
@@ -77,31 +78,4 @@ public sealed class GetSoilResultsQueryHandler(
 
         return response;
     }
-}
-
-public sealed record SoilResultsResponse(
-    Guid ParcelId,
-    double SandPercent,
-    double SiltPercent,
-    double ClayPercent,
-    string CompositionUnit,
-    double BulkDensity,
-    string BulkDensityUnit,
-    double OrganicCarbon,
-    string OrganicCarbonUnit,
-    double Ph,
-    string PrimaryType,
-    string UsdaClass,
-    double? AiConfidence,
-    List<DepthProfileItem>? MultiDepthProfile,
-    string? HeatmapTileUrl,
-    DateTime GeneratedAt
-);
-
-public sealed class DepthProfileItem
-{
-    public string Depth { get; set; } = string.Empty;
-    public double Sand { get; set; }
-    public double Clay { get; set; }
-    public string Type { get; set; } = string.Empty;
 }

@@ -2,7 +2,7 @@ using MediatR;
 using Planora.Application.Features.Analysis.Dtos;
 using Planora.Domain.Shared.Results;
 
-namespace Planora.Application.Features.Analysis.Commands;
+namespace Planora.Application.Features.Analysis.Commands.PdfCompleted;
 
 public sealed record PdfCompletedCommand : IRequest<Result<AnalysisJobProcessedResponse>>
 {

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Options;
+using Planora.Application.Features.Parcels.Dtos.BoreholeResults;
 using Planora.Application.Features.Parcels.Errors;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
@@ -78,35 +79,3 @@ public sealed class GetBoreholeResultsQueryHandler(
         return response;
     }
 }
-
-public sealed record BoreholeResultsResponse(
-    Guid ParcelId,
-    int MinimumRequired,
-    int OptimalCount,
-    double CoveragePercentage,
-    string? GridSize,
-    string? PlacementStrategy,
-    List<BoreholePlacementPointDto>? PlacementPoints,
-    string? PlacementGeoJsonUrl,
-    CostComparisonDto CostComparison,
-    DateTime GeneratedAt
-);
-
-public sealed record BoreholePlacementPointDto(
-    string Id,
-    double Latitude,
-    double Longitude,
-    string Priority,
-    string? Reason = null,
-    double? EstimatedDepth = null
-);
-
-public sealed record CostComparisonDto(
-    int TraditionalBoreholeCount,
-    decimal TraditionalEstimatedCost,
-    int OptimizedBoreholeCount,
-    decimal OptimizedEstimatedCost,
-    decimal SavingsAmount,
-    double SavingsPercentage,
-    string Currency
-);

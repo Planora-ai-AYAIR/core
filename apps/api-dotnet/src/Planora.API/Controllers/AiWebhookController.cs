@@ -1,7 +1,12 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Planora.Application.Features.Analysis.Commands;
+using Planora.Application.Features.Analysis.Commands.AnalysisFailed;
+using Planora.Application.Features.Analysis.Commands.BoreholeCompleted;
+using Planora.Application.Features.Analysis.Commands.PdfCompleted;
+using Planora.Application.Features.Analysis.Commands.RiskCompleted;
+using Planora.Application.Features.Analysis.Commands.SoilCompleted;
+using Planora.Application.Features.Analysis.Commands.TopographyCompleted;
 using Planora.Application.Features.Analysis.Dtos;
 using Planora.Application.Features.Parcels.Dtos.Webhook;
 using Planora.Domain.AnalysisJob;

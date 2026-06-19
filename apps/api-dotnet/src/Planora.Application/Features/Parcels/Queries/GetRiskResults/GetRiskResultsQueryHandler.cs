@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Options;
+using Planora.Application.Features.Parcels.Dtos.RiskResults;
 using Planora.Application.Features.Parcels.Errors;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
@@ -99,24 +100,3 @@ public sealed class GetRiskResultsQueryHandler(
     private static List<string>? DeserializeFactors(string? json) =>
         string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<List<string>>(json);
 }
-
-public sealed record RiskResultsResponse(
-    Guid ParcelId,
-    int OverallRiskScore,
-    string OverallRiskLevel,
-    RiskSubResultDto Flood,
-    RiskSubResultDto Seismic,
-    RiskSubResultDto ExpansiveSoil,
-    RiskSubResultDto Liquefaction,
-    DateTime GeneratedAt
-);
-
-public sealed record RiskSubResultDto(
-    int Score,
-    string Level,
-    List<string>? Factors = null,
-    string? GeoJsonUrl = null,
-    string? Source = null,
-    double? ReplacementDepth = null,
-    string? Susceptibility = null
-);

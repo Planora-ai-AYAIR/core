@@ -1,4 +1,5 @@
 using MediatR;
+using Planora.Application.Features.Parcels.Dtos.RiskResults;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Domain.Shared.Results;
 
