@@ -517,19 +517,70 @@ export const MOCK_RISK_DATA: RiskData = {
 
 // ---------- Borehole mock ----------
 export const MOCK_BOREHOLE_DATA: BoreholeData = {
-  points: [
-    { id: 'BH-1', lng: 31.942, lat: 30.633, depth: 15, cost: 4500 },
-    { id: 'BH-2', lng: 31.9419, lat: 30.6329, depth: 12, cost: 3800 },
-    { id: 'BH-3', lng: 31.9421, lat: 30.6331, depth: 18, cost: 5000 },
+  minRequired: 12,
+  recommended: 18,
+  coveragePercent: 85,
+  gridSize: '30m adaptive spacing',
+  strategy: 'Adaptive grid with hotspots',
+
+  placementPoints: [
+    {
+      id: 'BH-001',
+      lng: 31.942,
+      lat: 30.633,
+      priority: 'Critical',
+      reason: 'High clay variability',
+      estimatedDepth: 18,
+    },
+    {
+      id: 'BH-002',
+      lng: 31.9419,
+      lat: 30.6329,
+      priority: 'High',
+      reason: 'Liquefaction risk zone',
+      estimatedDepth: 15,
+    },
+    {
+      id: 'BH-003',
+      lng: 31.9421,
+      lat: 30.6331,
+      priority: 'Medium',
+      reason: 'Moderate slope change',
+      estimatedDepth: 12,
+    },
+    {
+      id: 'BH-004',
+      lng: 31.942,
+      lat: 30.6328,
+      priority: 'Low',
+      reason: 'Homogeneous sandy soil',
+      estimatedDepth: 10,
+    },
+    {
+      id: 'BH-005',
+      lng: 31.94185,
+      lat: 30.63295,
+      priority: 'High',
+      reason: 'Expansive soil boundary',
+      estimatedDepth: 20,
+    },
+    // add more up to ~12 points for realism
   ],
-  optimalArea: [
-    [31.9418, 30.6328],
-    [31.9422, 30.6328],
-    [31.9422, 30.6332],
-    [31.9418, 30.6332],
-    [31.9418, 30.6328],
-  ],
-  estimatedCost: 13300,
-  drillingCost: 9000,
-  testingCost: 4300,
+
+  costAnalysis: {
+    traditionalCount: 30,
+    traditionalCost: 420000,
+    optimizedCount: 12,
+    optimizedCost: 180000,
+    savingsAmount: 240000,
+    savingsPercent: 57,
+    ratePerMeter: 700,
+  },
+
+  parameters: {
+    maxSpacing: 30,
+    minBoreholes: 12,
+    targetDepth: 20,
+    unit: 'm',
+  },
 };

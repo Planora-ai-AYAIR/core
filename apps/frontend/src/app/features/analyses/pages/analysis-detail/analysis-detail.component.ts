@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MapComponent } from '../../../../shared/components/map/map.component';
 import { MapLayerService } from '../../services/map-layer.service';
-import { BoreholeTabComponent } from '../../components/analysis-detail/borehole-tab/borehole-tab.component';
+import { BoreholeTabComponent } from '../../components/analysis-detail/borehole/borehole-tab/borehole-tab.component';
 import { SoilTabComponent } from '../../components/analysis-detail/soil/soil-tab/soil-tab.component';
 import { TopographyTabComponent } from '../../components/analysis-detail/topography-tab/topography-tab.component';
 import { MapLayerItem } from '../../interfaces/map-layer-item';
@@ -55,8 +55,8 @@ export class AnalysisDetailComponent {
     { id: 'topography', label: 'Topography', status: 'ready' },
     { id: 'soil', label: 'Soil Composition', status: 'ready' },
     { id: 'bearing', label: 'Bearing Capacity', status: 'ready' },
-    { id: 'risk', label: 'Construction Risk', status: 'loading' },
-    { id: 'borehole', label: 'Drilling Plan', status: 'pending' },
+    { id: 'risk', label: 'Construction Risk', status: 'ready' },
+    { id: 'borehole', label: 'Drilling Plan', status: 'ready' },
   ];
 
   activeModuleIndex() {
@@ -241,27 +241,11 @@ export class AnalysisDetailComponent {
         // borehole
         {
           id: 'borehole-points',
-          label: 'Proposed Boreholes',
+          label: 'Borehole Points',
           visible: true,
           opacity: 1.0,
           group: 'borehole',
           setOpacity: (m, o) => m.setPaintProperty('borehole-points', 'circle-opacity', o),
-        },
-        {
-          id: 'depth-rings',
-          label: 'Drilling Depth',
-          visible: true,
-          opacity: 0.5,
-          group: 'borehole',
-          setOpacity: (m, o) => m.setPaintProperty('depth-rings', 'fill-opacity', o),
-        },
-        {
-          id: 'optimal-area',
-          label: 'Optimal Drilling Area',
-          visible: false,
-          opacity: 0.3,
-          group: 'borehole',
-          setOpacity: (m, o) => m.setPaintProperty('optimal-area', 'fill-opacity', o),
         },
       ];
 
@@ -285,7 +269,7 @@ export class AnalysisDetailComponent {
     soil: { status: 'Completed', estimatedSeconds: 0 },
     bearing: { status: 'Completed', estimatedSeconds: 0 },
     risk: { status: 'Completed', estimatedSeconds: 0 },
-    borehole: { status: 'Waiting', estimatedSeconds: 90 },
+    borehole: { status: 'Completed', estimatedSeconds: 0 },
   });
 
   // Make the computed return a Record that accepts any string key
