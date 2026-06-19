@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Planora.Application.Interfaces.Repositories;
-using Planora.Domain.Entities;
+using Planora.Domain.Analysis;
 using Planora.Infrastructure.Persistence.Contexts;
 
 namespace Planora.Infrastructure.Persistence.Repositories;

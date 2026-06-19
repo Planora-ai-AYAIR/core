@@ -1,4 +1,4 @@
-using Planora.Domain.Entities;
+using Planora.Domain.Analysis;
 
 namespace Planora.Application.Interfaces.Repositories;
 

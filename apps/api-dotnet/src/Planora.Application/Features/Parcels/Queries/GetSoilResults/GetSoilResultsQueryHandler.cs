@@ -1,14 +1,12 @@
-using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Options;
 using Planora.Application.Features.Parcels.Errors;
-using Planora.Application.Features.Parcels.Queries.GetSoilResults;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.AnalysisJob;
-using Planora.Domain.Entities;
 using Planora.Domain.Shared.Results;
+using System.Text.Json;
 
 namespace Planora.Application.Features.Parcels.Queries.GetSoilResults;
 

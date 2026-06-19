@@ -1,5 +1,5 @@
 using MediatR;
-using Planora.Application.Features.Auth;
+using Planora.Application.Features.Auth.Errors;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Shared.Results;

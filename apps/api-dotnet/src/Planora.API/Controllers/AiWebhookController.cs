@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Planora.Application.Features.Analysis.Webhooks;
-using Planora.Application.Features.Analysis.Webhooks.Payloads;
+using Planora.Application.Features.Analysis.Commands;
+using Planora.Application.Features.Analysis.Dtos;
 using Planora.Application.Features.Parcels.Dtos.Webhook;
 using Planora.Domain.AnalysisJob;
 using System.Text.Json;
@@ -22,39 +22,51 @@ public sealed class AiWebhookController(ISender mediator) : BaseApiController
         var result = envelope.EventType switch
         {
             AiWebhookEventTypes.TopographyCompleted => await mediator.Send(
-                new TopographyCompletedCommand{
+                new TopographyCompletedCommand
+                {
                     PythonJobId = envelope.JobId,
-                    Payload = envelope.Data.Deserialize<TopographyResultPayload>(JsonOptions)!},
+                    Payload = envelope.Data.Deserialize<TopographyResultPayload>(JsonOptions)!
+                },
                 ct),
 
             AiWebhookEventTypes.AnalysisFailed => await mediator.Send(
-                new AnalysisFailedCommand{
+                new AnalysisFailedCommand
+                {
                     PythonJobId = envelope.JobId,
-                    Reason = envelope.Data.Deserialize<AnalysisFailurePayload>(JsonOptions)!.Reason},
+                    Reason = envelope.Data.Deserialize<AnalysisFailurePayload>(JsonOptions)!.Reason
+                },
                 ct),
 
             AiWebhookEventTypes.SoilCompleted => await mediator.Send(
-                new SoilCompletedCommand{
+                new SoilCompletedCommand
+                {
                     PythonJobId = envelope.JobId,
-                    Payload = envelope.Data.Deserialize<SoilResultPayload>(JsonOptions)!},
+                    Payload = envelope.Data.Deserialize<SoilResultPayload>(JsonOptions)!
+                },
                 ct),
 
             AiWebhookEventTypes.RiskCompleted => await mediator.Send(
-                new RiskCompletedCommand{
+                new RiskCompletedCommand
+                {
                     PythonJobId = envelope.JobId,
-                    Payload = envelope.Data.Deserialize<RiskResultPayload>(JsonOptions)!},
+                    Payload = envelope.Data.Deserialize<RiskResultPayload>(JsonOptions)!
+                },
                 ct),
 
             AiWebhookEventTypes.BoreholeCompleted => await mediator.Send(
-                new BoreholeCompletedCommand{
+                new BoreholeCompletedCommand
+                {
                     PythonJobId = envelope.JobId,
-                    Payload = envelope.Data.Deserialize<BoreholeResultPayload>(JsonOptions)!},
+                    Payload = envelope.Data.Deserialize<BoreholeResultPayload>(JsonOptions)!
+                },
                 ct),
 
             AiWebhookEventTypes.PdfCompleted => await mediator.Send(
-                new PdfCompletedCommand{
+                new PdfCompletedCommand
+                {
                     PythonJobId = envelope.JobId,
-                    Payload = envelope.Data.Deserialize<PdfResultPayload>(JsonOptions)!},
+                    Payload = envelope.Data.Deserialize<PdfResultPayload>(JsonOptions)!
+                },
                 ct),
 
             _ => AnalysisJobErrors.UnsupportedEventType

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Planora.Domain.Analysis;
 using Planora.Domain.AnalysisJob;
-using Planora.Domain.Entities;
 
 namespace Planora.Infrastructure.Persistence.Configurations;
 

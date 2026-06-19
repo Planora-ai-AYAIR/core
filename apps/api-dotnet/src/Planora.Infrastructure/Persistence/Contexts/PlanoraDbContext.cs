@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Planora.Domain.Analysis;
 using Planora.Domain.AnalysisJob;
 using Planora.Domain.Common;
-using Planora.Domain.Entities;
 using Planora.Domain.Notifications;
 using Planora.Domain.Parcels;
 using Planora.Domain.Payments;
