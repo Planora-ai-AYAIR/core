@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+secrets/
+tmp/
+*.tif
+*.shp
+*.dbf
+*.shx
+*.prj
+.vscode/
