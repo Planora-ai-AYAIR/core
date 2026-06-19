@@ -6,4 +6,5 @@ public sealed class AiOptions
 
     public string BaseUrl { get; init; } = string.Empty;
     public string SharedSecret { get; init; } = string.Empty;
+    public string ApiKey { get; init; } = string.Empty;
 }

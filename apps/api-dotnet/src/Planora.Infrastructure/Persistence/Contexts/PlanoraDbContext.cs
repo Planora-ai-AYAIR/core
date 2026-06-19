@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Planora.Domain.AnalysisJob;
 using Planora.Domain.Common;
+using Planora.Domain.Entities;
 using Planora.Domain.Notifications;
 using Planora.Domain.Parcels;
 using Planora.Domain.Payments;
@@ -35,6 +36,10 @@ public class PlanoraDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
     public DbSet<ReportFile> ReportFiles { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<TopographyResult> TopographyResults { get; set; }
+    public DbSet<SoilResult> SoilResults { get; set; }
+    public DbSet<RiskResult> RiskResults { get; set; }
+    public DbSet<BoreholeResult> BoreholeResults { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -15,6 +15,7 @@ using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.API;
 using Planora.Infrastructure.BackgroundJobs;
+using Planora.Infrastructure.Http;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
@@ -108,9 +109,8 @@ public static class DependencyInjection
         .ConfigureHttpClient((client) =>
         {
             client.BaseAddress = new Uri(aiOptions.BaseUrl);
-            //TODO  : add the X-Api-Key header when agreed upon
-        }
-);
+        })
+        .AddHttpMessageHandler<AiApiKeyHandler>();
 
 
 
@@ -179,10 +179,19 @@ public static class DependencyInjection
         services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IAiAnalysisService, AiAnalysisService>();
-        
-        
+
+        // Analysis Result Repositories
+        services.AddScoped<ITopographyResultRepository, TopographyResultRepository>();
+        services.AddScoped<ISoilResultRepository, SoilResultRepository>();
+        services.AddScoped<IRiskResultRepository, RiskResultRepository>();
+        services.AddScoped<IBoreholeResultRepository, BoreholeResultRepository>();
+
         //Background jobs
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
+        services.AddScoped<IProcessSoilJob, ProcessSoilJob>();
+        services.AddScoped<IProcessRiskJob, ProcessRiskJob>();
+        services.AddScoped<IProcessBoreholeJob, ProcessBoreholeJob>();
+        services.AddScoped<IProcessPdfJob, ProcessPdfJob>();
 
         return services;
     }

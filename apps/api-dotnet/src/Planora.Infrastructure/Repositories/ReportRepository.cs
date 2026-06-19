@@ -11,10 +11,19 @@ public sealed class ReportRepository(PlanoraDbContext context) : IReportReposito
     public async Task<Report?> GetLatestCompletedReportByParcelIdAsync(Guid parcelId, CancellationToken cancellationToken = default)
     {
         return await context.Reports
-            .Include(r => r.Modules)   // (contains OutputMetadata JSON)
-            .Include(r => r.Files)     // (contains S3 keys)
+            .Include(r => r.Modules)
+            .Include(r => r.Files)
             .Where(r => r.ParcelId == parcelId && r.Status == ReportStatus.Completed)
             .OrderByDescending(r => r.ProcessingCompletedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<Report?> GetInProgressReportByParcelIdAsync(Guid parcelId, CancellationToken cancellationToken = default)
+    {
+        return await context.Reports
+            .Include(r => r.Modules)
+            .Where(r => r.ParcelId == parcelId && r.Status != ReportStatus.Completed && r.Status != ReportStatus.PendingPayment)
+            .OrderByDescending(r => r.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }
 }
