@@ -306,14 +306,16 @@ export const MOCK_BEARING_DATA: BearingData = {
       unit: '',
       safeThreshold: 0.4,
       source: 'Sentinel-2 NDMI',
-      tooltip: 'Elevated soil moisture can reduce effective bearing capacity and increase settlement risk.',
+      tooltip:
+        'Elevated soil moisture can reduce effective bearing capacity and increase settlement risk.',
     },
     waterTableDepth: {
       value: 8.5,
       unit: 'm',
       safeThreshold: 5,
       source: 'SoilGrids',
-      tooltip: 'A shallower water table increases the risk of liquefaction and reduces usable bearing capacity.',
+      tooltip:
+        'A shallower water table increases the risk of liquefaction and reduces usable bearing capacity.',
     },
     terrainSlope: {
       value: 3.2,
@@ -357,34 +359,84 @@ export const MOCK_BEARING_DATA: BearingData = {
 
 // ---------- Risk mock ----------
 export const MOCK_RISK_DATA: RiskData = {
-  floodRisk: 'Low',
-  seismicZone: 'Zone II',
-  liquefactionPotential: 'Medium',
-  landslideRisk: 'None',
-  hazards: [
+  overallRiskScore: 42,
+  overallRiskLevel: 'Moderate',
+  benchmarkComparison: 'Lower than 65% of sites in Nile Delta region',
+
+  floodRisk: {
+    score: 35,
+    level: 'Low',
+    icon: 'pi pi-cloud-download',
+    color: '#3B82F6',
+    factors: [
+      { label: 'Terrain slope', detail: 'Average slope 3.2% — moderate drainage' },
+      { label: 'TWI index', detail: 'Topographic Wetness Index: 4.8 (moderate)' },
+      { label: 'Proximity to drainage', detail: '500m from nearest drainage basin' },
+    ],
+    mitigation: 'Install drainage systems, elevate foundation above flood level',
+  },
+  seismicRisk: {
+    score: 28,
+    level: 'Low',
+    icon: 'pi pi-map',
+    color: '#F59E0B',
+    factors: [
+      { label: 'NCSR zone', detail: 'Zone II — moderate shaking expected' },
+      { label: 'Fault line distance', detail: '25 km from nearest active fault' },
+      { label: 'Soil amplification', detail: 'Sandy loam — moderate amplification potential' },
+    ],
+    mitigation: 'Design for seismic loads per ECP 201, consider base isolation',
+  },
+
+  expansiveSoilRisk: {
+    score: 55,
+    level: 'Moderate',
+    icon: 'pi pi-arrows-v',
+    color: '#A0522D',
+    factors: [
+      { label: 'Clay content', detail: '45% clay in top 1m' },
+      { label: 'Shrink-swell potential', detail: 'Medium — montmorillonite traces' },
+    ],
+    mitigation: 'Replace top 1.5m with non-expansive fill, use raft foundation',
+  },
+
+  liquefactionRisk: {
+    score: 68,
+    level: 'High',
+    icon: 'pi pi-exclamation-triangle',
+    color: '#8B5CF6',
+    factors: [
+      { label: 'Sand content', detail: '20% sand in top 1m' },
+      { label: 'Water table depth', detail: '8.5m — moderate risk' },
+      { label: 'Seismic zone', detail: 'Zone II — moderate shaking' },
+    ],
+    mitigation: 'Deep pile foundations to bearing stratum, soil densification',
+  },
+
+  mitigations: [
     {
-      label: 'Flood Risk',
-      rating: 'Low',
-      description: '0.5 m above 100-year floodplain',
-      icon: '💧',
+      risk: 'High Flood',
+      suggestion: 'Install drainage systems, elevate foundation above flood level',
+      costImpact: 'Medium',
+      feasibility: 'High',
     },
     {
-      label: 'Seismic Zone',
-      rating: 'Zone II',
-      description: 'Peak ground acceleration 0.15 g',
-      icon: '🌍',
+      risk: 'High Seismic',
+      suggestion: 'Design for seismic loads per ECP 201, consider base isolation',
+      costImpact: 'High',
+      feasibility: 'Medium',
     },
     {
-      label: 'Liquefaction',
-      rating: 'Medium',
-      description: 'Sandy silt at 4-6 m depth',
-      icon: '⏳',
+      risk: 'High Expansive Soil',
+      suggestion: 'Replace top 1.5m with non-expansive fill, use raft foundation',
+      costImpact: 'Medium',
+      feasibility: 'High',
     },
     {
-      label: 'Landslide',
-      rating: 'None',
-      description: 'Slope < 5% — no risk detected',
-      icon: '⛰️',
+      risk: 'High Liquefaction',
+      suggestion: 'Deep pile foundations to bearing stratum, soil densification',
+      costImpact: 'High',
+      feasibility: 'Medium',
     },
   ],
   floodFeatures: [
@@ -409,31 +461,126 @@ export const MOCK_RISK_DATA: RiskData = {
       ],
     },
   ],
-  seismicPoint: [31.942, 30.633],
-  liquefactionPolygon: [
-    [31.9419, 30.6329],
-    [31.9421, 30.6329],
-    [31.9421, 30.6331],
-    [31.9419, 30.6331],
-    [31.9419, 30.6329],
-  ],
+  seismicZonesGeoJSON: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: { classification: 'Zone II' },
+        geometry: { type: 'Point', coordinates: [31.942, 30.633] },
+      },
+    ],
+  },
+  expansiveSoilZonesGeoJSON: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: { clayPercent: 45 },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [31.9418, 30.6328],
+              [31.9422, 30.6328],
+              [31.9422, 30.6332],
+              [31.9418, 30.6332],
+              [31.9418, 30.6328],
+            ],
+          ],
+        },
+      },
+    ],
+  },
+  liquefactionZonesGeoJSON: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: { risk: 'High' },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [31.9419, 30.6329],
+              [31.9421, 30.6329],
+              [31.9421, 30.6331],
+              [31.9419, 30.6331],
+              [31.9419, 30.6329],
+            ],
+          ],
+        },
+      },
+    ],
+  },
 };
 
 // ---------- Borehole mock ----------
 export const MOCK_BOREHOLE_DATA: BoreholeData = {
-  points: [
-    { id: 'BH-1', lng: 31.942, lat: 30.633, depth: 15, cost: 4500 },
-    { id: 'BH-2', lng: 31.9419, lat: 30.6329, depth: 12, cost: 3800 },
-    { id: 'BH-3', lng: 31.9421, lat: 30.6331, depth: 18, cost: 5000 },
+  minRequired: 12,
+  recommended: 18,
+  coveragePercent: 85,
+  gridSize: '30m adaptive spacing',
+  strategy: 'Adaptive grid with hotspots',
+
+  placementPoints: [
+    {
+      id: 'BH-001',
+      lng: 31.942,
+      lat: 30.633,
+      priority: 'Critical',
+      reason: 'High clay variability',
+      estimatedDepth: 18,
+    },
+    {
+      id: 'BH-002',
+      lng: 31.9419,
+      lat: 30.6329,
+      priority: 'High',
+      reason: 'Liquefaction risk zone',
+      estimatedDepth: 15,
+    },
+    {
+      id: 'BH-003',
+      lng: 31.9421,
+      lat: 30.6331,
+      priority: 'Medium',
+      reason: 'Moderate slope change',
+      estimatedDepth: 12,
+    },
+    {
+      id: 'BH-004',
+      lng: 31.942,
+      lat: 30.6328,
+      priority: 'Low',
+      reason: 'Homogeneous sandy soil',
+      estimatedDepth: 10,
+    },
+    {
+      id: 'BH-005',
+      lng: 31.94185,
+      lat: 30.63295,
+      priority: 'High',
+      reason: 'Expansive soil boundary',
+      estimatedDepth: 20,
+    },
+    // add more up to ~12 points for realism
   ],
-  optimalArea: [
-    [31.9418, 30.6328],
-    [31.9422, 30.6328],
-    [31.9422, 30.6332],
-    [31.9418, 30.6332],
-    [31.9418, 30.6328],
-  ],
-  estimatedCost: 13300,
-  drillingCost: 9000,
-  testingCost: 4300,
+
+  costAnalysis: {
+    traditionalCount: 30,
+    traditionalCost: 420000,
+    optimizedCount: 12,
+    optimizedCost: 180000,
+    savingsAmount: 240000,
+    savingsPercent: 57,
+    ratePerMeter: 700,
+  },
+
+  parameters: {
+    maxSpacing: 30,
+    minBoreholes: 12,
+    targetDepth: 20,
+    unit: 'm',
+  },
 };

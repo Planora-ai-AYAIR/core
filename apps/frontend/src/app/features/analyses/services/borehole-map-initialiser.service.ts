@@ -5,79 +5,59 @@ import { BoreholeData } from '../interfaces/borehole-data';
 import type { FeatureCollection, Polygon } from 'geojson';
 
 @Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'root' })
 export class BoreholeMapInitialiser implements MapInitialiser<BoreholeData> {
   addLayers(map: maplibregl.Map, data: BoreholeData): void {
-    this.addBoreholePoints(map, data.points);
-    this.addDepthRings(map, data.points);
-    this.addOptimalArea(map, data.optimalArea);
-  }
-
-  private addBoreholePoints(map: maplibregl.Map, points: BoreholeData['points']) {
-    map.addSource('bh-src', {
+    // Add borehole points source
+    map.addSource('boreholes-src', {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
-        features: points.map((p) => ({
+        features: data.placementPoints.map((p) => ({
           type: 'Feature',
-          properties: { name: p.id, depth: p.depth },
+          properties: { id: p.id, priority: p.priority, reason: p.reason, depth: p.estimatedDepth },
           geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
         })),
       },
     });
+
     map.addLayer({
       id: 'borehole-points',
       type: 'circle',
-      source: 'bh-src',
+      source: 'boreholes-src',
       paint: {
-        'circle-radius': 10,
-        'circle-color': '#B86E3D',
-        'circle-stroke-color': '#fff',
+        'circle-radius': 8,
+        'circle-color': [
+          'match',
+          ['get', 'priority'],
+          'Critical',
+          '#EF4444',
+          'High',
+          '#F97316',
+          'Medium',
+          '#EAB308',
+          'Low',
+          '#10B981',
+          '#ccc',
+        ],
+        'circle-opacity': 0.9,
         'circle-stroke-width': 2,
+        'circle-stroke-color': '#fff',
       },
     });
-  }
 
-  private addDepthRings(map: maplibregl.Map, points: BoreholeData['points']) {
-    const ringFeatures: FeatureCollection<Polygon>['features'] = points.map((p) => {
-      const radius = p.depth * 0.0001;
-      const coords: [number, number][] = [];
-      for (let a = 0; a <= 360; a += 30) {
-        const rad = (a * Math.PI) / 180;
-        coords.push([p.lng + radius * Math.cos(rad), p.lat + radius * Math.sin(rad)]);
-      }
-      return {
-        type: 'Feature',
-        properties: { name: p.id },
-        geometry: { type: 'Polygon', coordinates: [coords] },
-      };
+    // Popup on click
+    map.on('click', 'borehole-points', (e) => {
+      const props = e.features?.[0].properties;
+      if (!props) return;
+      const html = `<strong>${props['id']}</strong><br>
+                    Priority: ${props['priority']}<br>
+                    Reason: ${props['reason']}<br>
+                    Est. depth: ${props['depth']} m`;
+      new maplibregl.Popup().setLngLat(e.lngLat).setHTML(html).addTo(map);
     });
-    map.addSource('depth-src', {
-      type: 'geojson',
-      data: { type: 'FeatureCollection', features: ringFeatures },
-    });
-    map.addLayer({
-      id: 'depth-rings',
-      type: 'fill',
-      source: 'depth-src',
-      paint: { 'fill-color': '#B86E3D', 'fill-opacity': 0.2, 'fill-outline-color': '#B86E3D' },
-    });
-  }
 
-  private addOptimalArea(map: maplibregl.Map, coords: [number, number][]) {
-    map.addSource('optimal-src', {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'Polygon', coordinates: [coords] },
-      },
-    });
-    map.addLayer({
-      id: 'optimal-area',
-      type: 'fill',
-      source: 'optimal-src',
-      paint: { 'fill-color': '#10B981', 'fill-opacity': 0.3, 'fill-outline-color': '#047857' },
-      layout: { visibility: 'none' },
-    });
+    map.on('mouseenter', 'borehole-points', () => (map.getCanvas().style.cursor = 'pointer'));
+    map.on('mouseleave', 'borehole-points', () => (map.getCanvas().style.cursor = ''));
   }
 }
