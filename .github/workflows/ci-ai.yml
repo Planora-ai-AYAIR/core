@@ -29,11 +29,11 @@ jobs:
 
       - name: Lint with ruff
         working-directory: apps/ai-python
-        run: ruff check src/
+        run: ruff check .
 
       - name: Run tests
         working-directory: apps/ai-python
-        run: pytest src/ -v --tb=short || echo "No tests yet — skipping"
+        run: pytest . -v --tb=short || echo "No tests yet — skipping"
 
       - name: Docker build check
         env:
