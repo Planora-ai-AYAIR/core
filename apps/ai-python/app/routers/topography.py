@@ -8,7 +8,6 @@ import logging
 import os
 import time
 import uuid
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 
@@ -192,7 +191,7 @@ async def _run_pipeline(python_job_id: str, req: TopographyJobRequest):
 
         # Step 1: export DEM
         upd("processing", 10, "DEM Export", "Exporting DEM tile from Copernicus")
-        task_id = export_dem_for_parcel(bbox_list, python_job_id, out_dir)
+        export_dem_for_parcel(bbox_list, python_job_id, out_dir)
 
         # Step 2: full analysis
         upd("processing", 30, "Elevation Analysis", "Computing elevation statistics")
@@ -233,12 +232,12 @@ async def _run_pipeline(python_job_id: str, req: TopographyJobRequest):
             "slopeDistribution": slope_distribution,
             "cutFill": cut_fill,
             "tileUrls": {
-                "elevation": f"s3://bucket/elevation/{{z}}/{{x}}/{{y}}.png",
-                "slope": f"s3://bucket/slope/{{z}}/{{x}}/{{y}}.png",
+                "elevation": "s3://bucket/elevation/{z}/{x}/{y}.png",
+                "slope": "s3://bucket/slope/{z}/{x}/{y}.png",
             },
             "geoJsonUrls": {
-                "contours": f"s3://bucket/contours.geojson",
-                "ponding": f"s3://bucket/ponding.geojson",
+                "contours": "s3://bucket/contours.geojson",
+                "ponding": "s3://bucket/ponding.geojson",
             },
             "metadata": {
                 "copernicusDemVersion": "COP-30",

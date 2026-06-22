@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel
 
-from app.schemas.common import BoundingBox, GeoJsonPolygon, JobStatus, BaseJobRequest
+from app.schemas.common import JobStatus, BaseJobRequest
 
 
 class SoilData(BaseModel):

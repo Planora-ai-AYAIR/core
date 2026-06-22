@@ -7,7 +7,6 @@ areas and reduce total borehole count.
 
 import logging
 import math
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

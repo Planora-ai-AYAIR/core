@@ -155,7 +155,7 @@ async def _run_soil_pipeline(python_job_id: str, req: SoilJobRequest):
                 "classification": soil.get("dominant_soil_type", "Loamy"),
             },
             "depthProfiles": depth_profiles,
-            "heatmapTileUrl": f"s3://bucket/soil_heatmap/{{z}}/{{x}}/{{y}}.png",
+            "heatmapTileUrl": "s3://bucket/soil_heatmap/{z}/{x}/{y}.png",
             "dataSources": ["ISRIC SoilGrids v2.0", "AfSIS Africa Soil", "Sentinel-2 L2A"],
         }
 

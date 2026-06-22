@@ -1,10 +1,10 @@
 """Topography module schemas — API Contract §3.1."""
 
 from __future__ import annotations
-from typing import Optional, Literal
+from typing import Optional
 from pydantic import BaseModel, Field
 
-from app.schemas.common import BoundingBox, GeoJsonPolygon, JobStatus, BaseJobRequest
+from app.schemas.common import JobStatus, BaseJobRequest
 
 
 # ── Internal options (used by terrain_service) ───────────────
