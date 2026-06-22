@@ -2,14 +2,12 @@ using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Planora.Api;
+using Planora.Api.Hubs;
+using Planora.Api.Middlewares;
 using Planora.Application;
 using Planora.Infrastructure;
 using Planora.Infrastructure.Persistence.Seeders;
 using Serilog;
-using System.Text.Json;
-using FluentValidation;
-using Planora.Api.Middlewares;
-using Planora.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

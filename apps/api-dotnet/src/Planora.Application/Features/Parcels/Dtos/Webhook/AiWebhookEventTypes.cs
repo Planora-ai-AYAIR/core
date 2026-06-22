@@ -8,4 +8,7 @@ public static class AiWebhookEventTypes
     public const string SoilFailed = "soil.failed";
     public const string RiskCompleted = "risk.completed";
     public const string RiskFailed = "risk.failed";
+    public const string BoreholeCompleted = "borehole.completed";
+    public const string PdfCompleted = "pdf.completed";
+    public const string AnalysisFailed = "analysis.failed";
 }

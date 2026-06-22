@@ -1,6 +1,6 @@
 ﻿using Planora.Domain.Shared.Results;
 
-namespace Planora.Application.Features.Auth;
+namespace Planora.Application.Features.Auth.Errors;
 
 public static class AuthErrors
 {

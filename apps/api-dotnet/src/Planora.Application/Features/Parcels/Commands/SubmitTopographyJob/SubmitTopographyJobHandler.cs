@@ -21,7 +21,7 @@ public sealed class SubmitTopographyJobHandler(
             SubmitTopographyJobCommand,
             Result<SubmitTopographyJobResponse>>
 {
-    public async Task<Result<SubmitTopographyJobResponse>> Handle(SubmitTopographyJobCommand request,CancellationToken ct)
+    public async Task<Result<SubmitTopographyJobResponse>> Handle(SubmitTopographyJobCommand request, CancellationToken ct)
     {
         logger.LogInformation(
             "Submitting topography job for ParcelId {ParcelId}",
@@ -36,16 +36,16 @@ public sealed class SubmitTopographyJobHandler(
         {
             return ParcelErrors.NotFound;
         }
-        
+
         var proccessTopographyRequest = new ProccessTopographyJobAiRequest(
-            ParcelId : parcel.Id,
+            ParcelId: parcel.Id,
             BoundaryGeoJson: parcel.Boundary.ToGeoJson(),
             AreaHectares: parcel.AreaHectares,
             CentroidLatitude: parcel.Centroid.Y,
             CentroidLongitude: parcel.Centroid.X
         );
 
-        var jobId = processTopographyJob.Enqueue(proccessTopographyRequest, ct);
+        var jobId = processTopographyJob.Enqueue(proccessTopographyRequest);
 
         await cacheService.SetAsync(
             $"parcel-status:{parcel.Id}",
