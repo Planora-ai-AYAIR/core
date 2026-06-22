@@ -64,10 +64,10 @@
     >
       <p>© {{ currentYear }} Planora. All rights reserved.</p>
       <div class="flex gap-6">
-        <a routerLink="/privacy" class="hover:text-planora-clay-500 transition-colors"
+        <a [routerLink]="ROUTES.privacy" class="hover:text-planora-clay-500 transition-colors"
           >Privacy Policy</a
         >
-        <a routerLink="/terms" class="hover:text-planora-clay-500 transition-colors"
+        <a [routerLink]="ROUTES.terms" class="hover:text-planora-clay-500 transition-colors"
           >Terms of Service</a
         >
         <a routerLink="/cookies" class="hover:text-planora-clay-500 transition-colors"

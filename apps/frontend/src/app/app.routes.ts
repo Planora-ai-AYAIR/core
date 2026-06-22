@@ -1,11 +1,28 @@
 import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './shared/components/layouts/public-layout/public-layout.component';
 import { AuthenticatedLayoutComponent } from './shared/components/layouts/authenticated-layout/authenticated-layout.component';
+import { authGuard } from './core/guards/auth.guard';
+import { dashboardGuard } from './core/guards/dashboard.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routing').then((m) => m.AUTH_ROUTES),
+  },
+  {
+    path: 'terms',
+    loadComponent: () =>
+      import('./shared/components/terms-page/terms-page.component').then(
+        (m) => m.TermsPageComponent,
+      ),
+  },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./shared/components/privacy-page/privacy-page.component').then(
+        (m) => m.PrivacyPageComponent,
+      ),
   },
 
   {
@@ -18,20 +35,21 @@ export const routes: Routes = [
           import('./features/landingpage/pages/landingpage/landingpage.component').then(
             (m) => m.LandingpageComponent,
           ),
+        canActivate: [authGuard],
       },
-
       {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',
       },
-      // Privacy Policy
     ],
   },
 
   {
     path: 'app',
     component: AuthenticatedLayoutComponent,
+    canActivate: [dashboardGuard, roleGuard],
+    data: { roles: ['Client'] },
     children: [
       {
         path: 'dashboard',
@@ -60,7 +78,8 @@ export const routes: Routes = [
   // 404 Error
   {
     path: 'not-found',
-    loadComponent: () => import('./shared/components/not-found/not-found.component').then((m) => m.NotFoundComponent),
+    loadComponent: () =>
+      import('./shared/components/not-found/not-found.component').then((m) => m.NotFoundComponent),
   },
 
   // Wildcard - redirect to 404
