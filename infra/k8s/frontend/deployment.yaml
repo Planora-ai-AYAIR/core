@@ -1,6 +1,50 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: frontend-placeholder
-data:
-  status: "pending"
+  name: frontend
+  namespace: planora
+  labels:
+    app: frontend
+    project: planora-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          # Replace with your ECR image URI
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/planora/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            # Angular build-time env vars — typically baked into the image at build time
+            # Runtime config can be served via /assets/env.json pattern
+            - name: API_BASE_URL
+              value: "/api"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
