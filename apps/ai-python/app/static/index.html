@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoSense — Soil & Terrain</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --panel2: #1e222b; --line: #2a2f3a;
+    --text: #e6e9ef; --muted: #9aa3b2; --accent: #4ade80; --accent2: #38bdf8;
+    --warn: #fbbf24; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px; margin-bottom: 20px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  textarea {
+    width: 100%; min-height: 130px; resize: vertical;
+    background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; font-family: ui-monospace, "Cascadia Code", monospace;
+    font-size: 13px;
+  }
+  textarea:focus { outline: none; border-color: var(--accent2); }
+  .row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+  button {
+    background: var(--accent); color: #06281a; border: 0; cursor: pointer;
+    font-weight: 600; font-size: 14px; padding: 11px 20px; border-radius: 10px;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  .ghost { background: transparent; color: var(--accent2); border: 1px solid var(--line); }
+  .hint { color: var(--muted); font-size: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+  .panel-title { font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin: 0 0 14px; display: flex; gap: 8px; align-items: center; }
+  .kv { display: flex; justify-content: space-between; padding: 7px 0;
+    border-bottom: 1px solid var(--line); font-size: 14px; }
+  .kv:last-child { border-bottom: 0; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .chip { display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; }
+  .chip.good { background: rgba(74,222,128,.15); color: var(--accent); }
+  .chip.warn { background: rgba(251,191,36,.15); color: var(--warn); }
+  .chip.bad  { background: rgba(248,113,113,.15); color: var(--bad); }
+  .note { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.3);
+    color: var(--warn); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-top: 6px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #06281a; border-radius: 50%; display: inline-block;
+    animation: s .7s linear infinite; vertical-align: -3px; margin-right: 8px; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  .bar { height: 8px; border-radius: 6px; background: var(--panel2); overflow: hidden; display: flex; }
+  .bar > span { display: block; height: 100%; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: 0; }
+  a { color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌍 GeoSense — Soil & Terrain</h1>
+  <div class="sub">Enter polygon coordinates as <code>lat, lon</code> (one point per line) and get soil composition + terrain analysis.</div>
+
+  <div class="card">
+    <label for="coords">Coordinates (lat, lon)</label>
+    <textarea id="coords" spellcheck="false">31.4976423, 29.781129
+31.5032575, 29.7779854
+31.4986716, 29.7745251
+31.4934212, 29.7780081</textarea>
+    <div class="row">
+      <button id="run">Analyze</button>
+      <button class="ghost" id="sample">Load Nile Delta sample</button>
+      <span class="hint">First/last point auto-closed. Min 3 points.</span>
+    </div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const fmt = (v, suffix = "") => (v === null || v === undefined) ? "—" : (v + suffix);
+
+const SAMPLE = `30.6000, 31.0000
+30.6030, 31.0040
+30.5990, 31.0070
+30.5960, 31.0030`;
+
+$("#sample").onclick = () => { $("#coords").value = SAMPLE; };
+
+function parseCoords(text) {
+  return text.trim().split(/\n+/).map(line => {
+    const parts = line.split(/[,\s]+/).map(Number).filter(n => !Number.isNaN(n));
+    return parts.length >= 2 ? [parts[0], parts[1]] : null;
+  }).filter(Boolean);
+}
+
+$("#run").onclick = async () => {
+  const points = parseCoords($("#coords").value);
+  const btn = $("#run");
+  const out = $("#results");
+
+  if (points.length < 3) {
+    out.innerHTML = `<div class="card"><div class="note">Need at least 3 valid coordinate lines.</div></div>`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin"></span>Analyzing…`;
+  out.innerHTML = `<div class="card"><div class="muted">Querying SoilGrids & terrain…</div></div>`;
+
+  try {
+    const res = await fetch("/api/v1/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ points }),
+    });
+    const body = await res.json();
+    render(body);
+  } catch (e) {
+    out.innerHTML = `<div class="card"><div class="note">Request failed: ${e}</div></div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Analyze";
+  }
+};
+
+function soilTypeChip(t) {
+  const cls = t === "Sandy" ? "warn" : t === "Clayey" ? "good" : "good";
+  return `<span class="chip ${cls}">${t || "Unknown"}</span>`;
+}
+
+function riskChip(level) {
+  const cls = level === "High" ? "bad" : level === "Medium" ? "warn" : "good";
+  return `<span class="chip ${cls}">${level || "—"}</span>`;
+}
+
+function render(body) {
+  const out = $("#results");
+
+  // Unified envelope: { statusCode, message, errors, data }
+  if (body.errors && body.errors.length) {
+    out.innerHTML = `<div class="card"><div class="note">${
+      body.errors.map(e => e.message || JSON.stringify(e)).join("<br>")
+    }</div></div>`;
+    return;
+  }
+
+  const data = body.data || body;
+  const loc = data.location || {};
+  const s = data.soilComposition;
+  const t = data.terrain;
+  const h = data.hydrology;
+  let html = "";
+
+  // Location card
+  if (loc.centroid) {
+    const bb = loc.boundingBox || {};
+    html += `<div class="card"><div class="panel-title">📍 Location</div>
+      <div class="kv"><span class="k">Centroid</span><span class="v">${loc.centroid.lat.toFixed(5)}, ${loc.centroid.lon.toFixed(5)}</span></div>
+      <div class="kv"><span class="k">Bounding box</span><span class="v">${[bb.minX, bb.minY, bb.maxX, bb.maxY].map(n => Number(n).toFixed(4)).join(", ")}</span></div>
+    </div>`;
+  }
+
+  html += `<div class="grid">`;
+
+  // Soil card
+  html += `<div class="card"><div class="panel-title">🌱 Soil Composition</div>`;
+  if (s && s.composition && s.composition.clay !== null) {
+    const comp = s.composition, props = s.properties;
+    html += `
+      <div class="kv"><span class="k">Dominant type</span><span class="v">${soilTypeChip(s.classification.primaryType)}</span></div>
+      <div class="kv"><span class="k">Clay (${s.surfaceDepth})</span><span class="v">${fmt(comp.clay, " %")}</span></div>
+      <div class="kv"><span class="k">Sand (${s.surfaceDepth})</span><span class="v">${fmt(comp.sand, " %")}</span></div>
+      <div class="kv"><span class="k">Silt (${s.surfaceDepth})</span><span class="v">${fmt(comp.silt, " %")}</span></div>
+      <div class="kv"><span class="k">Bulk density</span><span class="v">${fmt(props.bulkDensity, " g/cm³")}</span></div>
+      <div class="kv"><span class="k">Organic carbon</span><span class="v">${fmt(props.organicCarbon, " %")}</span></div>
+      <div class="kv"><span class="k">pH</span><span class="v">${fmt(props.ph)}</span></div>`;
+    // texture bar
+    const c = comp.clay || 0, sa = comp.sand || 0, si = comp.silt || 0;
+    const tot = c + sa + si || 1;
+    html += `<div style="margin-top:14px">
+      <div class="bar">
+        <span style="width:${c/tot*100}%;background:#4ade80"></span>
+        <span style="width:${sa/tot*100}%;background:#fbbf24"></span>
+        <span style="width:${si/tot*100}%;background:#38bdf8"></span>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:#4ade80"></span>Clay</span>
+        <span><span class="dot" style="background:#fbbf24"></span>Sand</span>
+        <span><span class="dot" style="background:#38bdf8"></span>Silt</span>
+      </div>
+    </div>`;
+  } else {
+    html += `<div class="muted">No soil data returned for this location.</div>`;
+  }
+  html += `</div>`;
+
+  // Terrain card
+  html += `<div class="card"><div class="panel-title">⛰️ Terrain</div>`;
+  if (t) {
+    const el = t.elevation, sl = t.slope, sum = t.summary;
+    html += `
+      <div class="kv"><span class="k">Terrain class</span><span class="v">${sum.terrainClass}</span></div>
+      <div class="kv"><span class="k">Elevation (mean)</span><span class="v">${fmt(el.mean, " m")}</span></div>
+      <div class="kv"><span class="k">Elevation range</span><span class="v">${el.min}–${el.max} m</span></div>
+      <div class="kv"><span class="k">Slope (mean)</span><span class="v">${fmt(sl.meanDeg, "°")}</span></div>
+      <div class="kv"><span class="k">Buildable area</span><span class="v">${fmt(sum.buildableAreaPct, " %")}</span></div>`;
+
+    // Slope distribution
+    const dist = (t.slopeAnalysis && t.slopeAnalysis.distribution) || [];
+    if (dist.length) {
+      html += `<div style="margin-top:16px">
+        <div class="hint" style="margin-bottom:8px;">Slope distribution (% of area)</div>`;
+      dist.forEach(d => {
+        html += `<div style="margin-bottom:7px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+            <span class="muted">${d.category} (${d.range})</span><span class="v">${d.percentage} %</span>
+          </div>
+          <div class="bar"><span style="width:${d.percentage}%;background:${d.color}"></span></div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Contour zones — elevation bands by area share
+    if (t.contourZones && t.contourZones.length) {
+      const palette = ["#0e7490","#0891b2","#22d3ee","#67e8f9","#a5f3fc","#cffafe"];
+      html += `<div style="margin-top:16px">
+        <div class="hint" style="margin-bottom:8px;">Elevation contour zones (% of area)</div>`;
+      t.contourZones.forEach((z, i) => {
+        const c = palette[i % palette.length];
+        html += `<div style="margin-bottom:7px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+            <span class="muted">${z.label}</span><span class="v">${z.area_pct} %</span>
+          </div>
+          <div class="bar"><span style="width:${z.area_pct}%;background:${c}"></span></div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  } else {
+    html += `<div class="muted">Terrain analysis not available (see notes below).</div>`;
+  }
+  html += `</div>`;
+
+  html += `</div>`; // grid
+
+  // Hydrology card
+  if (h) {
+    const wa = h.waterAccumulation || {};
+    html += `<div class="card"><div class="panel-title">💧 Hydrology</div>
+      <div class="kv"><span class="k">Drainage risk</span><span class="v">${riskChip(h.drainageRisk)}</span></div>
+      <div class="kv"><span class="k">Ponding risk</span><span class="v">${riskChip(h.pondingRisk && h.pondingRisk.level)}</span></div>
+      <div class="kv"><span class="k">TWI (mean wetness)</span><span class="v">${fmt(h.twiMean)}</span></div>
+      <div class="kv"><span class="k">High-wetness area</span><span class="v">${fmt(wa.highRiskPct, " %")}</span></div>
+      <div class="kv"><span class="k">Medium-wetness area</span><span class="v">${fmt(wa.mediumRiskPct, " %")}</span></div>
+      <div class="kv"><span class="k">Low-wetness area</span><span class="v">${fmt(wa.lowRiskPct, " %")}</span></div>`;
+    if (wa.highRiskPct !== null && wa.highRiskPct !== undefined) {
+      html += `<div style="margin-top:14px">
+        <div class="bar">
+          <span style="width:${wa.lowRiskPct||0}%;background:#22d3ee"></span>
+          <span style="width:${wa.mediumRiskPct||0}%;background:#fbbf24"></span>
+          <span style="width:${wa.highRiskPct||0}%;background:#f87171"></span>
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:#22d3ee"></span>Low</span>
+          <span><span class="dot" style="background:#fbbf24"></span>Medium</span>
+          <span><span class="dot" style="background:#f87171"></span>High</span>
+        </div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Notes
+  if (data.notes && data.notes.length) {
+    html += `<div class="card"><div class="panel-title">ℹ️ Notes</div>`;
+    for (const n of data.notes) html += `<div class="note">${n}</div>`;
+    html += `</div>`;
+  }
+
+  out.innerHTML = html;
+}
+</script>
+</body>
+</html>

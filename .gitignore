@@ -26,3 +26,4 @@ apps/api-dotnet/src/CLAUDE.md
 **/.vs/
 *.user
 *.suo
+apps/api-dotnet/src/Planora.Api/appsettings.Development.Local.json

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AuthLayoutComponent } from '../../components/auth-layout/auth-layout.component';
 import { ForgotPasswordComponent } from '../../components/forgot-password/forgot-password.component';
 

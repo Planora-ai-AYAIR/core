@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter, HostBinding, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ROUTES } from '../../config/constants';
+import { SignInFacadeService } from '../../../features/auth/services/sign-in/sign-in-facade.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface NavItem {
   id: string;
@@ -18,7 +20,9 @@ interface NavItem {
   styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent {
-  private router = inject(Router);
+  private signInFacade = inject(SignInFacadeService);
+  protected authService = inject(AuthService);
+
   readonly ROUTES = ROUTES;
 
   @Input() collapsed = false;
@@ -35,9 +39,9 @@ export class SidebarComponent {
   }
 
   navItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'pi-chart-bar', route: '/app/dashboard' },
-    { id: 'parcels', label: 'Parcels', icon: 'pi-map', route: '/app/parcels' },
-    { id: 'analyses', label: 'Analyses', icon: 'pi-sitemap', route: '/app/analyses' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'pi-chart-bar', route: ROUTES.dashboard },
+    { id: 'parcels', label: 'Parcels', icon: 'pi-map', route: ROUTES.newParcel },
+    { id: 'analyses', label: 'Analyses', icon: 'pi-sitemap', route: ROUTES.newAnalysis },
     { id: 'monitoring', label: 'Monitoring', icon: 'pi-desktop', route: '/app/monitoring' },
     { id: 'reports', label: 'Reports', icon: 'pi-file-pdf', route: '/app/reports' },
     { id: 'settings', label: 'Settings', icon: 'pi-cog', route: '/app/settings' },
@@ -49,5 +53,19 @@ export class SidebarComponent {
 
   closeMobileDrawer() {
     this.mobileOpenChange.emit(false);
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
+  onLogout(): void {
+    this.signInFacade.logout();
   }
 }

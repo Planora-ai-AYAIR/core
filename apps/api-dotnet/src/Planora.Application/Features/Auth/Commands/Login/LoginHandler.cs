@@ -1,5 +1,6 @@
 using MediatR;
 using Planora.Application.Common.Helpers;
+using Planora.Application.Features.Auth.Errors;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Shared.Results;
@@ -42,6 +43,8 @@ public sealed class LoginHandler(
 
         await auditLogRepository.LogAsync(user.Id, "Login", null, ct);
 
-        return new LoginResponse(user.Id, user.Email, user.PhoneNumber, role, true, accessToken, refreshToken);
+        string FullName = $"{user.FirstName} {user.LastName}".Trim();
+
+        return new LoginResponse(user.Id, user.Email, FullName, user.PhoneNumber, role, true, accessToken, refreshToken);
     }
 }

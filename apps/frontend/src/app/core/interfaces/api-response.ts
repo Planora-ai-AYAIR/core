@@ -1,7 +1,8 @@
+import { ApiError } from './api-error';
+
 export interface ApiResponse<T> {
-  data: T;
-  message: string;
   statusCode: number;
-  errors: string[];
-  succeeded: boolean;
+  message: string;
+  errors: ApiError[] | null;
+  data: T | null;
 }

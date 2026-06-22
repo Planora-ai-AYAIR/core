@@ -2,15 +2,16 @@ using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Planora.Api;
+using Planora.Api.Hubs;
+using Planora.Api.Middlewares;
 using Planora.Application;
 using Planora.Infrastructure;
 using Planora.Infrastructure.Persistence.Seeders;
 using Serilog;
-using System.Text.Json;
-using FluentValidation;
-using Planora.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true, reloadOnChange: true);
 
 // ──────────────────────────────────────────────
 //  Service Registration (Composition Root)
@@ -21,6 +22,7 @@ builder.Services
     .AddPresentationServices(builder.Configuration);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 // Register IMiddleware implementation so it can be injected and used by UseMiddleware
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Host.UseSerilog((context, configuration) =>
@@ -34,11 +36,12 @@ await AuthSeeder.SeedAsync(app.Services);
 // ──────────────────────────────────────────────
 //  HTTP Request Pipeline
 // ──────────────────────────────────────────────
-
 app.UseSerilogRequestLogging();
-
-// Use the IMiddleware-based global exception handler (registered above)
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments("/api/webhook"),
+    builder => builder.UseMiddleware<WebhookSignatureMiddleware>());
 
 if (app.Environment.IsDevelopment())
 {
@@ -66,6 +69,7 @@ app.UseOutputCache();
 //  Endpoints
 // ──────────────────────────────────────────────
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = async (context, report) =>

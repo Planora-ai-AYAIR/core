@@ -6,7 +6,7 @@
     <div class="relative z-10 max-w-lg p-12 animate-fade-up">
       <a [routerLink]="ROUTES.home" class="flex items-center">
         <img
-          src="/assets/images/logo/logo.png"
+          src="/assets/images/logo/logo.webp"
           alt="Planora Logo"
           class="h-16 w-auto lg:h-28 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"
         />
@@ -48,7 +48,7 @@
   >
     <!-- Watermark -->
     <div class="absolute -right-5 -bottom-20 pointer-events-none select-none opacity-[0.06]">
-      <img src="/assets/images/logo/logo.png" alt="Planora" class="w-150 grayscale" />
+      <img src="/assets/images/logo/logo.webp" alt="Planora" class="w-150 grayscale" />
     </div>
 
     <!-- Card -->
@@ -73,12 +73,12 @@
           >Help Center</a
         >
         <a
-          routerLink="/privacy"
+          [routerLink]="ROUTES.privacy"
           class="hover:text-planora-clay-500 hover:underline underline-offset-2 transition-colors"
           >Privacy</a
         >
         <a
-          routerLink="/terms"
+          [routerLink]="ROUTES.terms"
           class="hover:text-planora-clay-500 hover:underline underline-offset-2 transition-colors"
           >Terms</a
         >

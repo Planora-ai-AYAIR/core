@@ -1,10 +1,5 @@
 using System.Text.Json;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Planora.Api.Middlewares;
 

@@ -412,6 +412,419 @@ namespace Planora.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Planora.Domain.Entities.BoreholeResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AnalysisJobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("analysis_job_id");
+
+                    b.Property<double>("CoveragePercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("coverage_percentage");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("GridSize")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("grid_size");
+
+                    b.Property<int>("MinimumRequired")
+                        .HasColumnType("integer")
+                        .HasColumnName("minimum_required");
+
+                    b.Property<int>("OptimalCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("optimal_count");
+
+                    b.Property<int>("OptimizedBoreholeCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("optimized_borehole_count");
+
+                    b.Property<decimal>("OptimizedEstimatedCost")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("optimized_estimated_cost");
+
+                    b.Property<string>("PlacementGeoJsonUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("placement_geo_json_url");
+
+                    b.Property<string>("PlacementPointsJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("placement_points_json");
+
+                    b.Property<string>("PlacementStrategy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("placement_strategy");
+
+                    b.Property<decimal>("SavingsAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("savings_amount");
+
+                    b.Property<double>("SavingsPercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("savings_percentage");
+
+                    b.Property<int>("TraditionalBoreholeCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("traditional_borehole_count");
+
+                    b.Property<decimal>("TraditionalEstimatedCost")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("traditional_estimated_cost");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_borehole_results");
+
+                    b.HasIndex("AnalysisJobId")
+                        .HasDatabaseName("ix_borehole_results_analysis_job_id");
+
+                    b.ToTable("BoreholeResults", (string)null);
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.RiskResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AnalysisJobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("analysis_job_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("ExpansiveSoilFactorsJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("expansive_soil_factors_json");
+
+                    b.Property<string>("ExpansiveSoilLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("expansive_soil_level");
+
+                    b.Property<int>("ExpansiveSoilRisk")
+                        .HasColumnType("integer")
+                        .HasColumnName("expansive_soil_risk");
+
+                    b.Property<string>("FloodFactorsJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("flood_factors_json");
+
+                    b.Property<string>("FloodGeoJsonUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("flood_geo_json_url");
+
+                    b.Property<string>("FloodLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("flood_level");
+
+                    b.Property<int>("FloodRiskScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("flood_risk_score");
+
+                    b.Property<string>("LiquefactionFactorsJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("liquefaction_factors_json");
+
+                    b.Property<string>("LiquefactionLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("liquefaction_level");
+
+                    b.Property<int>("LiquefactionRisk")
+                        .HasColumnType("integer")
+                        .HasColumnName("liquefaction_risk");
+
+                    b.Property<string>("LiquefactionSusceptibility")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("liquefaction_susceptibility");
+
+                    b.Property<string>("OverallRiskLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("overall_risk_level");
+
+                    b.Property<int>("OverallRiskScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("overall_risk_score");
+
+                    b.Property<double?>("ReplacementDepth")
+                        .HasColumnType("double precision")
+                        .HasColumnName("replacement_depth");
+
+                    b.Property<string>("SeismicFactorsJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("seismic_factors_json");
+
+                    b.Property<string>("SeismicLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("seismic_level");
+
+                    b.Property<int>("SeismicRiskScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("seismic_risk_score");
+
+                    b.Property<string>("SeismicSource")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("seismic_source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_risk_results");
+
+                    b.HasIndex("AnalysisJobId")
+                        .HasDatabaseName("ix_risk_results_analysis_job_id");
+
+                    b.ToTable("RiskResults", (string)null);
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.SoilResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<double?>("AiConfidence")
+                        .HasColumnType("double precision")
+                        .HasColumnName("ai_confidence");
+
+                    b.Property<Guid>("AnalysisJobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("analysis_job_id");
+
+                    b.Property<string>("BearingCapacityCategory")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("bearing_capacity_category");
+
+                    b.Property<double>("BearingCapacityEstimate")
+                        .HasColumnType("double precision")
+                        .HasColumnName("bearing_capacity_estimate");
+
+                    b.Property<double>("BulkDensity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("bulk_density");
+
+                    b.Property<string>("BulkDensityUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("bulk_density_unit");
+
+                    b.Property<double>("ClayPercent")
+                        .HasColumnType("double precision")
+                        .HasColumnName("clay_percent");
+
+                    b.Property<string>("CompositionUnit")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("composition_unit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("HeatmapTileUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("heatmap_tile_url");
+
+                    b.Property<string>("MultiDepthProfileJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("multi_depth_profile_json");
+
+                    b.Property<double>("OrganicCarbon")
+                        .HasColumnType("double precision")
+                        .HasColumnName("organic_carbon");
+
+                    b.Property<string>("OrganicCarbonUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("organic_carbon_unit");
+
+                    b.Property<double>("Ph")
+                        .HasColumnType("double precision")
+                        .HasColumnName("ph");
+
+                    b.Property<string>("PrimaryType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("primary_type");
+
+                    b.Property<double>("SandPercent")
+                        .HasColumnType("double precision")
+                        .HasColumnName("sand_percent");
+
+                    b.Property<double>("SiltPercent")
+                        .HasColumnType("double precision")
+                        .HasColumnName("silt_percent");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("UsdaClass")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("usda_class");
+
+                    b.HasKey("Id")
+                        .HasName("pk_soil_results");
+
+                    b.HasIndex("AnalysisJobId")
+                        .HasDatabaseName("ix_soil_results_analysis_job_id");
+
+                    b.ToTable("SoilResults", (string)null);
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.TopographyResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AnalysisJobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("analysis_job_id");
+
+                    b.Property<string>("ContourGeoJsonUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("contour_geo_json_url");
+
+                    b.Property<double>("ContourInterval")
+                        .HasColumnType("double precision")
+                        .HasColumnName("contour_interval");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<double>("CutVolume")
+                        .HasColumnType("double precision")
+                        .HasColumnName("cut_volume");
+
+                    b.Property<double>("ElevationMax")
+                        .HasColumnType("double precision")
+                        .HasColumnName("elevation_max");
+
+                    b.Property<double>("ElevationMean")
+                        .HasColumnType("double precision")
+                        .HasColumnName("elevation_mean");
+
+                    b.Property<double>("ElevationMin")
+                        .HasColumnType("double precision")
+                        .HasColumnName("elevation_min");
+
+                    b.Property<string>("ElevationTileUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("elevation_tile_url");
+
+                    b.Property<double>("FillVolume")
+                        .HasColumnType("double precision")
+                        .HasColumnName("fill_volume");
+
+                    b.Property<double>("NetVolume")
+                        .HasColumnType("double precision")
+                        .HasColumnName("net_volume");
+
+                    b.Property<string>("PondingGeoJsonUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("ponding_geo_json_url");
+
+                    b.Property<double?>("PondingTotalArea")
+                        .HasColumnType("double precision")
+                        .HasColumnName("ponding_total_area");
+
+                    b.Property<int?>("PondingZonesCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("ponding_zones_count");
+
+                    b.Property<string>("SlopeDistributionJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("slope_distribution_json");
+
+                    b.Property<string>("SlopeTileUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("slope_tile_url");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_topography_results");
+
+                    b.HasIndex("AnalysisJobId")
+                        .HasDatabaseName("ix_topography_results_analysis_job_id");
+
+                    b.ToTable("TopographyResults", (string)null);
+                });
+
             modelBuilder.Entity("Planora.Domain.Notifications.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -428,7 +841,7 @@ namespace Planora.Infrastructure.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<string>("Data")
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("data");
 
                     b.Property<bool>("IsRead")
@@ -437,7 +850,8 @@ namespace Planora.Infrastructure.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("message");
 
                     b.Property<DateTime?>("ReadAt")
@@ -446,11 +860,14 @@ namespace Planora.Infrastructure.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("title");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("type");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -468,7 +885,11 @@ namespace Planora.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_notifications");
 
-                    b.ToTable("notifications", (string)null);
+                    b.HasIndex("UserId", "IsRead", "CreatedAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("IX_Notifications_UserId_IsRead_CreatedAt");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Planora.Domain.Parcels.Parcel", b =>
@@ -821,6 +1242,10 @@ namespace Planora.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("error_message");
 
+                    b.Property<long?>("FileSizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("file_size_bytes");
+
                     b.Property<string>("ModuleType")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -832,8 +1257,13 @@ namespace Planora.Infrastructure.Migrations
                         .HasColumnName("output_metadata");
 
                     b.Property<string>("OutputS3Key")
-                        .HasColumnType("text")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
                         .HasColumnName("output_s3key");
+
+                    b.Property<int?>("PageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("page_count");
 
                     b.Property<Guid>("ReportId")
                         .HasColumnType("uuid")
@@ -1098,6 +1528,46 @@ namespace Planora.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_analysis_jobs_parcels_parcel_id");
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.BoreholeResult", b =>
+                {
+                    b.HasOne("Planora.Domain.AnalysisJob.AnalysisJob", null)
+                        .WithMany()
+                        .HasForeignKey("AnalysisJobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_borehole_results_analysis_jobs_analysis_job_id");
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.RiskResult", b =>
+                {
+                    b.HasOne("Planora.Domain.AnalysisJob.AnalysisJob", null)
+                        .WithMany()
+                        .HasForeignKey("AnalysisJobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_risk_results_analysis_jobs_analysis_job_id");
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.SoilResult", b =>
+                {
+                    b.HasOne("Planora.Domain.AnalysisJob.AnalysisJob", null)
+                        .WithMany()
+                        .HasForeignKey("AnalysisJobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_soil_results_analysis_jobs_analysis_job_id");
+                });
+
+            modelBuilder.Entity("Planora.Domain.Entities.TopographyResult", b =>
+                {
+                    b.HasOne("Planora.Domain.AnalysisJob.AnalysisJob", null)
+                        .WithMany()
+                        .HasForeignKey("AnalysisJobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_topography_results_analysis_jobs_analysis_job_id");
                 });
 
             modelBuilder.Entity("Planora.Domain.Parcels.Parcel", b =>

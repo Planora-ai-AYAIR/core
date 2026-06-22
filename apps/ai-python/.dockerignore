@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets & local config — NEVER ship these into the image
+.env
+secrets/
+
+# Large geospatial artifacts (mounted/generated at runtime)
+*.tif
+*.tiff
+*.shp
+*.geojson
+
+# Dev tooling / VCS / docs
+.git/
+.gitignore
+.vscode/
+*.md

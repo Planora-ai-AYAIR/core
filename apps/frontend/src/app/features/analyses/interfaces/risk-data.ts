@@ -1,11 +1,36 @@
+export interface RiskFactor {
+  label: string;
+  detail: string;
+}
+
+export interface RiskBreakdown {
+  score: number; 
+  level: 'Low' | 'Moderate' | 'High';
+  icon: string; 
+  color: string; 
+  factors: RiskFactor[];
+  mitigation?: string;
+}
+
+export interface MitigationItem {
+  risk: string;
+  suggestion: string;
+  costImpact: string;
+  feasibility: string;
+}
+
 export interface RiskData {
-  floodRisk: string;
-  seismicZone: string;
-  liquefactionPotential: string;
-  landslideRisk: string;
-  hazards: { label: string; rating: string; description: string; icon: string }[];
-  // Map layers
+  overallRiskScore: number; 
+  overallRiskLevel: string; 
+  benchmarkComparison: string; 
+  floodRisk: RiskBreakdown;
+  seismicRisk: RiskBreakdown;
+  expansiveSoilRisk: RiskBreakdown;
+  liquefactionRisk: RiskBreakdown;
+  mitigations: MitigationItem[];
+
   floodFeatures: { risk: string; coords: [number, number][] }[];
-  seismicPoint: [number, number];
-  liquefactionPolygon: [number, number][];
+  seismicZonesGeoJSON: any;
+  expansiveSoilZonesGeoJSON: any;
+  liquefactionZonesGeoJSON: any;
 }

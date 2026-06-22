@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using Amazon.S3;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.API;
 using Planora.Infrastructure.BackgroundJobs;
+using Planora.Infrastructure.Http;
 using Planora.Infrastructure.Identity;
 using Planora.Infrastructure.Options;
 using Planora.Infrastructure.Persistence.Contexts;
@@ -31,10 +33,25 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // --- AWS Setup ---
+        var awsOptions = configuration.GetAWSOptions();
+        var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")
+                        ?? configuration["AWS:AccessKey"];
+        var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")
+                        ?? configuration["AWS:SecretKey"];
+        if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+        {
+            awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+        }
+        services.AddDefaultAWSOptions(awsOptions);
+        services.AddAWSService<IAmazonS3>();
+        services.AddScoped<IStorageService, StorageService>();
+
         // --- Configuration Options (bound from appsettings sections) ---
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
+        services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
 
         var cacheOptions = configuration
             .GetSection(CacheOptions.SectionName)
@@ -85,12 +102,15 @@ public static class DependencyInjection
             .AddAuthConfig()
             .AddBackgroundJobsConfig(configuration);
         
+        
+        var aiOptions = configuration.GetSection(AiOptions.SectionName).Get<AiOptions>()
+            ?? new AiOptions();
         services.AddRefitClient<IAiApiClient>()
         .ConfigureHttpClient((client) =>
         {
-            client.BaseAddress = new Uri(configuration["AiApi:BaseUrl"]);
-        }
-);
+            client.BaseAddress = new Uri(aiOptions.BaseUrl);
+        })
+        .AddHttpMessageHandler<AiApiKeyHandler>();
 
 
 
@@ -149,18 +169,29 @@ public static class DependencyInjection
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IParcelRepository, ParcelRepository>();
         services.AddScoped<IAnalysisJobRepository, AnalysisJobRepository>();
-        
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+
         // Services Registeration
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IBackgroundJobService, BackgroundJobService>();
         services.AddScoped<IHybridCacheService, HybridCacheService>();
+        services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IAiAnalysisService, AiAnalysisService>();
-        
-        
+
+        // Analysis Result Repositories
+        services.AddScoped<ITopographyResultRepository, TopographyResultRepository>();
+        services.AddScoped<ISoilResultRepository, SoilResultRepository>();
+        services.AddScoped<IRiskResultRepository, RiskResultRepository>();
+        services.AddScoped<IBoreholeResultRepository, BoreholeResultRepository>();
+
         //Background jobs
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
+        services.AddScoped<IProcessSoilJob, ProcessSoilJob>();
+        services.AddScoped<IProcessRiskJob, ProcessRiskJob>();
+        services.AddScoped<IProcessBoreholeJob, ProcessBoreholeJob>();
+        services.AddScoped<IProcessPdfJob, ProcessPdfJob>();
 
         return services;
     }

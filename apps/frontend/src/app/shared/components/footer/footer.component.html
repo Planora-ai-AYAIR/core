@@ -8,9 +8,9 @@
       <div class="footer-animate lg:col-span-2 flex flex-col pt-1">
         <a [routerLink]="ROUTES.home" class="flex items-center">
           <img
-            src="/assets/images/logo/logo.png"
+            src="/assets/images/logo/logo.webp"
             alt="Planora Logo"
-            class="h-16 w-auto lg:h-24 transition-transform duration-300 group-hover:scale-105"
+            class="h-16 w-auto lg:h-26 mb-2 transition-transform duration-300 group-hover:scale-105"
           />
         </a>
         <p class="text-sm text-planora-basalt-600 leading-relaxed mb-6 max-w-xs">
@@ -64,10 +64,10 @@
     >
       <p>© {{ currentYear }} Planora. All rights reserved.</p>
       <div class="flex gap-6">
-        <a routerLink="/privacy" class="hover:text-planora-clay-500 transition-colors"
+        <a [routerLink]="ROUTES.privacy" class="hover:text-planora-clay-500 transition-colors"
           >Privacy Policy</a
         >
-        <a routerLink="/terms" class="hover:text-planora-clay-500 transition-colors"
+        <a [routerLink]="ROUTES.terms" class="hover:text-planora-clay-500 transition-colors"
           >Terms of Service</a
         >
         <a routerLink="/cookies" class="hover:text-planora-clay-500 transition-colors"

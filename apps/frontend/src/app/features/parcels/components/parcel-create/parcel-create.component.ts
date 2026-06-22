@@ -293,9 +293,9 @@ export class ParcelCreateComponent {
           const first = convertedCoords[0];
           const last = convertedCoords[convertedCoords.length - 1];
           if (first[0] === last[0] && first[1] === last[1]) {
-            coords = convertedCoords.slice(0, -1); // closed ring – remove duplicate
+            coords = convertedCoords.slice(0, -1); // closed ring - remove duplicate
           } else {
-            coords = convertedCoords; // open ring – keep all
+            coords = convertedCoords; // open ring - keep all
           }
         }
 

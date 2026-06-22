@@ -4,7 +4,8 @@ export interface MapLayerItem {
   visible: boolean;
   opacity: number;
   group: string;
-  
+  hidden?: boolean;
+
   setOpacity?: (map: maplibregl.Map, opacity: number) => void;
   linkedLayers?: string[];
 }

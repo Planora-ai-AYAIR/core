@@ -8,7 +8,9 @@ import {
   MOCK_SOIL_DATA,
   MOCK_RISK_DATA,
   MOCK_BOREHOLE_DATA,
+  MOCK_BEARING_DATA,
 } from '../analysis-mock-data';
+import { BearingData } from '../interfaces/bearing-data';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +18,7 @@ import {
 export class AnalysisDetailFacadeService {
   readonly topographyData = signal<TopographyData | null>(null);
   readonly soilData = signal<SoilData | null>(null);
+  readonly bearingData = signal<BearingData | null>(null);
   readonly riskData = signal<RiskData | null>(null);
   readonly boreholeData = signal<BoreholeData | null>(null);
 
@@ -27,6 +30,7 @@ export class AnalysisDetailFacadeService {
     // Simulate API call - replace with HTTP later
     this.topographyData.set(MOCK_TOPOGRAPHY_DATA);
     this.soilData.set(MOCK_SOIL_DATA);
+    this.bearingData.set(MOCK_BEARING_DATA);
     this.riskData.set(MOCK_RISK_DATA);
     this.boreholeData.set(MOCK_BOREHOLE_DATA);
     this.loading.set(false);
