@@ -58,9 +58,6 @@ export class SignInComponent implements OnInit {
     }
 
     const credentials: LoginRequest = this.signInForm.value;
-    //this.signInFacade.login(credentials);
-
-    // redirect to dashboard for now since backend isn't ready
-    this.router.navigate([ROUTES.dashboard]);
+    this.signInFacade.login(credentials);
   }
 }

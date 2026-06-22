@@ -7,13 +7,22 @@
 
   <!-- Form fields -->
   <div class="space-y-5">
-    <!-- Full Name -->
+    <!-- First Name -->
     <app-input
-      formControlName="name"
+      formControlName="firstName"
       type="text"
-      placeholder="Full name"
-      [showError]="signUpForm.get('name')!.touched && signUpForm.get('name')!.invalid"
-      [errorMessage]="getErrorMessage('name')"
+      placeholder="First name"
+      [showError]="signUpForm.get('firstName')!.touched && signUpForm.get('firstName')!.invalid"
+      [errorMessage]="getErrorMessage('firstName')"
+    ></app-input>
+
+    <!-- Last Name -->
+    <app-input
+      formControlName="lastName"
+      type="text"
+      placeholder="Last name"
+      [showError]="signUpForm.get('lastName')!.touched && signUpForm.get('lastName')!.invalid"
+      [errorMessage]="getErrorMessage('lastName')"
     ></app-input>
 
     <!-- Email -->
@@ -61,11 +70,13 @@
       />
       <label for="acceptTerms" class="text-xs text-planora-basalt-600 leading-snug">
         I agree to the
-        <a routerLink="/terms" class="underline text-planora-clay-600 hover:text-planora-clay-500"
+        <a
+          [routerLink]="ROUTES.terms"
+          class="underline text-planora-clay-600 hover:text-planora-clay-500"
           >Terms of Service</a
         >
         and
-        <a routerLink="/privacy" class="underline text-planora-clay-600 hover:text-planora-clay-500"
+        <a [routerLink]="ROUTES.privacy" class="underline text-planora-clay-600 hover:text-planora-clay-500"
           >Privacy Policy</a
         >.
       </label>
@@ -86,7 +97,7 @@
     variant="primary"
     [fullWidth]="true"
     [disabled]="signUpForm.invalid"
-    [isLoading]="isLoading"
+    [isLoading]="isLoading()"
     loadingText="Creating account..."
     class="mt-2"
   >

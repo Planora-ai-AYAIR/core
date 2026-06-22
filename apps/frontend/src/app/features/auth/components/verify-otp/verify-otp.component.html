@@ -3,7 +3,7 @@
   <div class="text-center">
     <h1 class="font-display text-3xl font-bold text-planora-basalt-900">Verify OTP</h1>
     <p class="text-sm text-planora-basalt-500 mt-1">
-      We sent a 6-digit code to <strong>{{ email() }}</strong>
+      Enter the 6‑digit code we sent to your email.
     </p>
   </div>
 
@@ -16,7 +16,7 @@
       variant="primary"
       [fullWidth]="true"
       [disabled]="otpForm.invalid"
-      [isLoading]="isLoading"
+      [isLoading]="false"
       loadingText="Verifying..."
     >
       Verify Code
