@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +19,7 @@ public static class DependencyInjection
     {
         services
             .AddApiDocumentation()
+            .AddAppCors(configuration)
             .AddAppOutputCaching()
             .AddAppHealthChecks(configuration)
             .AddJwtAuthentication(configuration)
@@ -68,6 +69,32 @@ public static class DependencyInjection
                         Array.Empty<string>()
                     }
                 });
+        });
+
+        return services;
+    }
+
+    public static IServiceCollection AddAppCors(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("DefaultCorsPolicy", builder =>
+            {
+                var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+                if (allowedOrigins.Length > 0)
+                {
+                    builder.WithOrigins(allowedOrigins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                }
+                else
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                }
+            });
         });
 
         return services;

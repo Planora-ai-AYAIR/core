@@ -7,6 +7,7 @@
     <UserSecretsId>bd877ca7-040f-47b6-8164-a8bf62dde50f</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+    <EnvironmentName>Production</EnvironmentName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +30,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Planora.Application\Planora.Application.csproj" />
     <ProjectReference Include="..\Planora.Infrastructure\Planora.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+    <Content Update="appsettings.Development.Local.json" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>
