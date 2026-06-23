@@ -3,13 +3,11 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Helpers;
 using Planora.Application.Features.Analysis.Dtos.StartAnalysis;
-using Planora.Application.Features.Notifications.Dtos;
 using Planora.Application.Interfaces.Jobs;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.AnalysisJob;
 using Planora.Domain.Enums;
-using Planora.Domain.Notifications;
 using Planora.Domain.Parcels;
 using Planora.Domain.Shared.Results;
 using INotificationPublisher = Planora.Application.Interfaces.Services.INotificationPublisher;
@@ -70,7 +68,8 @@ public sealed class StartAnalysisHandler(
         parcel.MarkAsProcessing();
         await parcelRepository.UpdateAsync(parcel, ct);
 
-        await PublishAnalysisStartedNotificationAsync(parcel, analysisJobResult.Value, ct);
+        await AnalysisNotificationHelper.PublishStartedNotificationAsync(
+            analysisJobResult.Value, parcelRepository, notificationRepository, notificationPublisher, ct);
 
         logger.LogInformation(
             "Aggregated analysis started for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}, HangfireJobId {HangfireJobId}",
@@ -84,43 +83,4 @@ public sealed class StartAnalysisHandler(
             EstimatedDuration: "2-6 hours",
             PollEndpoint: $"/api/parcels/{parcel.Id}/analysis-status");
     }
-
-    private async Task PublishAnalysisStartedNotificationAsync(Parcel parcel, AnalysisJob job, CancellationToken ct)
-    {
-        var data = JsonSerializer.Serialize(new
-        {
-            parcelId = parcel.Id,
-            analysisJobId = job.Id,
-            link = $"/parcels/{parcel.Id}/analysis"
-        });
-
-        var result = Notification.Create(
-            id: Guid.NewGuid(),
-            userId: parcel.UserId,
-            type: NotificationType.AnalysisStarted,
-            title: "Analysis started",
-            message: $"Aggregated analysis started for Parcel #{parcel.Id.ToString()[..8]}",
-            data: data);
-
-        if (result.IsError) return;
-
-        await notificationRepository.AddAsync(result.Value, ct);
-
-        var dto = new NotificationDto(
-            result.Value.Id,
-            result.Value.Type,
-            result.Value.Title,
-            result.Value.Message,
-            Link: ExtractLink(data),
-            Data: data,
-            result.Value.CreatedAt,
-            result.Value.IsRead);
-
-        await notificationPublisher.PublishAsync(parcel.UserId, dto, ct);
-        await notificationPublisher.PublishToGroupAsync($"parcel:{parcel.Id}", dto, ct);
-    }
-
-    private static string? ExtractLink(string? data) =>
-        data is null ? null : JsonDocument.Parse(data).RootElement
-            .TryGetProperty("link", out var l) ? l.GetString() : null;
 }
