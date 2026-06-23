@@ -16,6 +16,7 @@ namespace Planora.Domain.Enums
         AccountBanned, 
         AccountActivated,
         ModuleCompleted,
-        ModuleFailed
+        ModuleFailed,
+        AnalysisStarted
     }
 }
