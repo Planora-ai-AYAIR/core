@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Planora.Api.Helpers;
 using Planora.Application.Features.Parcels.Commands.CreateParcel;
 using Planora.Application.Features.Parcels.Dtos.CreateParcel;
-using Planora.Application.Features.Parcels.Queries.GetParcelAnalysis;
 using Planora.Application.Features.Parcels.Queries.GetParcelAnalysisStatus;
 using Planora.Domain.Shared.Results;
 
@@ -36,20 +35,6 @@ public class ParcelsController : BaseApiController
         return result.Match<ActionResult>(
             onValue: response => CreatedEnvelope(response, "Parcel created successfully"),
             onError: errors => Problem(errors));
-    }
-
-    [HttpGet("{parcelId:guid}/analysis")]
-    public async Task<ActionResult> GetParcelAnalysis(
-        Guid parcelId,
-        ISender sender,
-        CancellationToken ct)
-    {
-        var query = new GetParcelAnalysisQuery(parcelId);
-        var result = await sender.Send(query, ct);
-
-        return result.Match<ActionResult>(
-            onValue:  response => OkEnvelope(response, "Parcel analysis assets retrieved successfully"),
-            onError:  errors   => Problem(errors));
     }
 
     [HttpGet("{parcelId:guid}/analysis-status")]
