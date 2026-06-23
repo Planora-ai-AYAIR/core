@@ -24,6 +24,10 @@ public sealed class AnalysisJobRepository(PlanoraDbContext context) : IAnalysisJ
             .OrderBy(j => j.CreatedAt)
             .ToListAsync(ct);
 
+    public async Task<bool> HasActiveJobAsync(Guid parcelId, CancellationToken ct) =>
+        await context.AnalysisJobs
+            .AnyAsync(j => j.ParcelId == parcelId && (j.Status == AnalysisJobStatus.Pending || j.Status == AnalysisJobStatus.Running), ct);
+
     public async Task AddAsync(AnalysisJob job, CancellationToken ct)
     {
         await context.AnalysisJobs.AddAsync(job, ct);
