@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '../../core/guards/auth.guard';
 
 export const AUTH_ROUTES: Routes = [
   {
@@ -11,6 +12,7 @@ export const AUTH_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/sign-in-page/sign-in-page.component').then((m) => m.SignInPageComponent),
     title: 'Sign In',
+    canActivate: [authGuard],
   },
   {
     path: 'forgot-password',
@@ -19,6 +21,7 @@ export const AUTH_ROUTES: Routes = [
         (m) => m.ForgotPasswordPageComponent,
       ),
     title: 'Forget Password',
+    canActivate: [authGuard],
   },
   {
     path: 'reset-password',
@@ -27,19 +30,21 @@ export const AUTH_ROUTES: Routes = [
         (m) => m.ResetPasswordPageComponent,
       ),
     title: 'Reset Password',
+    canActivate: [authGuard],
   },
   {
     path: 'sign-up',
     loadComponent: () =>
       import('./pages/sign-up-page/sign-up-page.component').then((m) => m.SignUpPageComponent),
     title: 'Sign Up',
+    canActivate: [authGuard],
   },
   {
-    path: 'verify-otp',
+    path: 'confirm-email',
     loadComponent: () =>
-      import('./pages/verify-otp-page/verify-otp-page.component').then(
-        (m) => m.VerifyOtpPageComponent,
+      import('./pages/confirm-email-page/confirm-email-page.component').then(
+        (m) => m.ConfirmEmailPageComponent,
       ),
-    title: 'Verify OTP',
+    title: 'Confirm Email',
   },
 ];

@@ -53,39 +53,12 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center ml-2">
         <button
-          class="w-10 h-10 hidden sm:flex items-center justify-center rounded-xl border border-planora-desert-200 text-planora-basalt-500 hover:text-planora-clay-600 hover:bg-white transition-all shadow-sm"
+          class="w-10 h-10 sm:flex items-center justify-center rounded-xl border border-planora-desert-200 text-planora-basalt-500 hover:text-planora-clay-600 hover:bg-white transition-all shadow-sm"
         >
           <i class="pi pi-bell"></i>
         </button>
-
-        <div
-          class="flex items-center gap-3 pl-3 border-l border-planora-desert-200/60 cursor-pointer group"
-        >
-          @if (user.avatar) {
-            <img
-              [src]="user.avatar"
-              alt="User avatar"
-              class="w-9 h-9 rounded-xl object-cover border border-planora-desert-200 shadow-sm"
-            />
-          } @else {
-            <div
-              class="w-9 h-9 rounded-xl bg-gradient-to-br from-planora-clay-500 to-planora-clay-600 flex items-center justify-center text-xs font-bold text-white border border-planora-clay-400 shadow-sm transition-transform group-hover:scale-105 duration-200"
-            >
-              {{ user.name.charAt(0) }}
-            </div>
-          }
-          <div class="hidden sm:flex flex-col text-left select-none">
-            <span
-              class="text-sm font-semibold text-planora-basalt-800 transition-colors group-hover:text-planora-clay-600"
-              >{{ user.name }}</span
-            >
-            <span class="text-[10px] font-medium text-planora-basalt-400 -mt-0.5"
-              >Geotechnical Lead</span
-            >
-          </div>
-        </div>
       </div>
     </header>
 

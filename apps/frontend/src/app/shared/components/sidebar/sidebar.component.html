@@ -10,7 +10,7 @@
   "
 >
   <div class="flex items-center min-w-max">
-    <a [routerLink]="ROUTES.home" class="flex items-center gap-2 group">
+    <a [routerLink]="ROUTES.dashboard" class="flex items-center gap-2 group">
       <img
         [src]="collapsed ? '/assets/images/logo/logo_tiny.webp' : '/assets/images/logo/logo.webp'"
         alt="Planora Logo"
@@ -29,7 +29,7 @@
     <a
       [routerLink]="item.route"
       routerLinkActive="active-link"
-      [routerLinkActiveOptions]="{ exact: item.route === '/app/dashboard' }"
+      [routerLinkActiveOptions]="{ exact: item.route === ROUTES.dashboard }"
       (click)="closeMobileDrawer()"
       class="group relative flex items-center gap-4 px-4 py-3 rounded-xl text-planora-basalt-600 font-medium transition-all duration-200 hover:bg-white hover:text-planora-clay-600"
     >
@@ -40,21 +40,49 @@
   }
 </nav>
 
-<div class="p-4 border-t border-planora-desert-200">
-  <div class="flex items-center gap-3 px-2 py-2 rounded-xl bg-planora-limestone-100/50">
+<div
+  class="p-4 border-t border-planora-desert-200"
+  *ngIf="authService.currentUser$ | async as user"
+>
+  <div
+    *ngIf="!collapsed"
+    class="flex items-center gap-3 px-2 py-2 rounded-xl bg-planora-limestone-100/50 group/user relative"
+  >
     <div
       class="w-8 h-8 rounded-full bg-planora-clay-500 shrink-0 flex items-center justify-center text-white text-xs font-bold"
     >
-      AM
+      {{ getInitials(user.name) }}
     </div>
     <div class="nav-label flex-1 min-w-0">
-      <p class="text-xs font-bold text-planora-basalt-900 truncate">Ahmed Mahmoud</p>
-      <p class="text-[10px] text-planora-basalt-400 truncate">Pro Account</p>
+      <p class="text-xs font-bold text-planora-basalt-900 truncate">{{ user.name }}</p>
+      <p class="text-[10px] text-planora-basalt-400 truncate">{{ user.role }} Account</p>
     </div>
+    <button
+      (click)="onLogout()"
+      class="text-planora-basalt-400 hover:text-planora-clay-600 transition-colors p-1 rounded-lg hover:bg-white"
+      title="Logout"
+    >
+      <i class="pi pi-sign-out text-sm"></i>
+    </button>
+  </div>
+
+  <div *ngIf="collapsed" class="flex flex-col items-center gap-3 py-2">
+    <div
+      [title]="user.name + ' (' + user.role + ')'"
+      class="w-10 h-10 rounded-full bg-planora-clay-500 flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer"
+    >
+      {{ getInitials(user.name) }}
+    </div>
+    <button
+      (click)="onLogout()"
+      class="w-10 h-10 flex items-center justify-center text-planora-basalt-400 hover:text-planora-clay-600 hover:bg-planora-limestone-100/50 rounded-xl transition-all"
+      title="Logout"
+    >
+      <i class="pi pi-sign-out text-base"></i>
+    </button>
   </div>
 </div>
 
-<!-- Collapse/expand button (desktop only) -->
 <div class="p-3 hidden lg:block">
   <button
     (click)="toggleCollapse()"

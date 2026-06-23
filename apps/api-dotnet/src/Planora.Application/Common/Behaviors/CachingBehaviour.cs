@@ -31,8 +31,8 @@ public class CachingBehavior<TRequest, TResponse>(
         string requestName = typeof(TRequest).Name;
         if(cacheResult is not null)
         {
-          logger.LogInformation("Cache hit for {Resquest}", requestName);
-          return cacheResult;
+            logger.LogInformation("Cache hit for {Resquest}", requestName);
+            return cacheResult;
         }
         
         logger.LogInformation("Cache miss for {Resquest}", requestName);

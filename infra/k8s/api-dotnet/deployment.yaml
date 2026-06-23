@@ -1,6 +1,154 @@
 apiVersion: v1
-kind: ConfigMap
+kind: Namespace
 metadata:
-  name: api-dotnet-placeholder
-data:
-  status: "pending"
+  name: planora
+---
+# ServiceAccount annotated with IRSA role ARN for S3 + Secrets Manager access
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-dotnet
+  namespace: planora
+  annotations:
+    # Replace with: terraform output -raw api_irsa_role_arn
+    eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT_ID:role/planora-api-irsa-production"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-dotnet
+  namespace: planora
+  labels:
+    app: api-dotnet
+    project: planora-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-dotnet
+  template:
+    metadata:
+      labels:
+        app: api-dotnet
+    spec:
+      serviceAccountName: api-dotnet
+      containers:
+        - name: api-dotnet
+          # Replace with your ECR image URI after CI builds it
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/planora/api-dotnet:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          # All non-secret config from ConfigMap
+          envFrom:
+            - configMapRef:
+                name: api-dotnet-config
+          # Secrets pulled from Secrets Manager via External Secrets Operator
+          # and projected into the env vars the .NET app expects
+          env:
+            - name: CONNECTION_MODE
+              value: "Prod"
+            - name: CONNECTIONSTRINGS__PRODCS
+              valueFrom:
+                secretKeyRef:
+                  name: planora-db-secret
+                  key: CONNECTIONSTRINGS__PRODCS
+            - name: CONNECTIONSTRINGS__HANGFIRECONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: planora-db-secret
+                  key: CONNECTIONSTRINGS__HANGFIRECONNECTIONSTRING
+            - name: CONNECTIONSTRINGS__REDISCONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: planora-redis-secret
+                  key: CONNECTIONSTRINGS__REDISCONNECTIONSTRING
+            - name: JWTSETTINGS__SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-jwt-secret
+                  key: JWTSETTINGS__SECRETKEY
+            - name: EMAILSETTINGS__SMTPHOST
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SMTPHOST
+            - name: EMAILSETTINGS__SMTPPORT
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SMTPPORT
+            - name: EMAILSETTINGS__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__USERNAME
+            - name: EMAILSETTINGS__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__PASSWORD
+            - name: EMAILSETTINGS__SENDEREMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SENDEREMAIL
+            - name: EMAILSETTINGS__SENDERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SENDERNAME
+            - name: EMAILSETTINGS__USESSL
+              value: "true"
+            - name: HANGFIRESETTINGS__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-hangfire-secret
+                  key: HANGFIRESETTINGS__USERNAME
+            - name: HANGFIRESETTINGS__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: planora-hangfire-secret
+                  key: HANGFIRESETTINGS__PASSWORD
+            - name: AIOPTIONS__BASEURL
+              valueFrom:
+                secretKeyRef:
+                  name: planora-ai-secret
+                  key: AIOPTIONS__BASEURL
+            - name: AIOPTIONS__APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-ai-secret
+                  key: AIOPTIONS__APIKEY
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS_REGION
+            - name: AWS_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS_BUCKET_NAME
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      terminationGracePeriodSeconds: 60

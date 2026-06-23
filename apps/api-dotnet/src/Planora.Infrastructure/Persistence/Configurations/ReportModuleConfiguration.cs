@@ -18,6 +18,13 @@ public class ReportModuleConfiguration : IEntityTypeConfiguration<ReportModule>
         builder.Property(m => m.OutputMetadata)
             .HasColumnType("jsonb");
 
+        builder.Property(m => m.OutputS3Key)
+            .HasMaxLength(2000);
+
+        builder.Property(m => m.PageCount);
+
+        builder.Property(m => m.FileSizeBytes);
+
         // 3. Unique Constraint (One module type per report)
         builder.HasIndex(m => new { m.ReportId, m.ModuleType })
             .IsUnique();
