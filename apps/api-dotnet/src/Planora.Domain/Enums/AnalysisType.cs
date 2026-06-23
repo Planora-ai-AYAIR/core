@@ -6,5 +6,6 @@ public enum AnalysisType
     Soil,
     Risk,
     Borehole,
-    Pdf
+    Pdf,
+    Aggregated
 }
