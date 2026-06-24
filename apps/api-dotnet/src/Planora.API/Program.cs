@@ -30,7 +30,7 @@ builder.Services.AddSignalR();
 // Register IMiddleware implementation so it can be injected and used by UseMiddleware
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration)
+    configuration.ReadFrom.Configuration(context.Configuration));
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
