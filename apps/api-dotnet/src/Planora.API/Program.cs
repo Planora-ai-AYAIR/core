@@ -11,7 +11,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true, reloadOnChange: true);
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true, reloadOnChange: true);
+}
 
 // ──────────────────────────────────────────────
 //  Service Registration (Composition Root)
@@ -43,8 +46,8 @@ app.UseWhen(
     context => context.Request.Path.StartsWithSegments("/api/webhook"),
     builder => builder.UseMiddleware<WebhookSignatureMiddleware>());
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseHangfireDashboard("/jobs", new DashboardOptions
@@ -57,10 +60,10 @@ if (app.Environment.IsDevelopment())
         ],
         DashboardTitle = "Planora"
     });
-}
+//}
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("DefaultCorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseOutputCache();
@@ -91,5 +94,14 @@ app.MapHealthChecks("/health", new HealthCheckOptions
         await context.Response.WriteAsJsonAsync(result);
     }
 });
+
+// http://planora-ai.runasp.net/.
+
+app.MapGet(
+    "/.well-known/acme-challenge/tkbMK-JbS7q_ncGWxTb-QSSudC9T4wN_o0rBdSRJUAo",
+    () => Results.Text(
+        "tkbMK-JbS7q_ncGWxTb-QSSudC9T4wN_o0rBdSRJUAo.a4MsoFTqgCOpkYthwg5QkmmkqpmHlAe3VzLxh9f1nXU",
+        "text/plain"
+    ));
 
 app.Run();
