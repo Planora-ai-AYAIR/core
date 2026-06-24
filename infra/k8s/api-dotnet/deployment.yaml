@@ -3,15 +3,13 @@ kind: Namespace
 metadata:
   name: planora
 ---
-# ServiceAccount annotated with IRSA role ARN for S3 + Secrets Manager access
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: api-dotnet
   namespace: planora
   annotations:
-    # Replace with: terraform output -raw api_irsa_role_arn
-    eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT_ID:role/planora-api-irsa-production"
+    eks.amazonaws.com/role-arn: "arn:aws:iam::536728890307:role/planora-api-irsa-production"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,7 +20,7 @@ metadata:
     app: api-dotnet
     project: planora-ai
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: api-dotnet
@@ -34,36 +32,32 @@ spec:
       serviceAccountName: api-dotnet
       containers:
         - name: api-dotnet
-          # Replace with your ECR image URI after CI builds it
-          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/planora/api-dotnet:latest
+          image: ghcr.io/planora-ai-ayair/planora-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: http
-          # All non-secret config from ConfigMap
           envFrom:
             - configMapRef:
                 name: api-dotnet-config
-          # Secrets pulled from Secrets Manager via External Secrets Operator
-          # and projected into the env vars the .NET app expects
           env:
-            - name: CONNECTION_MODE
+            - name: ConnectionMode
               value: "Prod"
-            - name: CONNECTIONSTRINGS__PRODCS
+            - name: ConnectionStrings__ProdCS
               valueFrom:
                 secretKeyRef:
                   name: planora-db-secret
-                  key: CONNECTIONSTRINGS__PRODCS
-            - name: CONNECTIONSTRINGS__HANGFIRECONNECTIONSTRING
+                  key: ConnectionStrings__ProdCS
+            - name: ConnectionStrings__HangfireConnectionString
               valueFrom:
                 secretKeyRef:
                   name: planora-db-secret
-                  key: CONNECTIONSTRINGS__HANGFIRECONNECTIONSTRING
-            - name: CONNECTIONSTRINGS__REDISCONNECTIONSTRING
+                  key: ConnectionStrings__HangfireConnectionString
+            - name: ConnectionStrings__RedisConnectionString
               valueFrom:
                 secretKeyRef:
                   name: planora-redis-secret
-                  key: CONNECTIONSTRINGS__REDISCONNECTIONSTRING
+                  key: ConnectionStrings__RedisConnectionString
             - name: JWTSETTINGS__SECRETKEY
               valueFrom:
                 secretKeyRef:
@@ -133,8 +127,8 @@ spec:
                   key: AWS_BUCKET_NAME
           resources:
             requests:
-              cpu: 250m
-              memory: 512Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
               cpu: 1000m
               memory: 1Gi
@@ -147,7 +141,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health/ready
+              path: /health
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10

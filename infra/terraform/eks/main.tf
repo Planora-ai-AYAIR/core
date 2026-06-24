@@ -294,7 +294,7 @@ output "oidc_provider_arn" {
 
 output "node_sg_id" {
   description = "Security group ID of EKS nodes — referenced by RDS and ElastiCache SGs"
-  value       = aws_security_group.eks_nodes.id
+  value       = aws_eks_cluster.planora.vpc_config[0].cluster_security_group_id
 }
 
 output "api_irsa_role_arn" {

@@ -7,7 +7,7 @@ metadata:
     app: frontend
     project: planora-ai
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -18,21 +18,18 @@ spec:
     spec:
       containers:
         - name: frontend
-          # Replace with your ECR image URI
-          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/planora/frontend:latest
+          image: ghcr.io/planora-ai-ayair/planora-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http
           env:
-            # Angular build-time env vars — typically baked into the image at build time
-            # Runtime config can be served via /assets/env.json pattern
             - name: API_BASE_URL
               value: "/api"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 50m
+              memory: 64Mi
             limits:
               cpu: 500m
               memory: 256Mi
