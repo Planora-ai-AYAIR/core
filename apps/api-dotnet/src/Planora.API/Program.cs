@@ -32,7 +32,15 @@ builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration)
 );
 
+using Microsoft.EntityFrameworkCore;
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<Planora.Infrastructure.Persistence.Contexts.PlanoraDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 await AuthSeeder.SeedAsync(app.Services);
 
