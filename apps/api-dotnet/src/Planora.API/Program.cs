@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -30,10 +31,6 @@ builder.Services.AddSignalR();
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration)
-);
-
-using Microsoft.EntityFrameworkCore;
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
