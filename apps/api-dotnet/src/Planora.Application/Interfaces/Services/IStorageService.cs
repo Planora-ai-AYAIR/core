@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace Planora.Application.Interfaces.Services;
 
-namespace Planora.Application.Interfaces.Services
+public interface IStorageService
 {
     public interface IStorageService
     {
@@ -25,4 +21,11 @@ namespace Planora.Application.Interfaces.Services
         // NEW: Generate presigned URL for ANY bucket (for AI assets)
         Task<string> GetPreSignedUrlAsync(string bucketName, string s3Key, TimeSpan expiry);
     }
+
+    /// <summary>
+    /// Generates a presigned URL for the given S3 key.
+    /// Returns <c>null</c> if the key is null/empty or if the object does not exist in S3.
+    /// Logs a warning when the object is not found.
+    /// </summary>
+    Task<string?> TryGetPreSignedUrlAsync(string? s3Key, TimeSpan expiry, CancellationToken ct = default);
 }

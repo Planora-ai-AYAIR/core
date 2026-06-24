@@ -2,6 +2,7 @@ export const ROUTES = {
   home: '/',
   signIn: '/auth/sign-in',
   signUp: '/auth/sign-up',
+  confirmEmail: '/auth/confirm-email',
   forgotPassword: '/auth/forgot-password',
   verifyOtp: '/auth/verify-otp',
   resetPassword: '/auth/reset-password',
@@ -9,7 +10,20 @@ export const ROUTES = {
   dashboard: '/app/dashboard',
   newAnalysis: '/app/analyses',
   newParcel: '/app/parcels/new',
+
+  terms: '/terms',
+  privacy: '/privacy',
 };
+
+export const PUBLIC_AUTH_ENDPOINTS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/verify-otp',
+  '/auth/resend-otp',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/refresh-token',
+];
 
 export const REG_EXP = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,

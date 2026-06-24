@@ -9,4 +9,5 @@ public interface IAiAnalysisService
     Task<string> ProccessRiskAsync(ProccessRiskJobAiRequest request, CancellationToken ct = default);
     Task<string> ProccessBoreholeAsync(ProccessBoreholeJobAiRequest request, CancellationToken ct = default);
     Task<string> ProccessPdfAsync(ProccessPdfJobAiRequest request, CancellationToken ct = default);
+    Task<AiAnalysisJobResponse> SubmitAnalysisJobAsync(SubmitAiAnalysisJobRequest request, CancellationToken ct = default);
 }

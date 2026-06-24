@@ -25,5 +25,20 @@ namespace Planora.Api.Services
                     dto.Id, userId);
             }
         }
+        public async Task PublishToGroupAsync(string groupName, NotificationDto dto, CancellationToken ct)
+        {
+            try
+            {
+                await hub.Clients.Group(groupName).NotificationReceived(dto);
+                logger.LogInformation(
+                    "Pushed notification {NotificationId} to group {GroupName}", dto.Id, groupName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex,
+                    "Failed to push notification {NotificationId} to group {GroupName}",
+                    dto.Id, groupName);
+            }
+        }
     }
 }

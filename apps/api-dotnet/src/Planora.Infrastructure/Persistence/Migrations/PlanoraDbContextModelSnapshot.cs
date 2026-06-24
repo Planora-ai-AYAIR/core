@@ -1572,6 +1572,71 @@ namespace Planora.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_analysis_jobs_parcels_parcel_id");
+
+                    b.OwnsOne("Planora.Domain.AnalysisJob.AnalysisOptions", "Options", b1 =>
+                        {
+                            b1.Property<Guid>("AnalysisJobId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<decimal?>("ContourInterval")
+                                .HasPrecision(10, 4)
+                                .HasColumnType("numeric(10,4)")
+                                .HasColumnName("options_contour_interval");
+
+                            b1.Property<bool>("IncludeBearing")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("boolean")
+                                .HasDefaultValue(false)
+                                .HasColumnName("options_include_bearing");
+
+                            b1.Property<bool>("IncludeBorehole")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("boolean")
+                                .HasDefaultValue(false)
+                                .HasColumnName("options_include_borehole");
+
+                            b1.Property<bool>("IncludeRisk")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("boolean")
+                                .HasDefaultValue(false)
+                                .HasColumnName("options_include_risk");
+
+                            b1.Property<bool>("IncludeSoil")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("boolean")
+                                .HasDefaultValue(false)
+                                .HasColumnName("options_include_soil");
+
+                            b1.Property<bool>("IncludeTopography")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("boolean")
+                                .HasDefaultValue(false)
+                                .HasColumnName("options_include_topography");
+
+                            b1.Property<string>("ReferencePlane")
+                                .HasMaxLength(64)
+                                .HasColumnType("character varying(64)")
+                                .HasColumnName("options_reference_plane");
+
+                            b1.Property<string>("SlopeCategories")
+                                .HasColumnType("jsonb")
+                                .HasColumnName("options_slope_categories");
+
+                            b1.Property<string>("SoilDepths")
+                                .HasColumnType("jsonb")
+                                .HasColumnName("options_soil_depths");
+
+                            b1.HasKey("AnalysisJobId");
+
+                            b1.ToTable("AnalysisJobs", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("AnalysisJobId")
+                                .HasConstraintName("fk_analysis_jobs_analysis_jobs_id");
+                        });
+
+                    b.Navigation("Options");
                 });
 
             modelBuilder.Entity("Planora.Domain.Parcels.Parcel", b =>

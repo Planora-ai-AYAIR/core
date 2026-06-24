@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -11,7 +12,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true, reloadOnChange: true);
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true, reloadOnChange: true);
+}
 
 // ──────────────────────────────────────────────
 //  Service Registration (Composition Root)
@@ -26,10 +30,14 @@ builder.Services.AddSignalR();
 // Register IMiddleware implementation so it can be injected and used by UseMiddleware
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration)
-);
-
+    configuration.ReadFrom.Configuration(context.Configuration));
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<Planora.Infrastructure.Persistence.Contexts.PlanoraDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 await AuthSeeder.SeedAsync(app.Services);
 
@@ -43,8 +51,8 @@ app.UseWhen(
     context => context.Request.Path.StartsWithSegments("/api/webhook"),
     builder => builder.UseMiddleware<WebhookSignatureMiddleware>());
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseHangfireDashboard("/jobs", new DashboardOptions
@@ -57,10 +65,10 @@ if (app.Environment.IsDevelopment())
         ],
         DashboardTitle = "Planora"
     });
-}
+//}
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("DefaultCorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseOutputCache();

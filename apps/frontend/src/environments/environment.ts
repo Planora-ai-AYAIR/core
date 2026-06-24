@@ -1,14 +1,18 @@
 export const environment = {
   production: false,
 
-  apiUrl: 'https://.runasp.net/api/',
+  apiUrl: 'http://planora-ai.runasp.net/api/',
 
   // APIs
-  /*Auth: {
-    'register-patient': 'Auth/register/patient', 
-    'register-doctor': 'Auth/register/doctor',
-    login: 'Auth/login',
-    'refresh-token': 'Auth/refresh-token',
-    'revoke-token': 'Auth/revoke-token',
-  },*/
+  Auth: {
+    login: 'auth/login',
+    register: 'auth/register',
+    'forgot-password': 'auth/forgot-password',
+    'verify-otp': 'auth/verify-otp',
+    'resend-otp': 'auth/resend-otp',
+    'reset-password': 'auth/reset-password',
+    'change-password': 'auth/change-password',
+    'refresh-token': 'auth/refresh-token',
+    logout: 'auth/logout',
+  },
 };
