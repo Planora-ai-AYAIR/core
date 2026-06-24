@@ -95,13 +95,4 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     }
 });
 
-// http://planora-ai.runasp.net/.
-
-app.MapGet(
-    "/.well-known/acme-challenge/tkbMK-JbS7q_ncGWxTb-QSSudC9T4wN_o0rBdSRJUAo",
-    () => Results.Text(
-        "tkbMK-JbS7q_ncGWxTb-QSSudC9T4wN_o0rBdSRJUAo.a4MsoFTqgCOpkYthwg5QkmmkqpmHlAe3VzLxh9f1nXU",
-        "text/plain"
-    ));
-
 app.Run();
