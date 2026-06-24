@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Planora.Api.Helpers;
 using Planora.Application.Features.Parcels.Commands.CreateParcel;
 using Planora.Application.Features.Parcels.Dtos.CreateParcel;
+using Planora.Application.Features.Parcels.Queries.GetParcelAnalysisStatus;
 using Planora.Application.Features.Parcels.Queries.GetParcelAnalysis;
 using Planora.Domain.Shared.Results;
 
@@ -35,6 +36,23 @@ public class ParcelsController : BaseApiController
         return result.Match<ActionResult>(
             onValue: response => CreatedEnvelope(response, "Parcel created successfully"),
             onError: errors => Problem(errors));
+    }
+    
+    [HttpGet("{parcelId:guid}/analysis-status")]
+    public async Task<ActionResult> GetParcelAnalysisStatus(
+        Guid parcelId,
+        ISender sender,
+        CancellationToken ct)
+    {
+        if (!User.TryGetUserId(out var userId))
+            return Problem([Error.Unauthorized("Unauthorized", "User ID not found in token.")]);
+
+        var query = new GetParcelAnalysisStatusQuery(parcelId, userId);
+        var result = await sender.Send(query, ct);
+
+        return result.Match<ActionResult>(
+            onValue:  response => OkEnvelope(response, "Parcel analysis status retrieved successfully"),
+            onError:  errors   => Problem(errors));
     }
 
     [HttpGet("{parcelId:guid}/analysis")]
