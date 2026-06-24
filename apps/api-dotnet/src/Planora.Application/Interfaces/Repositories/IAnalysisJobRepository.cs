@@ -8,6 +8,7 @@ public interface IAnalysisJobRepository
     Task<AnalysisJob?> GetByPythonJobIdAsync(string pythonJobId, CancellationToken ct = default);
     Task<IReadOnlyList<AnalysisJob>> GetByParcelIdAsync(Guid parcelId, CancellationToken ct = default);
     Task<IReadOnlyList<AnalysisJob>> GetPendingJobsAsync(CancellationToken ct = default);
+    Task<bool> HasActiveJobAsync(Guid parcelId, CancellationToken ct = default);
     Task AddAsync(AnalysisJob job, CancellationToken ct = default);
     Task UpdateAsync(AnalysisJob job, CancellationToken ct);
     Task SaveChangesAsync(CancellationToken ct);

@@ -21,5 +21,13 @@ namespace Planora.Api.Hubs
                 Context.UserIdentifier, Context.ConnectionId, exception?.Message);
             return base.OnDisconnectedAsync(exception);
         }
+
+        public async Task SubscribeToParcel(Guid parcelId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"parcel:{parcelId}");
+            _logger.LogInformation(
+                "Connection {ConnectionId} subscribed to parcel group {ParcelId}",
+                Context.ConnectionId, parcelId);
+        }
     }
 }

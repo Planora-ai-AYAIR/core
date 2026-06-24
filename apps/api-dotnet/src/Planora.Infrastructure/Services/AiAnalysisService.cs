@@ -30,4 +30,9 @@ public sealed class AiAnalysisService(IAiApiClient client) : IAiAnalysisService
     {
         return await client.ProccessPdfAsync(request, ct);
     }
+
+    public async Task<AiAnalysisJobResponse> SubmitAnalysisJobAsync(SubmitAiAnalysisJobRequest request, CancellationToken ct)
+    {
+        return await client.SubmitAnalysisJobAsync(request, ct);
+    }
 }

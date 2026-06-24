@@ -192,6 +192,7 @@ public static class DependencyInjection
         services.AddScoped<IProcessRiskJob, ProcessRiskJob>();
         services.AddScoped<IProcessBoreholeJob, ProcessBoreholeJob>();
         services.AddScoped<IProcessPdfJob, ProcessPdfJob>();
+        services.AddScoped<IProcessAggregatedAnalysisJob, ProcessAggregatedAnalysisJob>();
 
         return services;
     }

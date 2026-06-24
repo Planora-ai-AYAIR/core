@@ -11,25 +11,36 @@ public sealed class AnalysisJob : AuditableEntity
     public AnalysisJobStatus Status { get; private set; }
     public string? ErrorMessage { get; private set; }
     public DateTime? CompletedAt { get; private set; }
+    public AnalysisOptions? Options { get; private set; }
 
     private AnalysisJob() { }
 
-    private AnalysisJob(Guid id, Guid parcelId, string pythonJobId, AnalysisType type)
+    private AnalysisJob(Guid id, Guid parcelId, string pythonJobId, AnalysisType type, AnalysisOptions? options)
     {
         Id = id;
         ParcelId = parcelId;
         PythonJobId = pythonJobId;
         Type = type;
         Status = AnalysisJobStatus.Pending;
+        Options = options;
         CreatedAt = DateTime.UtcNow;
     }
 
-    public static Result<AnalysisJob> Create(Guid id, Guid parcelId, string pythonJobId, AnalysisType type)
+    public static Result<AnalysisJob> Create(Guid id, Guid parcelId, string pythonJobId, AnalysisType type, AnalysisOptions? options = null)
     {
         if (parcelId == Guid.Empty) return AnalysisJobErrors.InvalidParcelId;
-        if (string.IsNullOrWhiteSpace(pythonJobId)) return AnalysisJobErrors.InvalidPythonJobId;
 
-        return new AnalysisJob(id, parcelId, pythonJobId.Trim(), type);
+        return new AnalysisJob(id, parcelId, pythonJobId?.Trim() ?? string.Empty, type, options);
+    }
+
+    public Result<Updated> SetPythonJobId(string pythonJobId)
+    {
+        if (string.IsNullOrWhiteSpace(pythonJobId)) return AnalysisJobErrors.InvalidPythonJobId;
+        if (Status != AnalysisJobStatus.Pending) return AnalysisJobErrors.InvalidStatus;
+
+        PythonJobId = pythonJobId.Trim();
+        UpdatedAt = DateTime.UtcNow;
+        return Result.Updated;
     }
 
     public Result<Updated> MarkAsRunning()

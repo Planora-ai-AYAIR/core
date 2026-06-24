@@ -8,9 +8,45 @@ using INotificationPublisher = Planora.Application.Interfaces.Services.INotifica
 
 namespace Planora.Application.Common.Helpers;
 
-
 internal static class AnalysisNotificationHelper
 {
+    public static async Task PublishStartedNotificationAsync(
+        AnalysisJob job,
+        IParcelRepository parcelRepository,
+        INotificationRepository notificationRepository,
+        INotificationPublisher notificationPublisher,
+        CancellationToken ct)
+    {
+        var parcel = await parcelRepository.GetByIdAsync(job.ParcelId, ct);
+        if (parcel is null) return;
+
+        var data = JsonSerializer.Serialize(new
+        {
+            parcelId = parcel.Id,
+            analysisJobId = job.Id,
+            link = $"/parcels/{parcel.Id}/analysis"
+        });
+
+        var result = Notification.Create(
+            id: Guid.NewGuid(),
+            userId: parcel.UserId,
+            type: NotificationType.AnalysisStarted,
+            title: "Analysis started",
+            message: $"Aggregated analysis started for Parcel #{parcel.Id.ToString()[..8]}",
+            data: data);
+
+        if (result.IsError) return;
+
+        await notificationRepository.AddAsync(result.Value, ct);
+        var dto = new NotificationDto(
+            result.Value.Id, result.Value.Type,
+            result.Value.Title, result.Value.Message,
+            Link: ExtractLink(data), Data: data,
+            result.Value.CreatedAt, result.Value.IsRead);
+        await notificationPublisher.PublishAsync(parcel.UserId, dto, ct);
+        await notificationPublisher.PublishToGroupAsync($"parcel:{parcel.Id}", dto, ct);
+    }
+
     public static async Task PublishCompletionNotificationAsync(
         AnalysisJob job,
         IParcelRepository parcelRepository,
@@ -46,6 +82,7 @@ internal static class AnalysisNotificationHelper
             Link: ExtractLink(data), Data: data,
             result.Value.CreatedAt, result.Value.IsRead);
         await notificationPublisher.PublishAsync(parcel.UserId, dto, ct);
+        await notificationPublisher.PublishToGroupAsync($"parcel:{parcel.Id}", dto, ct);
     }
 
     public static async Task PublishFailureNotificationAsync(
@@ -85,6 +122,7 @@ internal static class AnalysisNotificationHelper
             Link: ExtractLink(data), Data: data,
             result.Value.CreatedAt, result.Value.IsRead);
         await notificationPublisher.PublishAsync(parcel.UserId, dto, ct);
+        await notificationPublisher.PublishToGroupAsync($"parcel:{parcel.Id}", dto, ct);
     }
 
     public static string? ExtractLink(string? data) =>
