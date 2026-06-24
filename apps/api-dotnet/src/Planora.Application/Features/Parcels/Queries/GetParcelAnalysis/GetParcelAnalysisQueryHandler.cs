@@ -4,6 +4,7 @@ using Planora.Application.Common.Options;
 using Planora.Application.Features.Parcels.Dtos.Analysis;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
+using Planora.Domain.Analysis;
 using Planora.Domain.AnalysisJob;
 using Planora.Domain.Enums;
 using Planora.Domain.Shared.Results;
@@ -30,7 +31,7 @@ public sealed class GetParcelAnalysisQueryHandler(
     {
         var cacheKey = $"analysis:{request.ParcelId}";
 
-        // 1. Redis cache
+        // Redis cache
         var cached = await cacheService.GetAsync<ParcelAnalysisResponse>(cacheKey, ct);
         if (cached is not null)
         {
@@ -40,14 +41,20 @@ public sealed class GetParcelAnalysisQueryHandler(
 
         logger.LogInformation("Generating presigned asset URLs for ParcelId: {ParcelId}", request.ParcelId);
 
-        // 2. Load all completed analysis jobs for this parcel in one query
+        // Load all completed analysis jobs for this parcel in one query
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
 
-        // 3. Build each module section concurrently
-        var topographyTask = BuildTopographyAssetsAsync(jobs, ct);
-        var soilTask       = BuildSoilAssetsAsync(jobs, ct);
-        var riskTask       = BuildRiskAssetsAsync(jobs, ct);
-        var boreholeTask   = BuildBoreholeAssetsAsync(jobs, ct);
+        // Read each module's persisted result SEQUENTIALLY.
+        var topographyResult = await GetResultAsync(jobs, AnalysisType.Topography, topographyResultRepository.GetByAnalysisJobIdAsync, ct);
+        var soilResult       = await GetResultAsync(jobs, AnalysisType.Soil,       soilResultRepository.GetByAnalysisJobIdAsync,       ct);
+        var riskResult       = await GetResultAsync(jobs, AnalysisType.Risk,       riskResultRepository.GetByAnalysisJobIdAsync,       ct);
+        var boreholeResult   = await GetResultAsync(jobs, AnalysisType.Borehole,   boreholeResultRepository.GetByAnalysisJobIdAsync,   ct);
+
+        // 4. Generate presigned URLs CONCURRENTLY
+        var topographyTask = BuildTopographyAssetsAsync(topographyResult, ct);
+        var soilTask       = BuildSoilAssetsAsync(soilResult, ct);
+        var riskTask       = BuildRiskAssetsAsync(riskResult, ct);
+        var boreholeTask   = BuildBoreholeAssetsAsync(boreholeResult, ct);
 
         await Task.WhenAll(topographyTask, soilTask, riskTask, boreholeTask);
 
@@ -61,7 +68,7 @@ public sealed class GetParcelAnalysisQueryHandler(
             Borehole:             boreholeTask.Result,
             PresignedUrlsExpireAt: expireAt);
 
-        // 4. Cache for 50 minutes
+        // Cache for 50 minutes
         await cacheService.SetAsync(cacheKey, response, new CacheEntryOptions
         {
             Expiration            = CacheExpiry,
@@ -77,15 +84,17 @@ public sealed class GetParcelAnalysisQueryHandler(
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────
-
-    private async Task<TopographyAssetsDto?> BuildTopographyAssetsAsync(IReadOnlyList<Domain.AnalysisJob.AnalysisJob> jobs, CancellationToken ct)
+    private static async Task<TResult?> GetResultAsync<TResult>(IReadOnlyList<AnalysisJob> jobs, AnalysisType type, Func<Guid, CancellationToken, Task<TResult?>> fetch, CancellationToken ct)
+        where TResult : class
     {
-        var job = jobs.FirstOrDefault(j =>
-            j.Type == AnalysisType.Topography && j.Status == AnalysisJobStatus.Completed);
-
+        var job = jobs.FirstOrDefault(j => j.Type == type && j.Status == AnalysisJobStatus.Completed);
         if (job is null) return null;
 
-        var result = await topographyResultRepository.GetByAnalysisJobIdAsync(job.Id, ct);
+        return await fetch(job.Id, ct);
+    }
+
+    private async Task<TopographyAssetsDto?> BuildTopographyAssetsAsync(TopographyResult? result, CancellationToken ct)
+    {
         if (result is null) return null;
 
         var contour   = await storageService.TryGetPreSignedUrlAsync(result.ContourGeoJsonUrl,   UrlExpiry, ct);
@@ -96,14 +105,8 @@ public sealed class GetParcelAnalysisQueryHandler(
         return new TopographyAssetsDto(contour, ponding, elevation, slope);
     }
 
-    private async Task<SoilAssetsDto?> BuildSoilAssetsAsync(IReadOnlyList<Domain.AnalysisJob.AnalysisJob> jobs, CancellationToken ct)
+    private async Task<SoilAssetsDto?> BuildSoilAssetsAsync(SoilResult? result, CancellationToken ct)
     {
-        var job = jobs.FirstOrDefault(j =>
-            j.Type == AnalysisType.Soil && j.Status == AnalysisJobStatus.Completed);
-
-        if (job is null) return null;
-
-        var result = await soilResultRepository.GetByAnalysisJobIdAsync(job.Id, ct);
         if (result is null) return null;
 
         var heatmap = await storageService.TryGetPreSignedUrlAsync(result.HeatmapTileUrl, UrlExpiry, ct);
@@ -111,14 +114,8 @@ public sealed class GetParcelAnalysisQueryHandler(
         return new SoilAssetsDto(heatmap);
     }
 
-    private async Task<RiskAssetsDto?> BuildRiskAssetsAsync(IReadOnlyList<Domain.AnalysisJob.AnalysisJob> jobs, CancellationToken ct)
+    private async Task<RiskAssetsDto?> BuildRiskAssetsAsync(RiskResult? result, CancellationToken ct)
     {
-        var job = jobs.FirstOrDefault(j =>
-            j.Type == AnalysisType.Risk && j.Status == AnalysisJobStatus.Completed);
-
-        if (job is null) return null;
-
-        var result = await riskResultRepository.GetByAnalysisJobIdAsync(job.Id, ct);
         if (result is null) return null;
 
         var flood = await storageService.TryGetPreSignedUrlAsync(result.FloodGeoJsonUrl, UrlExpiry, ct);
@@ -126,14 +123,8 @@ public sealed class GetParcelAnalysisQueryHandler(
         return new RiskAssetsDto(flood);
     }
 
-    private async Task<BoreholeAssetsDto?> BuildBoreholeAssetsAsync(IReadOnlyList<Domain.AnalysisJob.AnalysisJob> jobs, CancellationToken ct)
+    private async Task<BoreholeAssetsDto?> BuildBoreholeAssetsAsync(BoreholeResult? result, CancellationToken ct)
     {
-        var job = jobs.FirstOrDefault(j =>
-            j.Type == AnalysisType.Borehole && j.Status == AnalysisJobStatus.Completed);
-
-        if (job is null) return null;
-
-        var result = await boreholeResultRepository.GetByAnalysisJobIdAsync(job.Id, ct);
         if (result is null) return null;
 
         var placement = await storageService.TryGetPreSignedUrlAsync(result.PlacementGeoJsonUrl, UrlExpiry, ct);
