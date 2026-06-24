@@ -16,7 +16,6 @@ Bucket layout (single bucket for dev, configurable for prod):
 
 from __future__ import annotations
 
-import io
 import json
 import logging
 from pathlib import Path

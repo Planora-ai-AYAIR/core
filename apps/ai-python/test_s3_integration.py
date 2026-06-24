@@ -9,14 +9,12 @@ Expected output: all lines show ✅
 """
 
 import sys
-import os
-import json
 
 # ── 1. Config import ──────────────────────────────────────────────────────
 print("\n[1/5] Loading config...")
 try:
     from app.config import settings, get_s3_service
-    print(f"  ✅ config loaded")
+    print("  ✅ config loaded")
     print(f"     aws_region    = {settings.aws_region}")
     print(f"     aws_s3_bucket = {settings.aws_s3_bucket}")
 except Exception as e:
@@ -26,7 +24,6 @@ except Exception as e:
 # ── 2. S3Service import ───────────────────────────────────────────────────
 print("\n[2/5] Importing S3Service...")
 try:
-    from app.services.s3_service import S3Service
     s3 = get_s3_service()
     print(f"  ✅ S3Service instantiated — bucket={s3.bucket}")
 except Exception as e:
@@ -40,10 +37,10 @@ try:
     if ok:
         print(f"  ✅ S3 bucket reachable — {s3.bucket}")
     else:
-        print(f"  ❌ S3 ping returned False — check AWS credentials and bucket name")
-        print(f"     Make sure these env vars are set:")
-        print(f"       AWS_ACCESS_KEY_ID")
-        print(f"       AWS_SECRET_ACCESS_KEY")
+        print("  ❌ S3 ping returned False — check AWS credentials and bucket name")
+        print("     Make sure these env vars are set:")
+        print("       AWS_ACCESS_KEY_ID")
+        print("       AWS_SECRET_ACCESS_KEY")
         sys.exit(1)
 except Exception as e:
     print(f"  ❌ S3 ping exception: {e}")
@@ -64,7 +61,7 @@ try:
         ]
     }
     uri = s3.upload_geojson(test_geojson, test_parcel_id, "test_contours.geojson")
-    print(f"  ✅ GeoJSON uploaded")
+    print("  ✅ GeoJSON uploaded")
     print(f"     URI: {uri}")
 except Exception as e:
     print(f"  ❌ GeoJSON upload failed: {e}")
@@ -89,7 +86,7 @@ try:
         b'\xaeB`\x82'                  # CRC
     )
     tile_uri = s3.upload_tile(minimal_png, test_parcel_id, "elevation", z=14, x=9721, y=6142)
-    print(f"  ✅ PNG tile uploaded")
+    print("  ✅ PNG tile uploaded")
     print(f"     URI: {tile_uri}")
     print(f"     Template: {s3.tile_url_template(test_parcel_id, 'elevation')}")
 except Exception as e:
@@ -100,11 +97,11 @@ except Exception as e:
 print("\n" + "="*55)
 print("✅ All checks passed — S3 integration is working")
 print("="*55)
-print(f"\nAssets will be stored under:")
+print("\nAssets will be stored under:")
 print(f"  s3://{s3.bucket}/tiles/{{parcel_id}}/{{layer}}/{{z}}/{{x}}/{{y}}.png")
 print(f"  s3://{s3.bucket}/assets/{{parcel_id}}/{{filename}}")
-print(f"\nYou can verify the test files in your S3 console:")
+print("\nYou can verify the test files in your S3 console:")
 print(f"  Bucket : {s3.bucket}")
 print(f"  Region : {s3.region}")
-print(f"  Path   : tiles/test_verification_parcel/  &  assets/test_verification_parcel/")
+print("  Path   : tiles/test_verification_parcel/  &  assets/test_verification_parcel/")
 print()

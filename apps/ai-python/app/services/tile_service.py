@@ -24,10 +24,7 @@ from __future__ import annotations
 
 import io
 import logging
-import math
-import os
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 

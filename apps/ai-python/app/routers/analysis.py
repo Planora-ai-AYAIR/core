@@ -11,12 +11,13 @@ import os
 import threading
 import traceback
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Union
 from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
-from app.config import get_s3_service, settings
+from app.config import get_s3_service
 from app.schemas.analysis import (
     AnalysisJobRequest, AnalysisResult,
     BearingClass, BoreholeCostAnalysis, BoreholeCostOption, BoreholeAssets,
@@ -37,7 +38,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/analysis", tags=["Analysis"])
 
-from pathlib import Path
 _BASE = Path(__file__).parent.parent.parent   # → D:\core\apps\ai-python
 
 RASTER_DIR   = os.getenv("RASTER_DIR",   str(_BASE / "data" / "rasters"))
@@ -605,10 +605,14 @@ def _build_soil(s: dict, urls: dict) -> SoilResult:
     silt = s.get("silt_0_5", 30.0)
     bdod = s.get("bdod_0_5",  1.4)
 
-    if sand > 70:   primary, usda = "Sandy",      "Sandy"
-    elif clay > 35: primary, usda = "Clayey",     "Clay"
-    elif silt > 50: primary, usda = "Silty Loam", "Silt Loam"
-    else:           primary, usda = "Sandy Loam", "Loamy"
+    if sand > 70:
+        primary, usda = "Sandy",      "Sandy"
+    elif clay > 35:
+        primary, usda = "Clayey",     "Clay"
+    elif silt > 50:
+        primary, usda = "Silty Loam", "Silt Loam"
+    else:
+        primary, usda = "Sandy Loam", "Loamy"
 
     layers = []
     for depth_label, d1, d2 in [
@@ -838,9 +842,12 @@ def _build_borehole_geojson(points: list[dict]) -> dict:
 # ═══════════════════════════════════════════════════════════════════════════
 
 def _score_to_level(score: int) -> RiskLevel:
-    if score >= 65: return RiskLevel.HIGH
-    if score >= 45: return RiskLevel.MODERATE
-    if score >= 25: return RiskLevel.MEDIUM
+    if score >= 65:
+        return RiskLevel.HIGH
+    if score >= 45:
+        return RiskLevel.MODERATE
+    if score >= 25:
+        return RiskLevel.MEDIUM
     return RiskLevel.LOW
 
 
