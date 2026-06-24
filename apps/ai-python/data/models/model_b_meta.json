@@ -1,0 +1,36 @@
+{
+  "features": [
+    "clay_0_5",
+    "sand_0_5",
+    "silt_0_5",
+    "bdod_0_5",
+    "clay_30_60",
+    "sand_30_60",
+    "bdod_30_60",
+    "slope",
+    "TWI"
+  ],
+  "metrics": {
+    "test_r2": 0.8389189821662923,
+    "test_mae": 27.357064181406972,
+    "p10_p90_coverage": 0.7811666666666667
+  },
+  "config": {
+    "FOOT_B": 1.8,
+    "FOOT_DF": 1.2,
+    "FS": 3.0,
+    "Q_CAP": 600.0,
+    "CLASS_BINS": [
+      0,
+      75,
+      200,
+      1000000000.0
+    ],
+    "CLASS_NAMES": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "version": "model_b_v1"
+}
