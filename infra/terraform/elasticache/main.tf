@@ -86,17 +86,8 @@ resource "aws_elasticache_parameter_group" "planora" {
   name   = "planora-redis-params-${var.environment}"
   family = "redis7"
 
-  # Require AOF persistence so Redis survives pod restarts
-  parameter {
-    name  = "appendonly"
-    value = "yes"
-  }
-
-  parameter {
-    name  = "appendfsync"
-    value = "everysec"
-  }
-
+  # Note: AOF (appendonly) is disabled because it is unsupported on t3.micro Free Tier nodes.
+  
   tags = {
     Project     = "Planora-AI"
     Environment = var.environment
@@ -106,7 +97,7 @@ resource "aws_elasticache_parameter_group" "planora" {
 # ── ElastiCache Replication Group (Redis with 1 replica for HA) ─────────────────
 resource "aws_elasticache_replication_group" "planora" {
   replication_group_id = "planora-redis-${var.environment}"
-  description          = "Planora Redis cache — HybridCache + DistributedCache"
+  description          = "Planora Redis cache - HybridCache and DistributedCache"
 
   node_type            = var.redis_node_type
   engine_version       = var.redis_engine_version
@@ -114,10 +105,10 @@ resource "aws_elasticache_replication_group" "planora" {
   subnet_group_name    = aws_elasticache_subnet_group.planora.name
   security_group_ids   = [aws_security_group.redis.id]
 
-  # 1 primary + 1 replica across AZs
-  num_cache_clusters         = 2
-  automatic_failover_enabled = true
-  multi_az_enabled           = true
+  # 1 node only for Free Tier (750 hours/month)
+  num_cache_clusters         = 1
+  automatic_failover_enabled = false
+  multi_az_enabled           = false
 
   # Encryption
   at_rest_encryption_enabled = true

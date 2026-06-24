@@ -153,12 +153,12 @@ resource "aws_db_instance" "planora" {
   vpc_security_group_ids = [aws_security_group.rds.id]
   parameter_group_name   = aws_db_parameter_group.planora.name
 
-  # High availability
-  multi_az               = true
+  # High availability - Disabled for Free Tier
+  multi_az               = false
   publicly_accessible    = false
 
-  # Backups — daily full backup + PITR as required by deployment doc
-  backup_retention_period = 7
+  # Backups — Disabled for Free Tier
+  backup_retention_period = 0
   backup_window           = "02:00-03:00"
   maintenance_window      = "sun:04:00-sun:05:00"
   copy_tags_to_snapshot   = true

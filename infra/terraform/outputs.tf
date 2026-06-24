@@ -59,3 +59,9 @@ output "secret_arns" {
   description = "ARNs of all Secrets Manager secrets — reference in ExternalSecrets"
   value       = module.secrets.secret_arns
 }
+
+# ── API Gateway Outputs ───────────────────────────────────────────────────────
+output "api_gateway_url" {
+  description = "The invoke URL of the API Gateway REST API"
+  value       = module.apigw.api_gateway_invoke_url
+}

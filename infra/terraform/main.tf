@@ -24,6 +24,28 @@ provider "aws" {
   }
 }
 
+# ── Auto-Generated Credentials ─────────────────────────────────────────────
+resource "random_password" "db_master_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "jwt_secret_key" {
+  length  = 64
+  special = true
+}
+
+resource "random_password" "hangfire_dashboard_password" {
+  length  = 16
+  special = true
+}
+
+resource "random_password" "ai_service_api_key" {
+  length  = 32
+  special = true
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. VPC — networking foundation everything else depends on
 # ─────────────────────────────────────────────────────────────────────────────
@@ -77,7 +99,7 @@ module "rds" {
 
   db_instance_class      = var.db_instance_class
   db_master_username     = var.db_master_username
-  db_master_password     = var.db_master_password
+  db_master_password     = random_password.db_master_password.result
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -103,12 +125,12 @@ module "secrets" {
   aws_region  = var.aws_region
 
   db_host              = module.rds.rds_endpoint
-  db_password          = var.db_master_password
-  hangfire_db_password = var.db_master_password
+  db_password          = random_password.db_master_password.result
+  hangfire_db_password = random_password.db_master_password.result
 
   redis_endpoint = module.elasticache.redis_primary_endpoint
 
-  jwt_secret_key = var.jwt_secret_key
+  jwt_secret_key = random_password.jwt_secret_key.result
 
   smtp_host         = var.smtp_host
   smtp_port         = var.smtp_port
@@ -117,10 +139,20 @@ module "secrets" {
   smtp_sender_email = var.smtp_sender_email
   smtp_sender_name  = var.smtp_sender_name
 
-  hangfire_dashboard_password = var.hangfire_dashboard_password
+  hangfire_dashboard_password = random_password.hangfire_dashboard_password.result
 
   ai_service_base_url = var.ai_service_base_url
-  ai_service_api_key  = var.ai_service_api_key
+  ai_service_api_key  = random_password.ai_service_api_key.result
 
   aws_bucket_name = module.s3.bucket_name
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. API Gateway — REST API proxy to the EKS NLB
+# ─────────────────────────────────────────────────────────────────────────────
+module "apigw" {
+  source = "./apigw"
+
+  environment     = var.environment
+  api_backend_url = "http://ac780c7e579dc4ba5ac4c59fefff278a-c16daf94c84d9209.elb.us-east-1.amazonaws.com"
 }

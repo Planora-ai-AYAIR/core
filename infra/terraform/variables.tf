@@ -28,7 +28,7 @@ variable "availability_zones" {
 variable "db_instance_class" {
   description = "RDS instance class"
   type        = string
-  default     = "db.t3.medium"
+  default     = "db.t3.micro"
 }
 
 variable "db_master_username" {
@@ -37,11 +37,7 @@ variable "db_master_username" {
   default     = "planora_admin"
 }
 
-variable "db_master_password" {
-  description = "RDS master password — supply via TF_VAR_db_master_password env var or tfvars file (never hardcode)"
-  type        = string
-  sensitive   = true
-}
+
 
 # ── ElastiCache ────────────────────────────────────────────────────────────
 variable "redis_node_type" {
@@ -60,7 +56,7 @@ variable "kubernetes_version" {
 variable "node_instance_type" {
   description = "EC2 instance type for EKS worker nodes"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.micro"
 }
 
 variable "node_desired_size" {
@@ -79,14 +75,11 @@ variable "node_max_size" {
 }
 
 # ── Secrets — all sensitive, injected via CI/CD ──────────────────────────────
-variable "jwt_secret_key" {
-  description = "JWT signing secret key (256-bit minimum)"
-  type        = string
-  sensitive   = true
-}
+
 
 variable "smtp_host" {
-  type = string
+  type    = string
+  default = "smtp.example.com"
 }
 
 variable "smtp_port" {
@@ -97,15 +90,18 @@ variable "smtp_port" {
 variable "smtp_username" {
   type      = string
   sensitive = true
+  default   = "mock-user"
 }
 
 variable "smtp_password" {
   type      = string
   sensitive = true
+  default   = "mock-password"
 }
 
 variable "smtp_sender_email" {
-  type = string
+  type    = string
+  default = "noreply@planora.ai"
 }
 
 variable "smtp_sender_name" {
@@ -113,16 +109,7 @@ variable "smtp_sender_name" {
   default = "Planora AI"
 }
 
-variable "hangfire_dashboard_password" {
-  type      = string
-  sensitive = true
-}
-
 variable "ai_service_base_url" {
-  type = string
-}
-
-variable "ai_service_api_key" {
-  type      = string
-  sensitive = true
+  type    = string
+  default = "http://ai-python.planora.svc.cluster.local"
 }

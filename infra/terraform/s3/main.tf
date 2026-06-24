@@ -22,8 +22,14 @@ variable "environment" {
 }
 
 # ── S3 Bucket ────────────────────────────────────────────────────────────────
+resource "random_string" "bucket_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
 resource "aws_s3_bucket" "planora" {
-  bucket = "planora-ai-${var.environment}"
+  bucket = "planora-ai-${var.environment}-${random_string.bucket_suffix.result}"
 
   tags = {
     Project     = "Planora-AI"

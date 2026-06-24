@@ -4,10 +4,7 @@ metadata:
   name: api-dotnet-config
   namespace: planora
 data:
-  # Non-sensitive configuration — safe to store in Git
   ASPNETCORE_ENVIRONMENT: "Production"
   ASPNETCORE_URLS: "http://+:8080"
   CONNECTION_MODE: "Prod"
-  # AWS region is non-sensitive but kept here for convenience;
-  # the actual bucket name comes from Secrets Manager via ExternalSecret
   AWS_REGION: "us-east-1"

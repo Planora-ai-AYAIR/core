@@ -15,7 +15,6 @@ spec:
       targetPort: 8080
   type: ClusterIP
 ---
-# External LoadBalancer for the API (use AWS ALB Ingress Controller in prod instead)
 apiVersion: v1
 kind: Service
 metadata:

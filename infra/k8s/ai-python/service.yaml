@@ -13,5 +13,4 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 8000
-  # ClusterIP only — the Python AI service is internal; .NET backend calls it directly
   type: ClusterIP

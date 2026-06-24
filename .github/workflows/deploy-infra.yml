@@ -1,10 +1,10 @@
-name: Deploy — K8s Manifests
+name: Deploy — Infra & K8s
 
 on:
   push:
     branches: [main]
     paths:
-      - 'infra/k8s/**'
+      - 'infra/**'
   workflow_dispatch:
 
 permissions:
@@ -22,13 +22,22 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-south-1
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init & Apply
+        working-directory: infra/terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
 
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig \
-            --region eu-south-1 \
-            --name planora-cluster
+            --region us-east-1 \
+            --name planora-eks-production
 
       - name: Apply K8s manifests
         run: |
