@@ -26,4 +26,27 @@ public sealed class ReportRepository(PlanoraDbContext context) : IReportReposito
             .OrderByDescending(r => r.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public async Task AddAsync(Report report, CancellationToken ct)
+    {
+        await context.Reports.AddAsync(report,ct);
+        await context.SaveChangesAsync(ct);
+    }
+
+    public async Task<Report?> GetByIdAsync(
+        Guid reportId,
+        CancellationToken ct = default)
+    {
+        return await context.Reports
+            .Include(x => x.Modules)
+            .Include(x => x.Files)
+            .FirstOrDefaultAsync(
+                x => x.Id == reportId,
+                ct);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+    {
+        await context.SaveChangesAsync(ct);
+    }
 }

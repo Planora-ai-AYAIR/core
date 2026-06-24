@@ -35,7 +35,18 @@ public sealed class AnalysisJobRepository(PlanoraDbContext context) : IAnalysisJ
         context.AnalysisJobs.Update(job);
         await context.SaveChangesAsync(ct);
     }
-    
+
+    public async Task<AnalysisJob?> GetLatestCompletedByParcelIdAsync(
+    Guid parcelId,
+    CancellationToken ct)
+    {
+        return await context.AnalysisJobs
+            .Where(x =>
+                x.ParcelId == parcelId &&
+                x.Status == AnalysisJobStatus.Completed)
+            .OrderByDescending(x => x.CompletedAt)
+            .FirstOrDefaultAsync(ct);
+    }
     public async Task SaveChangesAsync(CancellationToken ct) =>
         await context.SaveChangesAsync(ct);
 }

@@ -12,6 +12,7 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
     public UserRole Role { get; set; } = UserRole.Client; // Default 'Client'
 
     public bool IsBanned { get; set; } = false;
+    public string? ProjectName { get; set; }
     public string? CompanyName { get; set; }
     public string? JobTitle { get; set; }
 
