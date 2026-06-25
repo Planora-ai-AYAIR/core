@@ -47,6 +47,6 @@ jobs:
 
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/planora-api --timeout=120s
-          kubectl rollout status deployment/planora-ai --timeout=120s
-          kubectl rollout status deployment/planora-frontend --timeout=120s
+          kubectl rollout restart deployment/ai-python -n planora
+          kubectl rollout restart deployment/api-dotnet -n planora
+          kubectl rollout restart deployment/frontend -n planora

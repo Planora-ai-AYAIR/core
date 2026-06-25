@@ -16,16 +16,12 @@ data:
   GEE_SERVICE_ACCOUNT_EMAIL: "planora@planora-497015.iam.gserviceaccount.com"
   GEE_SERVICE_ACCOUNT_KEY: "/app/secrets/planora_gee.json"
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ai-python-gee
-  namespace: planora
-  labels:
-    app: ai-python
-type: Opaque
-stringData:
-  planora_gee.json: "{}"
+# The "ai-python-gee" Secret (real GEE service-account key) is created
+# out-of-band, NOT from this file — kubectl apply re-applies this file on
+# every deploy, so a placeholder Secret here would overwrite the live key
+# with empty data each time. Create it once per cluster with:
+#   kubectl create secret generic ai-python-gee -n planora \
+#     --from-file=planora_gee.json=apps/ai-python/secrets/planora_gee.json
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -47,7 +43,7 @@ spec:
       containers:
         - name: ai-python
           image: ghcr.io/planora-ai-ayair/planora-ai:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
               name: http
