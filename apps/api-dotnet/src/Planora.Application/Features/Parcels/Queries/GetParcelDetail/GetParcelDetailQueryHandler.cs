@@ -7,9 +7,9 @@ using Planora.Domain.Shared.Results;
 
 namespace Planora.Application.Features.Parcels.Queries.GetParcelDetail;
 
-public sealed class GetParcelDetailQueryHandler(
+public sealed class GetParcelDetailHandler(
     IParcelRepository parcelRepository,
-    ILogger<GetParcelDetailQueryHandler> logger)
+    ILogger<GetParcelDetailHandler> logger)
     : IRequestHandler<GetParcelDetailQuery, Result<ParcelDetailResponse>>
 {
     public async Task<Result<ParcelDetailResponse>> Handle(
@@ -34,6 +34,10 @@ public sealed class GetParcelDetailQueryHandler(
             return ParcelErrors.NotFound;
         }
 
+        var boundaryCoordinates = parcel.Boundary.ExteriorRing.Coordinates
+            .Select(c => new CoordinateDto(c.X, c.Y))
+            .ToList();
+
         return new ParcelDetailResponse(
             parcel.Id,
             parcel.Name,
@@ -42,6 +46,9 @@ public sealed class GetParcelDetailQueryHandler(
             parcel.Governorate,
             parcel.Status.ToString(),
             parcel.GeojsonKey,
-            parcel.CreatedAt);
+            parcel.CreatedAt,
+            parcel.Centroid.Y,
+            parcel.Centroid.X,
+            boundaryCoordinates);
     }
 }

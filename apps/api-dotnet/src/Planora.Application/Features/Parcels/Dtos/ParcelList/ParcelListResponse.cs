@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Planora.Application.Features.Parcels.Dtos.ParcelList;
 
-namespace Planora.Application.Features.Parcels.Dtos.ParcelList
-{
-    public sealed record ParcelSummaryDto(
+public sealed record ParcelSummaryDto(
     Guid Id,
     string Name,
     decimal AreaHectares,
     string Status,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    double CentroidLatitude,
+    double CentroidLongitude);
 
-    public sealed record ParcelListResponse(
-        IReadOnlyList<ParcelSummaryDto> Parcels);
-}
+public sealed record ParcelListResponse(
+    IReadOnlyList<ParcelSummaryDto> Parcels);
