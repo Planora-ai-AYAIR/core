@@ -44,6 +44,23 @@ public sealed class SoilCompletedHandler(
             ? JsonSerializer.Serialize(request.Payload.DepthProfiles)
             : null;
 
+        var dataSourcesJson = request.Payload.DataSources is not null
+            ? JsonSerializer.Serialize(request.Payload.DataSources)
+            : null;
+
+        var bearing = request.Payload.Bearing;
+        var spectralIndices = request.Payload.SpectralIndices;
+
+        var featureImportanceJson = bearing?.FeatureImportance is not null
+            ? JsonSerializer.Serialize(bearing.FeatureImportance)
+            : null;
+
+        var soilFactorsJson = bearing?.SoilFactors is not null
+            ? JsonSerializer.Serialize(bearing.SoilFactors)
+            : null;
+
+        var modelMetadata = bearing?.ModelMetadata;
+
         var soilResult = new SoilResult(
             analysisJob.Id,
             request.Payload.SandPercent,
@@ -61,7 +78,29 @@ public sealed class SoilCompletedHandler(
             request.Payload.UsdaClass,
             request.Payload.AiConfidence,
             multiDepthProfileJson,
-            request.Payload.HeatmapTileUrl);
+            request.Payload.HeatmapTileUrl,
+            cec: request.Payload.Cec,
+            waterTableDepthMeters: request.Payload.WaterTableDepthMeters,
+            soilTypeGeoJsonUrl: request.Payload.SoilTypeGeoJsonUrl,
+            depthProfileImageUrl: request.Payload.DepthProfileImageUrl,
+            dataSourcesJson: dataSourcesJson,
+            ndviMean: spectralIndices?.NdviMean,
+            bsiMean: spectralIndices?.BsiMean,
+            ndmiMean: spectralIndices?.NdmiMean,
+            bearingConfidence: bearing?.Confidence,
+            bearingRange: bearing?.Range,
+            bearingTrafficLight: bearing?.TrafficLight,
+            recommendedFoundation: bearing?.RecommendedFoundation,
+            maxFloorsWithoutDeepFoundation: bearing?.MaxFloorsWithoutDeepFoundation,
+            floorCountCategory: bearing?.FloorCountCategory,
+            bearingMinKpa: bearing?.UncertaintyRange?.MinimumKpa,
+            bearingMaxKpa: bearing?.UncertaintyRange?.MaximumKpa,
+            featureImportanceJson: featureImportanceJson,
+            soilFactorsJson: soilFactorsJson,
+            bearingModelName: modelMetadata?.ModelName,
+            bearingFramework: modelMetadata?.Framework,
+            bearingTrainingR2: modelMetadata?.TrainingR2,
+            bearingShapEnabled: modelMetadata?.ShapEnabled);
 
         await soilResultRepository.AddAsync(soilResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);

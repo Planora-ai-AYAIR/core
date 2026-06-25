@@ -65,7 +65,13 @@ public sealed class TopographyCompletedHandler(
             request.Payload.PondingZonesCount,
             request.Payload.PondingTotalArea,
             request.Payload.ElevationTileUrl,
-            request.Payload.SlopeTileUrl);
+            request.Payload.SlopeTileUrl,
+            request.Payload.DemRasterUrl,
+            request.Payload.SlopeRasterUrl,
+            request.Payload.Metadata?.CopernicusDemVersion,
+            request.Payload.Metadata?.PixelResolutionMeters,
+            request.Payload.Metadata?.Crs,
+            request.Payload.Metadata?.ProcessingTimeSeconds);
 
         await topographyResultRepository.AddAsync(topographyResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);

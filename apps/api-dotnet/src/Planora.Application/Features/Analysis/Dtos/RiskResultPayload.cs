@@ -36,4 +36,25 @@ public sealed record RiskResultPayload
 
     [JsonPropertyName("liquefaction")]
     public RiskSubResultPayload? Liquefaction { get; init; }
+
+    [JsonPropertyName("riskHeatmapTileUrl")]
+    public string? RiskHeatmapTileUrl { get; init; }
+
+    [JsonPropertyName("mitigationSuggestions")]
+    public List<RiskMitigationSuggestionPayload>? MitigationSuggestions { get; init; }
+}
+
+public sealed record RiskMitigationSuggestionPayload
+{
+    [JsonPropertyName("riskType")]
+    public string RiskType { get; init; } = string.Empty;
+
+    [JsonPropertyName("suggestion")]
+    public string Suggestion { get; init; } = string.Empty;
+
+    [JsonPropertyName("costImpact")]
+    public string? CostImpact { get; init; }
+
+    [JsonPropertyName("feasibility")]
+    public string? Feasibility { get; init; }
 }
