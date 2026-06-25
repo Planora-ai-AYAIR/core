@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { MapInitialiser } from '../interfaces/map-initialiser';
+import { MapInitialiser } from '../../interfaces/map-initialiser';
 import maplibregl from 'maplibre-gl';
-import { TopographyData } from '../interfaces/topography-data';
+import { TopographyData } from '../../interfaces/topography-data';
 
 @Injectable({ providedIn: 'root' })
 export class TopographyMapInitialiser implements MapInitialiser<TopographyData> {

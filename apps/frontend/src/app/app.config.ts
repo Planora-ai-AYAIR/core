@@ -1,22 +1,19 @@
 import {
   APP_INITIALIZER,
   ApplicationConfig,
-  inject,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
+// 1. Add provideHttpClient and withInterceptorsFromDi imports
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { SignInApiService } from './features/auth/services/sign-in/sign-in-api.service';
 import { AuthService } from './core/services/auth.service';
 import { catchError, of, tap } from 'rxjs';
 
-function initializeAuth(): () => Promise<void> {
-  const auth = inject(AuthService);
-  const signInApi = inject(SignInApiService);
-
+function initializeAuth(auth: AuthService, signInApi: SignInApiService): () => Promise<void> {
   return () => {
     const refreshToken = auth.refreshToken;
     if (!refreshToken) {
@@ -46,6 +43,7 @@ function initializeAuth(): () => Promise<void> {
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(withInterceptorsFromDi()),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,

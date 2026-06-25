@@ -8,7 +8,10 @@ export const ROUTES = {
   resetPassword: '/auth/reset-password',
 
   dashboard: '/app/dashboard',
-  newAnalysis: '/app/analyses',
+
+  analysis: '/app/analyses',
+  newAnalysis: '/app/analyses/new',
+  parcel: '/app/parcels',
   newParcel: '/app/parcels/new',
 
   terms: '/terms',

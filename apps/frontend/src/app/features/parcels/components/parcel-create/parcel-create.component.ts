@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, computed, effect } from '@angular/core';
+import { Component, signal, ViewChild, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -9,6 +9,8 @@ import length from '@turf/length';
 import distance from '@turf/distance';
 import kinks from '@turf/kinks';
 import * as turf from '@turf/turf';
+import { ParcelFacadeService } from '../../services/parcel-facade.service';
+import { ToastService } from '../../../../shared/services/toaster.service';
 
 @Component({
   selector: 'app-parcel-create',
@@ -37,6 +39,9 @@ export class ParcelCreateComponent {
 
   initialCenter: [number, number] = [31.2357, 30.0444];
   initialZoom = 12;
+
+  private parcelFacade = inject(ParcelFacadeService);
+  private toast = inject(ToastService);
 
   constructor(private router: Router) {
     const saved = localStorage.getItem(STORAGE_KEYS.PARCELS_POINTS);
@@ -95,12 +100,11 @@ export class ParcelCreateComponent {
   onPointsChanged(points: [number, number][]) {
     this.polygonPoints.set(points);
     if (points.length >= 3) {
-      const feature: any = {
-        type: 'Feature',
-        geometry: { type: 'Polygon', coordinates: [[...points, points[0]]] },
-        properties: {},
+      const polygonGeoJSON = {
+        type: 'Polygon',
+        coordinates: [[...points, points[0]]],
       };
-      this.drawnGeoJSON.set(JSON.stringify(feature));
+      this.drawnGeoJSON.set(JSON.stringify(polygonGeoJSON));
     } else {
       this.drawnGeoJSON.set('');
     }
@@ -144,13 +148,39 @@ export class ParcelCreateComponent {
     localStorage.removeItem(STORAGE_KEYS.PARCELS_POINTS);
   }
 
-  saveParcel() {
-    if (!this.parcelName() || this.polygonPoints().length < 3) return;
+  saveParcel(): void {
+    if (!this.parcelName() || this.polygonPoints().length < 3 || this.saving()) return;
+
+    const geoJson = JSON.parse(this.drawnGeoJSON()); // already a Polygon object
+    const area = parseFloat(this.parcelStats().sqMeters.replace(/,/g, ''));
+
     this.saving.set(true);
-    setTimeout(() => {
-      this.saving.set(false);
-      this.router.navigate([ROUTES.newParcel]);
-    }, 1500);
+
+    const areaM2 = parseFloat(this.parcelStats().sqMeters.replace(/,/g, ''));
+
+    if (areaM2 < 50_000) {
+      this.toast.error('Parcel area must be at least 5 hectares (50,000 m²).');
+      return;
+    }
+
+    this.parcelFacade
+      .createParcel({
+        name: this.parcelName(),
+        geoJson, // ← this is { type: 'Polygon', coordinates: [...] }
+        area,
+        areaUnit: 'm2',
+      })
+      .subscribe({
+        next: (response) => {
+          this.saving.set(false);
+          if (response) {
+            this.router.navigate([ROUTES.parcel]);
+          }
+        },
+        error: () => {
+          this.saving.set(false);
+        },
+      });
   }
 
   locateMe() {

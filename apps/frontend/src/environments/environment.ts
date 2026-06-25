@@ -1,7 +1,8 @@
 export const environment = {
   production: false,
 
-  apiUrl: 'http://planora-ai.runasp.net/api/',
+  //apiUrl: 'https://n8ng4pqeob.execute-api.us-east-1.amazonaws.com/v1/api/',
+  apiUrl: 'https://planora-ai.runasp.net/api/',
 
   // APIs
   Auth: {
@@ -14,5 +15,14 @@ export const environment = {
     'change-password': 'auth/change-password',
     'refresh-token': 'auth/refresh-token',
     logout: 'auth/logout',
+  },
+
+  Parcels: {
+    create: 'parcels',
+    list: 'parcels',
+  },
+
+  Analysis: {
+    start: (parcelId: string) => `parcels/${parcelId}/analysis`,
   },
 };

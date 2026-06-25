@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { MapInitialiser } from '../interfaces/map-initialiser';
+import { MapInitialiser } from '../../interfaces/map-initialiser';
 import maplibregl from 'maplibre-gl';
-import { BoreholeData } from '../interfaces/borehole-data';
+import { BoreholeData } from '../../interfaces/borehole-data';
 import type { FeatureCollection, Polygon } from 'geojson';
 
 @Injectable({ providedIn: 'root' })

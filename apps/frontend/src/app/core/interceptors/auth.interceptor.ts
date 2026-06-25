@@ -24,10 +24,8 @@ export class AuthInterceptor implements HttpInterceptor {
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = this.auth.accessToken;
-    if (token) {
-      request = this.addToken(request, token);
-    }
+    // Dynamically apply token if it exists
+    request = this.injectToken(request);
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -43,12 +41,17 @@ export class AuthInterceptor implements HttpInterceptor {
     );
   }
 
-  private addToken(request: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
-    return request.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  // Helper method to guarantee it grabs whatever is current in state
+  private injectToken(request: HttpRequest<unknown>, customToken?: string): HttpRequest<unknown> {
+    const token = customToken || this.auth.accessToken;
+    if (token) {
+      return request.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+    return request;
   }
 
   private handle401Error(
@@ -71,9 +74,19 @@ export class AuthInterceptor implements HttpInterceptor {
         switchMap((response) => {
           this.isRefreshing = false;
           const tokens = response.data!;
+
+          // 1. Persist the new tokens to local storage and BehaviorSubject
           this.auth.storeTokens(tokens.accessToken, tokens.refreshToken);
           this.refreshTokenSubject.next(tokens.accessToken);
-          return next.handle(this.addToken(request, tokens.accessToken));
+
+          // 2. Clear old headers entirely and build a fresh request copy with the new token
+          const retriedRequest = request.clone({
+            setHeaders: {
+              Authorization: `Bearer ${tokens.accessToken}`,
+            },
+          });
+
+          return next.handle(retriedRequest);
         }),
         catchError((err) => {
           this.isRefreshing = false;
@@ -83,11 +96,17 @@ export class AuthInterceptor implements HttpInterceptor {
         }),
       );
     } else {
-      // Wait while another request is already refreshing
       return this.refreshTokenSubject.pipe(
         filter((token) => token !== null),
         take(1),
-        switchMap((token) => next.handle(this.addToken(request, token!))),
+        switchMap((token) => {
+          const retriedRequest = request.clone({
+            setHeaders: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          return next.handle(retriedRequest);
+        }),
       );
     }
   }
