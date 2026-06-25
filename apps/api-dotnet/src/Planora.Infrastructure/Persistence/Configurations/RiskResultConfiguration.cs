@@ -55,6 +55,9 @@ public sealed class RiskResultConfiguration : IEntityTypeConfiguration<RiskResul
         builder.Property(r => r.SeismicSource)
                .HasMaxLength(200);
 
+        builder.Property(r => r.SeismicZone)
+               .HasMaxLength(50);
+
         builder.Property(r => r.ExpansiveSoilLevel)
                .HasMaxLength(20);
 
@@ -71,6 +74,15 @@ public sealed class RiskResultConfiguration : IEntityTypeConfiguration<RiskResul
 
         builder.Property(r => r.LiquefactionSusceptibility)
                .HasMaxLength(20);
+
+        builder.Property(r => r.LiquefactionMethodology)
+               .HasMaxLength(200);
+
+        builder.Property(r => r.RiskHeatmapTileUrl)
+               .HasMaxLength(2000);
+
+        builder.Property(r => r.MitigationSuggestionsJson)
+               .HasColumnType("jsonb");
 
         builder.Property(r => r.CreatedAt)
                .IsRequired();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Planora.Api.Helpers;
 using Planora.Application.Features.Parcels.Commands.CreateParcel;
+using Planora.Application.Features.Parcels.Commands.RefreshAssets;
 using Planora.Application.Features.Parcels.Dtos.CreateParcel;
 using Planora.Application.Features.Parcels.Queries.GetParcelAnalysisStatus;
 using Planora.Application.Features.Parcels.Queries.GetParcelAnalysis;
@@ -61,11 +62,31 @@ public class ParcelsController : BaseApiController
         ISender sender,
         CancellationToken ct)
     {
-        var query = new GetParcelAnalysisQuery(parcelId);
+        if (!User.TryGetUserId(out var userId))
+            return Problem([Error.Unauthorized("Unauthorized", "User ID not found in token.")]);
+
+        var query = new GetParcelAnalysisQuery(parcelId, userId);
         var result = await sender.Send(query, ct);
 
         return result.Match<ActionResult>(
-            onValue:  response => OkEnvelope(response, "Parcel analysis assets retrieved successfully"),
+            onValue:  response => OkEnvelope(response, "Analysis completed successfully."),
+            onError:  errors   => Problem(errors));
+    }
+
+    [HttpPost("{parcelId:guid}/refresh-assets")]
+    public async Task<ActionResult> RefreshAssets(
+        Guid parcelId,
+        ISender sender,
+        CancellationToken ct)
+    {
+        if (!User.TryGetUserId(out var userId))
+            return Problem([Error.Unauthorized("Unauthorized", "User ID not found in token.")]);
+
+        var command = new RefreshParcelAssetsCommand(parcelId, userId);
+        var result = await sender.Send(command, ct);
+
+        return result.Match<ActionResult>(
+            onValue:  response => OkEnvelope(response, "Presigned URLs refreshed"),
             onError:  errors   => Problem(errors));
     }
 }

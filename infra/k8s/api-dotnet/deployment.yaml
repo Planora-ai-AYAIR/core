@@ -115,16 +115,26 @@ spec:
                 secretKeyRef:
                   name: planora-ai-secret
                   key: AIOPTIONS__APIKEY
-            - name: AWS_REGION
+            - name: AWS__REGION
               valueFrom:
                 secretKeyRef:
                   name: planora-s3-secret
-                  key: AWS_REGION
-            - name: AWS_BUCKET_NAME
+                  key: AWS__REGION
+            - name: AWS__BUCKETNAME
               valueFrom:
                 secretKeyRef:
                   name: planora-s3-secret
-                  key: AWS_BUCKET_NAME
+                  key: AWS__BUCKETNAME
+            - name: AWS__ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS__ACCESSKEY
+            - name: AWS__SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS__SECRETKEY
           resources:
             requests:
               cpu: 100m

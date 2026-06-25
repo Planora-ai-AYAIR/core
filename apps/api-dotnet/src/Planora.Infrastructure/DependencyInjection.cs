@@ -106,6 +106,8 @@ public static class DependencyInjection
         
         var aiOptions = configuration.GetSection(AiOptions.SectionName).Get<AiOptions>()
             ?? new AiOptions();
+            
+        services.AddTransient<AiApiKeyHandler>();
         services.AddRefitClient<IAiApiClient>()
         .ConfigureHttpClient((client) =>
         {

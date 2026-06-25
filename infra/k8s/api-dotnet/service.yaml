@@ -27,8 +27,8 @@ spec:
   selector:
     app: api-dotnet
   ports:
-    - name: https
+    - name: http
       protocol: TCP
-      port: 443
+      port: 80
       targetPort: 8080
   type: LoadBalancer

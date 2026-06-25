@@ -16,16 +16,12 @@ data:
   GEE_SERVICE_ACCOUNT_EMAIL: "planora@planora-497015.iam.gserviceaccount.com"
   GEE_SERVICE_ACCOUNT_KEY: "/app/secrets/planora_gee.json"
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ai-python-gee
-  namespace: planora
-  labels:
-    app: ai-python
-type: Opaque
-stringData:
-  planora_gee.json: "{}"
+# The "ai-python-gee" Secret (real GEE service-account key) is created
+# out-of-band, NOT from this file — kubectl apply re-applies this file on
+# every deploy, so a placeholder Secret here would overwrite the live key
+# with empty data each time. Create it once per cluster with:
+#   kubectl create secret generic ai-python-gee -n planora \
+#     --from-file=planora_gee.json=apps/ai-python/secrets/planora_gee.json
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -47,7 +43,7 @@ spec:
       containers:
         - name: ai-python
           image: ghcr.io/planora-ai-ayair/planora-ai:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
               name: http
@@ -97,3 +93,28 @@ spec:
     - name: http
       port: 8000
       targetPort: 8000
+---
+# Public NLB for ai-python — mirrors api-dotnet-lb / frontend-lb.
+# NOTE: app/main.py has no auth on any route (no API key / JWT check), so
+# every endpoint, including GEE-backed analysis and S3 writes, is open to
+# whoever has this URL. Consider an API-key gate before relying on this
+# for anything beyond docs/demo access.
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-python-lb
+  namespace: planora
+  labels:
+    app: ai-python
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  selector:
+    app: ai-python
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer

@@ -48,4 +48,28 @@ public sealed record TopographyResultPayload
 
     [JsonPropertyName("slopeTileUrl")]
     public string? SlopeTileUrl { get; init; }
+
+    [JsonPropertyName("demRasterUrl")]
+    public string? DemRasterUrl { get; init; }
+
+    [JsonPropertyName("slopeRasterUrl")]
+    public string? SlopeRasterUrl { get; init; }
+
+    [JsonPropertyName("metadata")]
+    public TopographyMetadataPayload? Metadata { get; init; }
+}
+
+public sealed record TopographyMetadataPayload
+{
+    [JsonPropertyName("copernicusDemVersion")]
+    public string? CopernicusDemVersion { get; init; }
+
+    [JsonPropertyName("pixelResolutionMeters")]
+    public int? PixelResolutionMeters { get; init; }
+
+    [JsonPropertyName("crs")]
+    public string? Crs { get; init; }
+
+    [JsonPropertyName("processingTimeSeconds")]
+    public int? ProcessingTimeSeconds { get; init; }
 }
