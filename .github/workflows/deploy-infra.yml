@@ -59,3 +59,16 @@ jobs:
             host=$(kubectl get svc "$svc" -n planora -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
             echo "$svc -> http://${host:-<pending>}"
           done
+
+      - name: Diagnose ai-python
+        if: always()
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n planora -o wide
+          echo "=== ai-python pod describe ==="
+          kubectl describe pod -l app=ai-python -n planora | tail -40
+          echo "=== ai-python logs ==="
+          kubectl logs deployment/ai-python -n planora --tail=30 || true
+          echo "=== NLB target health (curl from inside) ==="
+          kubectl run --rm -i --restart=Never --image=curlimages/curl diag-curl -n planora -- \
+            curl -s -o /dev/null -w "ai-python ClusterIP -> HTTP %{http_code}\n" --max-time 5 http://ai-python:8000/api/v1/health || true
