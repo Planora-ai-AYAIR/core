@@ -50,3 +50,12 @@ jobs:
           kubectl rollout restart deployment/ai-python -n planora
           kubectl rollout restart deployment/api-dotnet -n planora
           kubectl rollout restart deployment/frontend -n planora
+
+      - name: Print public endpoints
+        run: |
+          echo "Waiting for LoadBalancer hostnames to be assigned..."
+          kubectl get svc -n planora -o wide
+          for svc in ai-python-lb api-dotnet-lb frontend-lb; do
+            host=$(kubectl get svc "$svc" -n planora -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+            echo "$svc -> http://${host:-<pending>}"
+          done

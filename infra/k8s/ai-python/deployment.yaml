@@ -93,3 +93,28 @@ spec:
     - name: http
       port: 8000
       targetPort: 8000
+---
+# Public NLB for ai-python — mirrors api-dotnet-lb / frontend-lb.
+# NOTE: app/main.py has no auth on any route (no API key / JWT check), so
+# every endpoint, including GEE-backed analysis and S3 writes, is open to
+# whoever has this URL. Consider an API-key gate before relying on this
+# for anything beyond docs/demo access.
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-python-lb
+  namespace: planora
+  labels:
+    app: ai-python
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  selector:
+    app: ai-python
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
