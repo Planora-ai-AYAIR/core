@@ -15,7 +15,8 @@ RUN npm run build
 # No Node.js runtime in production — just a lean static file server.
 FROM nginx:1.27-alpine AS runtime
 
-COPY --from=build /app/dist/ /usr/share/nginx/html
+COPY --from=build /app/dist/planora-portal/browser/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 

@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
 
-  apiUrl: 'http://planora-ai.runasp.net/api/',
+  apiUrl: 'https://n8ng4pqeob.execute-api.us-east-1.amazonaws.com/v1/',
 
   // APIs
   Auth: {
