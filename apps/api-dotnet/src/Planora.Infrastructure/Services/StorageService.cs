@@ -64,7 +64,6 @@ public sealed class StorageService(
 
         return await s3Client.GetPreSignedURLAsync(request);
     }
-}
 
     public async Task<string?> TryGetPreSignedUrlAsync(string? s3Key, TimeSpan expiry, CancellationToken ct = default)
     {
