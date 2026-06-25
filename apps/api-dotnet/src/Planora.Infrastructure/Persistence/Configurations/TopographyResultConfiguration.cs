@@ -59,6 +59,22 @@ public sealed class TopographyResultConfiguration : IEntityTypeConfiguration<Top
         builder.Property(t => t.SlopeTileUrl)
                .HasMaxLength(2000);
 
+        builder.Property(t => t.DemRasterUrl)
+               .HasMaxLength(2000);
+
+        builder.Property(t => t.SlopeRasterUrl)
+               .HasMaxLength(2000);
+
+        builder.Property(t => t.CopernicusDemVersion)
+               .HasMaxLength(50);
+
+        builder.Property(t => t.PixelResolutionMeters);
+
+        builder.Property(t => t.Crs)
+               .HasMaxLength(20);
+
+        builder.Property(t => t.ProcessingTimeSeconds);
+
         builder.Property(t => t.CreatedAt)
                .IsRequired();
 

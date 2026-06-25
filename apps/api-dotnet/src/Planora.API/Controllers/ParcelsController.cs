@@ -61,11 +61,14 @@ public class ParcelsController : BaseApiController
         ISender sender,
         CancellationToken ct)
     {
-        var query = new GetParcelAnalysisQuery(parcelId);
+        if (!User.TryGetUserId(out var userId))
+            return Problem([Error.Unauthorized("Unauthorized", "User ID not found in token.")]);
+
+        var query = new GetParcelAnalysisQuery(parcelId, userId);
         var result = await sender.Send(query, ct);
 
         return result.Match<ActionResult>(
-            onValue:  response => OkEnvelope(response, "Parcel analysis assets retrieved successfully"),
+            onValue:  response => OkEnvelope(response, "Analysis completed successfully."),
             onError:  errors   => Problem(errors));
     }
 }

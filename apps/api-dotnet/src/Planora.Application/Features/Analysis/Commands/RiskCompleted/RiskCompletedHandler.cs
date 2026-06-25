@@ -59,6 +59,10 @@ public sealed class RiskCompletedHandler(
         var expansiveSoil = request.Payload.ExpansiveSoil;
         var liquefaction = request.Payload.Liquefaction;
 
+        var mitigationSuggestionsJson = request.Payload.MitigationSuggestions is not null
+            ? JsonSerializer.Serialize(request.Payload.MitigationSuggestions)
+            : null;
+
         var riskResult = new RiskResult(
             analysisJob.Id,
             flood?.Score ?? request.Payload.FloodRiskScore,
@@ -73,12 +77,16 @@ public sealed class RiskCompletedHandler(
             seismic?.Level ?? DeriveRiskLevel(request.Payload.SeismicRiskScore),
             seismic?.Factors is not null ? JsonSerializer.Serialize(seismic.Factors) : null,
             seismic?.Source,
+            seismicZone: seismic?.Zone,
             expansiveSoil?.Level ?? DeriveRiskLevel(request.Payload.ExpansiveSoilRisk),
             expansiveSoil?.Factors is not null ? JsonSerializer.Serialize(expansiveSoil.Factors) : null,
             expansiveSoil?.ReplacementDepth,
             liquefaction?.Level ?? DeriveRiskLevel(request.Payload.LiquefactionRisk),
             liquefaction?.Factors is not null ? JsonSerializer.Serialize(liquefaction.Factors) : null,
-            liquefaction?.Susceptibility);
+            liquefaction?.Susceptibility,
+            liquefactionMethodology: liquefaction?.Methodology,
+            riskHeatmapTileUrl: request.Payload.RiskHeatmapTileUrl,
+            mitigationSuggestionsJson: mitigationSuggestionsJson);
 
         await riskResultRepository.AddAsync(riskResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);

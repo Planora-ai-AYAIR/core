@@ -10,6 +10,9 @@ public sealed record RiskSubResultPayload
     [JsonPropertyName("level")]
     public string? Level { get; init; }
 
+    [JsonPropertyName("weight")]
+    public double? Weight { get; init; }
+
     [JsonPropertyName("factors")]
     public List<string>? Factors { get; init; }
 
@@ -19,9 +22,15 @@ public sealed record RiskSubResultPayload
     [JsonPropertyName("source")]
     public string? Source { get; init; }
 
+    [JsonPropertyName("zone")]
+    public string? Zone { get; init; }
+
     [JsonPropertyName("replacementDepth")]
     public double? ReplacementDepth { get; init; }
 
     [JsonPropertyName("susceptibility")]
     public string? Susceptibility { get; init; }
+
+    [JsonPropertyName("methodology")]
+    public string? Methodology { get; init; }
 }
