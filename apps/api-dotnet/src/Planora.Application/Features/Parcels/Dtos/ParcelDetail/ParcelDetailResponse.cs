@@ -11,6 +11,6 @@ public sealed record ParcelDetailResponse(
     string Status,
     string? GeojsonKey,
     DateTime CreatedAt,
-    double CentroidLatitude,
-    double CentroidLongitude,
-    IReadOnlyList<CoordinateDto> BoundaryCoordinates);
+    double? CentroidLatitude,
+    double? CentroidLongitude,
+    IReadOnlyList<CoordinateDto>? BoundaryCoordinates);

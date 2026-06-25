@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using Planora.Application.Features.Parcels.Dtos.ParcelDetail;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Domain.Parcels;
@@ -34,7 +35,8 @@ public sealed class GetParcelDetailHandler(
             return ParcelErrors.NotFound;
         }
 
-        var boundaryCoordinates = parcel.Boundary.ExteriorRing.Coordinates
+        var boundaryCoordinates = parcel.Boundary?.ExteriorRing?.Coordinates
+            .Where(c => IsValidCoordinate(c.X) && IsValidCoordinate(c.Y))
             .Select(c => new CoordinateDto(c.X, c.Y))
             .ToList();
 
@@ -47,8 +49,17 @@ public sealed class GetParcelDetailHandler(
             parcel.Status.ToString(),
             parcel.GeojsonKey,
             parcel.CreatedAt,
-            parcel.Centroid.Y,
-            parcel.Centroid.X,
-            boundaryCoordinates);
+            GetLatitude(parcel.Centroid),
+            GetLongitude(parcel.Centroid),
+            boundaryCoordinates?.Count > 0 ? boundaryCoordinates : null);
     }
+
+    private static double? GetLatitude(Point? centroid) =>
+        centroid is not null && IsValidCoordinate(centroid.Y) ? centroid.Y : null;
+
+    private static double? GetLongitude(Point? centroid) =>
+        centroid is not null && IsValidCoordinate(centroid.X) ? centroid.X : null;
+
+    private static bool IsValidCoordinate(double value) =>
+        !double.IsNaN(value) && !double.IsInfinity(value);
 }

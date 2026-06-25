@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using System.Linq;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using Planora.Application.Features.Parcels.Dtos.ParcelList;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Domain.Shared.Results;
@@ -30,10 +32,19 @@ public sealed class GetParcelListHandler(
                 p.AreaHectares,
                 p.Status.ToString(),
                 p.CreatedAt,
-                p.Centroid.Y,
-                p.Centroid.X))
+                GetLatitude(p.Centroid),
+                GetLongitude(p.Centroid)))
             .ToList();
 
         return new ParcelListResponse(summaries);
     }
+
+    private static double? GetLatitude(Point? centroid) =>
+        centroid is not null && IsValidCoordinate(centroid.Y) ? centroid.Y : null;
+
+    private static double? GetLongitude(Point? centroid) =>
+        centroid is not null && IsValidCoordinate(centroid.X) ? centroid.X : null;
+
+    private static bool IsValidCoordinate(double value) =>
+        !double.IsNaN(value) && !double.IsInfinity(value);
 }
