@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { MapInitialiser } from '../interfaces/map-initialiser';
+import { MapInitialiser } from '../../interfaces/map-initialiser';
 import maplibregl from 'maplibre-gl';
-import { SoilData } from '../interfaces/soil-data';
+import { SoilData } from '../../interfaces/soil-data';
 
 @Injectable({ providedIn: 'root' })
 export class SoilMapInitialiser implements MapInitialiser<SoilData> {

@@ -40,8 +40,8 @@ export class SidebarComponent {
 
   navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'pi-chart-bar', route: ROUTES.dashboard },
-    { id: 'parcels', label: 'Parcels', icon: 'pi-map', route: ROUTES.newParcel },
-    { id: 'analyses', label: 'Analyses', icon: 'pi-sitemap', route: ROUTES.newAnalysis },
+    { id: 'parcels', label: 'Parcels', icon: 'pi-map', route: ROUTES.parcel },
+    { id: 'analyses', label: 'Analyses', icon: 'pi-sitemap', route: ROUTES.analysis },
     { id: 'monitoring', label: 'Monitoring', icon: 'pi-desktop', route: '/app/monitoring' },
     { id: 'reports', label: 'Reports', icon: 'pi-file-pdf', route: '/app/reports' },
     { id: 'settings', label: 'Settings', icon: 'pi-cog', route: '/app/settings' },

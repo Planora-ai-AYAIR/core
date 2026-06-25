@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { MapInitialiser } from '../interfaces/map-initialiser';
+import { MapInitialiser } from '../../interfaces/map-initialiser';
 import maplibregl from 'maplibre-gl';
-import { RiskData } from '../interfaces/risk-data';
+import { RiskData } from '../../interfaces/risk-data';
 
 @Injectable({ providedIn: 'root' })
 export class RiskMapInitialiser implements MapInitialiser<RiskData> {

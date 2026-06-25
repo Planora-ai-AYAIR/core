@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { MapInitialiser } from '../interfaces/map-initialiser';
+import { MapInitialiser } from '../../interfaces/map-initialiser';
 import maplibregl from 'maplibre-gl';
-import { BearingData } from '../interfaces/bearing-data';
+import { BearingData } from '../../interfaces/bearing-data';
 
 @Injectable({ providedIn: 'root' })
 export class BearingMapInitialiser implements MapInitialiser<BearingData> {
