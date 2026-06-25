@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Planora.Application.Features.Analysis.Commands.AnalysisCompleted;
 using Planora.Application.Features.Analysis.Commands.AnalysisFailed;
 using Planora.Application.Features.Analysis.Commands.BoreholeCompleted;
 using Planora.Application.Features.Analysis.Commands.PdfCompleted;
@@ -25,7 +26,14 @@ public sealed class AiWebhookController(ISender mediator) : BaseApiController
     public async Task<IActionResult> Receive([FromBody] AiWebhookEnvelope envelope, CancellationToken ct)
     {
         var result = envelope.EventType switch
-        {
+        {   
+            AiWebhookEventTypes.AnalysisCompleted => await mediator.Send(
+                new AnalysisCompletedCommand
+                {
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<AggregatedAnalysisResultPayload>(JsonOptions)!
+                },
+                ct),
             AiWebhookEventTypes.TopographyCompleted => await mediator.Send(
                 new TopographyCompletedCommand
                 {
