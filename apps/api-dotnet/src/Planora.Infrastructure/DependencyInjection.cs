@@ -23,6 +23,7 @@ using Planora.Infrastructure.Persistence.Interceptors;
 using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
+using Planora.Infrastructure.Services.Reporting;
 using Refit;
 
 namespace Planora.Infrastructure;
@@ -170,6 +171,7 @@ public static class DependencyInjection
         services.AddScoped<IParcelRepository, ParcelRepository>();
         services.AddScoped<IAnalysisJobRepository, AnalysisJobRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
 
         // Services Registeration
         services.AddScoped<IJwtService, JwtService>();
@@ -179,12 +181,15 @@ public static class DependencyInjection
         services.AddScoped<IHybridCacheService, HybridCacheService>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IAiAnalysisService, AiAnalysisService>();
+        services.AddScoped<IPdfGeneratorService, QuestPdfReportGenerator>();
 
         // Analysis Result Repositories
         services.AddScoped<ITopographyResultRepository, TopographyResultRepository>();
         services.AddScoped<ISoilResultRepository, SoilResultRepository>();
         services.AddScoped<IRiskResultRepository, RiskResultRepository>();
         services.AddScoped<IBoreholeResultRepository, BoreholeResultRepository>();
+        services.AddScoped<IAnalysisResultQuery, AnalysisResultQuery>();
+
 
         //Background jobs
         services.AddScoped<IProcessTopographyJob, ProcessTopographyJob>();
@@ -192,6 +197,8 @@ public static class DependencyInjection
         services.AddScoped<IProcessRiskJob, ProcessRiskJob>();
         services.AddScoped<IProcessBoreholeJob, ProcessBoreholeJob>();
         services.AddScoped<IProcessPdfJob, ProcessPdfJob>();
+        services.AddScoped<IGeneratePdfJob, GeneratePdfJob>();
+
         services.AddScoped<IProcessAggregatedAnalysisJob, ProcessAggregatedAnalysisJob>();
 
         return services;

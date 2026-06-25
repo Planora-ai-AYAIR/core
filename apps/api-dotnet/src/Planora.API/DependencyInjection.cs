@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Planora.Api.Hubs;
 using Planora.Api.Services;
 using Planora.Application.Interfaces.Services;
 using Planora.Infrastructure.Options;
@@ -27,6 +28,8 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+        services.AddScoped<IReportNotifier, ReportNotifier>();
+
 
         return services;
     }

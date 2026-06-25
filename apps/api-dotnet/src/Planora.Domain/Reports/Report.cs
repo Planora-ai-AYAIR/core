@@ -57,5 +57,38 @@ namespace Planora.Domain.Reports
             PaymentId = paymentId;
             UpdatedAt = DateTime.UtcNow;
         }
+
+        public void MarkAsProcessing()
+        {
+            Status = ReportStatus.Processing;
+            ProcessingStartedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void MarkAsCompleted()
+        {
+            Status = ReportStatus.Completed;
+            ProcessingCompletedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void MarkAsFailed(string errorMessage)
+        {
+            Status = ReportStatus.Failed;
+            ErrorMessage = errorMessage;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void AddModule(ReportModule module)
+        {
+            _modules.Add(module);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void AddFile(ReportFile file)
+        {
+            _files.Add(file);
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

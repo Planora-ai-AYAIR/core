@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Options;
 using Planora.Application.Features.Parcels.Dtos.BoreholeResults;
-using Planora.Application.Features.Parcels.Errors;
+using Planora.Domain.Reports;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.AnalysisJob;

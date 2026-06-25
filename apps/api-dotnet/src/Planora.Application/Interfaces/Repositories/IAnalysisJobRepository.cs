@@ -11,5 +11,6 @@ public interface IAnalysisJobRepository
     Task<bool> HasActiveJobAsync(Guid parcelId, CancellationToken ct = default);
     Task AddAsync(AnalysisJob job, CancellationToken ct = default);
     Task UpdateAsync(AnalysisJob job, CancellationToken ct);
+    Task<AnalysisJob?> GetLatestCompletedByParcelIdAsync(Guid parcelId, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct);
 }

@@ -168,6 +168,7 @@ public sealed class UserRepository : IUserRepository
             user.FirstName,
             user.LastName,
             user.CompanyName,
+            user.ProjectName,
             user.Role,
             user.SubscriptionTier,
             user.EmailConfirmed,

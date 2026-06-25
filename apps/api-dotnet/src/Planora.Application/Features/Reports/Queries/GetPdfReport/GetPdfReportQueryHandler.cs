@@ -2,13 +2,13 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Options;
 using Planora.Application.Features.Parcels.Dtos.PdfReport;
-using Planora.Application.Features.Parcels.Errors;
+using Planora.Domain.Reports;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Enums;
 using Planora.Domain.Shared.Results;
 
-namespace Planora.Application.Features.Parcels.Queries.GetPdfReport;
+namespace Planora.Application.Features.Reports.Queries.GetPdfReport;
 
 public sealed class GetPdfReportQueryHandler(
     IReportRepository reportRepository,

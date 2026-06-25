@@ -14,6 +14,7 @@ namespace Planora.Application.Features.Auth.Dtos
         string FirstName,
         string LastName,
         string? CompanyName,
+        string? ProjectName,
         UserRole Role,
         ReportTier SubscriptionTier,
         bool EmailConfirmed,
