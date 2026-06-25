@@ -6,6 +6,7 @@ using Planora.Application.Features.Parcels.Dtos.PdfReport;
 using Planora.Application.Features.Reports.Commands.SubmitPdfJob;
 using Planora.Application.Features.Reports.Dtos.SubmitPdfJob;
 using Planora.Application.Features.Reports.Queries.GetPdfReport;
+using Planora.Application.Features.Reports.Queries.GetReportDownload;
 
 namespace Planora.Api.Controllers;
 
@@ -15,17 +16,18 @@ namespace Planora.Api.Controllers;
 public class ReportsController : BaseApiController
 {
 
-    [HttpGet("{parcelId:guid}/pdf")]
-    public async Task<ActionResult> GetPdfReport(
-        Guid parcelId,
+    
+    [HttpGet("{reportId:guid}")]
+    public async Task<ActionResult> GetReportDownload(
+        Guid reportId,
         ISender sender,
         CancellationToken ct)
     {
-        var query = new GetPdfReportQuery(parcelId);
+        var query = new GetReportDownloadQuery(reportId);
         var result = await sender.Send(query, ct);
 
         return result.Match<ActionResult>(
-            response => OkEnvelope(response, "PDF report retrieved successfully"),
+            response => OkEnvelope(response, "Presigned URL generated"),
             errors => Problem(errors));
     }
 

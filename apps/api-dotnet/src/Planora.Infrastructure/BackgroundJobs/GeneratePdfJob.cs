@@ -105,7 +105,7 @@ public sealed class GeneratePdfJob(
             logger.LogInformation("PDF uploaded to {S3Uri}", s3Uri);
 
             // 9. Create ReportFile record
-            var fileName = $"GeoSense_Report_{report.ParcelId}_{DateTime.UtcNow:yyyyMMdd}.pdf";
+            var fileName = $"Planora_Report_{report.ParcelId}_{DateTime.UtcNow:yyyyMMdd}.pdf";
             var reportFile = ReportFile.Create(
                 Guid.NewGuid(),
                 report.Id,
