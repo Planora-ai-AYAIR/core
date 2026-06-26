@@ -56,6 +56,7 @@ public sealed class ProcessAggregatedAnalysisJob(
         var coordinates = ParseCoordinatesFromGeoJson(geoJson);
 
         var request = new SubmitAiAnalysisJobRequest(
+            JobId: analysisJob.Id.ToString(),
             ParcelId: parcel.Id.ToString(),
             Parcel: new ParcelInfo(parcel.Name, parcel.AreaHectares * 10_000m),
             BoundingBox: new BoundingBoxInfo(
