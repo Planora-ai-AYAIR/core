@@ -122,7 +122,7 @@ async def _run_risk_pipeline(python_job_id: str, req: RiskJobRequest):
             "status": "completed",
             "results": results,
         })
-        await send_analysis_webhook(python_job_id, "risk", results)
+        await send_analysis_webhook(python_job_id, results)
 
     except Exception as e:
         logger.error(f"Risk pipeline failed for {python_job_id}: {e}", exc_info=True)

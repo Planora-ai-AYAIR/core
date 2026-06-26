@@ -46,7 +46,7 @@ async def _run_bearing(job_id: str, parcel_id: str, foundation_type: str) -> Non
     store.update_job(job_id, status="completed", progressPercentage=100,
                      completedAt=utc_now_iso(),
                      message="bearing analysis completed successfully")
-    await send_analysis_webhook(job_id, MODULE, result)
+    await send_analysis_webhook(job_id, result)
 
 
 @router.get("/{parcelId}", response_model=Envelope[BearingClientResult])

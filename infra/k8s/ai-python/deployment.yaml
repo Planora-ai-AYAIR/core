@@ -27,7 +27,7 @@ data:
 # The "ai-python-webhook" Secret holds the HMAC shared secret for webhook
 # signing. Create it once per cluster with:
 #   kubectl create secret generic ai-python-webhook -n planora \
-#     --from-literal=WEBHOOK_SECRET='<the-shared-secret>'
+#     --from-literal=SHARED_SECRET='<the-shared-secret>'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,11 +59,11 @@ spec:
             - configMapRef:
                 name: ai-python-config
           env:
-            - name: WEBHOOK_SECRET
+            - name: SHARED_SECRET
               valueFrom:
                 secretKeyRef:
                   name: ai-python-webhook
-                  key: WEBHOOK_SECRET
+                  key: SHARED_SECRET
                   optional: true
           volumeMounts:
             - name: gee-key

@@ -84,7 +84,7 @@ class Settings(BaseSettings):
         default="",
         description="URL to POST analysis-completed webhooks to"
     )
-    webhook_secret: str = Field(
+    shared_secret: str = Field(
         default="",
         description="HMAC-SHA256 shared secret for signing webhook payloads"
     )
