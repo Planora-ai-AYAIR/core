@@ -15,6 +15,7 @@ data:
   GEE_PROJECT: "planora-497015"
   GEE_SERVICE_ACCOUNT_EMAIL: "planora@planora-497015.iam.gserviceaccount.com"
   GEE_SERVICE_ACCOUNT_KEY: "/app/secrets/planora_gee.json"
+  WEBHOOK_URL: "https://n8ng4pqeob.execute-api.us-east-1.amazonaws.com/v1/api/webhooks/ai-events"
 ---
 # The "ai-python-gee" Secret (real GEE service-account key) is created
 # out-of-band, NOT from this file — kubectl apply re-applies this file on
@@ -22,6 +23,11 @@ data:
 # with empty data each time. Create it once per cluster with:
 #   kubectl create secret generic ai-python-gee -n planora \
 #     --from-file=planora_gee.json=apps/ai-python/secrets/planora_gee.json
+#
+# The "ai-python-webhook" Secret holds the HMAC shared secret for webhook
+# signing. Create it once per cluster with:
+#   kubectl create secret generic ai-python-webhook -n planora \
+#     --from-literal=WEBHOOK_SECRET='<the-shared-secret>'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -52,6 +58,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: ai-python-config
+          env:
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ai-python-webhook
+                  key: WEBHOOK_SECRET
+                  optional: true
           volumeMounts:
             - name: gee-key
               mountPath: /app/secrets
