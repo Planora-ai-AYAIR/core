@@ -59,11 +59,3 @@ jobs:
             host=$(kubectl get svc "$svc" -n planora -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
             echo "$svc -> http://${host:-<pending>}"
           done
-
-      - name: Diagnose cluster health
-        if: always()
-        run: |
-          echo "=== Nodes ==="
-          kubectl get nodes -o wide
-          echo "=== Pods ==="
-          kubectl get pods -n planora -o wide
