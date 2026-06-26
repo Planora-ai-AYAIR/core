@@ -1,0 +1,54 @@
+/* ── Overlay container ── */
+.notification-overlay {
+  display: none;
+}
+.notification-overlay-visible {
+  display: block;
+}
+
+/* ── Backdrop fade ── */
+.notification-backdrop {
+  background-color: transparent;
+  animation: none;
+}
+.notification-overlay-hidden .notification-backdrop {
+  animation: backdropFadeOut 0.2s ease-in forwards;
+}
+
+/* ── Panel slide + fade ── */
+.notification-panel {
+  animation: panelSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+}
+.notification-overlay-hidden .notification-panel {
+  animation: panelSlideUp 0.2s ease-in forwards;
+}
+
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes panelSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes panelSlideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}

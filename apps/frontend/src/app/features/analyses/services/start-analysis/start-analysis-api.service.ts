@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { AnalysisOptionsDto } from '../interfaces/start-analysis/analysis-options-dto';
-import { StartAnalysisResponse } from '../interfaces/start-analysis/start-analysis-response';
+import { environment } from '../../../../../environments/environment';
+import { AnalysisOptionsDto } from '../../interfaces/start-analysis/analysis-options-dto';
+import { StartAnalysisResponse } from '../../interfaces/start-analysis/start-analysis-response';
 
 @Injectable({ providedIn: 'root' })
 export class AnalysisApiService {

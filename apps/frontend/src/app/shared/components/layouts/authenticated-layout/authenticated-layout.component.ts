@@ -5,13 +5,13 @@ import {
   Router,
   NavigationEnd,
   ActivatedRoute,
-  UrlSegment,
   RouterLink,
 } from '@angular/router';
 import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
+import { NotificationDropdownComponent } from '../../notification-dropdown/notification-dropdown.component';
 
 interface Breadcrumb {
   label: string;
@@ -21,7 +21,7 @@ interface Breadcrumb {
 @Component({
   selector: 'app-authenticated-layout',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, RouterOutlet, RouterLink],
+  imports: [CommonModule, SidebarComponent, RouterOutlet, RouterLink, NotificationDropdownComponent],
   templateUrl: './authenticated-layout.component.html',
   styleUrls: ['./authenticated-layout.component.css'],
 })

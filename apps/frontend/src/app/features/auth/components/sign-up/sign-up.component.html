@@ -34,6 +34,15 @@
       [errorMessage]="getErrorMessage('email')"
     ></app-input>
 
+    <!-- Phone Number -->
+    <app-input
+      formControlName="phoneNumber"
+      type="tel"
+      placeholder="Phone number"
+      [showError]="signUpForm.get('phoneNumber')!.touched && signUpForm.get('phoneNumber')!.invalid"
+      [errorMessage]="getErrorMessage('phoneNumber')"
+    ></app-input>
+
     <!-- Password -->
     <app-input
       formControlName="password"
@@ -76,7 +85,9 @@
           >Terms of Service</a
         >
         and
-        <a [routerLink]="ROUTES.privacy" class="underline text-planora-clay-600 hover:text-planora-clay-500"
+        <a
+          [routerLink]="ROUTES.privacy"
+          class="underline text-planora-clay-600 hover:text-planora-clay-500"
           >Privacy Policy</a
         >.
       </label>

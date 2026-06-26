@@ -1,136 +1,123 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StatCardComponent } from '../../../../shared/components/stat-card/stat-card.component';
-
-// ── Backend matching interface ──
-interface BoundingBox {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
-
-interface ParcelData {
-  parcelId: string;
-  clientName: string;
-  area: number; // m²
-  status: string; // e.g. "completed", "pending", "processing"
-  modulesCompleted: string[];
-  boundingBox: BoundingBox;
-  createdAt: string;
-  completedAt: string | null;
-}
-
-// ── Internal display interface ──
-interface GeotechParcel {
-  id: string;
-  name: string;
-  location: string;
-  areaM2: number; // area in square meters
-  created: string;
-  modulesCompletedCount: number; // number of completed analysis modules
-  totalModules: number; // total possible modules (6)
-  riskProfile: 'Low' | 'Medium' | 'High';
-}
+import { ParcelFacadeService } from '../../services/parcel-facade.service';
+import { ParcelListResponse } from '../../interfaces/parcel-list/parcel-list-response';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-parcel-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, StatCardComponent],
+  imports: [CommonModule, RouterModule, FormsModule, StatCardComponent, ConfirmDialogComponent],
   templateUrl: './parcel-list.component.html',
   styleUrls: ['./parcel-list.component.css'],
 })
-export class ParcelListComponent {
-  parcels = signal<GeotechParcel[]>([]);
+export class ParcelListComponent implements OnInit {
+  private parcelFacade = inject(ParcelFacadeService);
+
+  parcels = signal<ParcelListResponse[]>([]);
   searchTerm = signal('');
   isLoading = signal(true);
+  error = signal<string | null>(null);
 
-  readonly totalModulesCount = 6; // from project: topography, soil, risk, bearing, boreholes, report
+  // Delete confirmation state
+  showDeleteConfirm = signal(false);
+  parcelToDelete = signal<string | null>(null);
 
   // ── Summary KPIs ──
   totalParcels = computed(() => this.parcels().length);
-
-  totalAreaM2 = computed(() => this.parcels().reduce((acc, p) => acc + p.areaM2, 0));
-
-  totalModulesCompleted = computed(() =>
-    this.parcels().reduce((acc, p) => acc + p.modulesCompletedCount, 0),
-  );
+  totalAreaM2 = computed(() => this.parcels().reduce((acc, p) => acc + p.areaHectares * 10000, 0));
+  processingCount = computed(() => this.parcels().filter((p) => p.status === 'Processing').length);
 
   filteredParcels = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.parcels();
     return this.parcels().filter(
-      (p) => p.name.toLowerCase().includes(term) || p.location.toLowerCase().includes(term),
+      (p) =>
+        p.name.toLowerCase().includes(term) || this.getLocation(p).toLowerCase().includes(term),
     );
   });
 
-  constructor() {
-    this.loadParcels();
+  ngOnInit(): void {
+    this.parcelFacade.getMyParcels().subscribe({
+      next: (parcels) => {
+        if (parcels) {
+          this.parcels.set(parcels);
+          this.error.set(null);
+        }
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to load parcels. Please try again.');
+        this.isLoading.set(false);
+      },
+    });
   }
 
-  private loadParcels() {
-    const raw: ParcelData[] = [
-      {
-        parcelId: 'parcel_550e8400',
-        clientName: 'Talaat Moustafa Group',
-        area: 50000,
-        status: 'completed',
-        modulesCompleted: ['topography', 'soil', 'risk'],
-        boundingBox: { minX: 30.0, minY: 31.0, maxX: 30.1, maxY: 31.1 },
-        createdAt: '2026-05-25T01:38:00Z',
-        completedAt: '2026-05-25T04:15:00Z',
-      },
-      {
-        parcelId: 'parcel_1a2b3c4d',
-        clientName: 'Orascom Construction',
-        area: 120000,
-        status: 'processing',
-        modulesCompleted: ['topography', 'soil'],
-        boundingBox: { minX: 29.5, minY: 31.2, maxX: 29.6, maxY: 31.3 },
-        createdAt: '2026-05-20T10:00:00Z',
-        completedAt: null,
-      },
-      {
-        parcelId: 'parcel_9z8y7x6w',
-        clientName: 'Egyptian Resorts Company',
-        area: 30000,
-        status: 'pending',
-        modulesCompleted: [],
-        boundingBox: { minX: 28.0, minY: 32.0, maxX: 28.1, maxY: 32.1 },
-        createdAt: '2026-05-28T08:30:00Z',
-        completedAt: null,
-      },
-    ];
-
-    const mapped: GeotechParcel[] = raw.map((p) => ({
-      id: p.parcelId,
-      name: p.clientName,
-      location: `${p.boundingBox.minY.toFixed(3)}°N, ${p.boundingBox.minX.toFixed(3)}°E`,
-      areaM2: p.area,
-      created: new Date(p.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      }),
-      modulesCompletedCount: p.modulesCompleted.length,
-      totalModules: this.totalModulesCount,
-      riskProfile: this.mapStatusToRisk(p.status),
-    }));
-
-    this.parcels.set(mapped);
-    this.isLoading.set(false);
+  // ── Display helpers ──
+  getLocation(p: ParcelListResponse): string {
+    const lat = p.centroidLatitude;
+    const lng = p.centroidLongitude;
+    if (lat == null || lng == null) return '—';
+    const latDir = lat >= 0 ? 'N' : 'S';
+    const lngDir = lng >= 0 ? 'E' : 'W';
+    return `${Math.abs(lat).toFixed(3)}°${latDir}, ${Math.abs(lng).toFixed(3)}°${lngDir}`;
   }
 
-  private mapStatusToRisk(status: string): 'Low' | 'Medium' | 'High' {
+  getAreaM2(p: ParcelListResponse): number {
+    return p.areaHectares * 10000;
+  }
+
+  getCreated(p: ParcelListResponse): string {
+    return new Date(p.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  getStatusClass(status: string): string {
     switch (status) {
-      case 'completed':
-        return 'Low';
-      case 'processing':
-        return 'Medium';
+      case 'Draft':
+        return 'bg-planora-desert-100 text-planora-basalt-700';
+      case 'Processing':
+        return 'bg-planora-gold-100 text-planora-gold-700';
+      case 'Completed':
+        return 'bg-green-100 text-green-700';
       default:
-        return 'Low';
+        return 'bg-planora-desert-100 text-planora-basalt-700';
     }
+  }
+
+  getRiskProfile(p: ParcelListResponse): 'Low' | 'Medium' | 'High' {
+    if (p.status === 'Processing') return 'Medium';
+    if (p.status === 'Draft' || p.status === 'Completed') return 'Low';
+    return 'Low';
+  }
+
+  // ── Delete actions ──
+  requestDelete(parcelId: string): void {
+    this.parcelToDelete.set(parcelId);
+    this.showDeleteConfirm.set(true);
+  }
+
+  onDeleteConfirmed(): void {
+    this.showDeleteConfirm.set(false);
+    const parcelId = this.parcelToDelete();
+    if (!parcelId) return;
+
+    this.parcelFacade.deleteParcel(parcelId).subscribe((success) => {
+      if (success) {
+        this.parcels.update((list) => list.filter((p) => p.id !== parcelId));
+      }
+      this.parcelToDelete.set(null);
+    });
+  }
+
+  onDeleteCancel(): void {
+    this.showDeleteConfirm.set(false);
+    this.parcelToDelete.set(null);
   }
 }

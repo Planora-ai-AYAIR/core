@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { CreateParcelResponse } from '../interfaces/parcel-new/create-parcel-response';
 import { CreateParcelRequest } from '../interfaces/parcel-new/create-parcel-request';
 import { ParcelListResponse } from '../interfaces/parcel-list/parcel-list-response';
+import { ParcelDetailResponse } from '../interfaces/parcel-detail/parcel-detail-response';
 
 @Injectable({ providedIn: 'root' })
 export class ParcelApiService {
@@ -20,6 +21,18 @@ export class ParcelApiService {
   getMyParcels(): Observable<ParcelListResponse[]> {
     return this.http
       .get<any>(`${this.baseUrl}${environment.Parcels.list}`)
+      .pipe(map((envelope) => envelope.data?.parcels ?? []));
+  }
+
+  getParcelById(parcelId: string): Observable<ParcelDetailResponse> {
+    return this.http
+      .get<any>(`${this.baseUrl}${environment.Parcels.details(parcelId)}`)
       .pipe(map((envelope) => envelope.data));
+  }
+
+  deleteParcel(parcelId: string): Observable<void> {
+    return this.http
+      .delete<any>(`${this.baseUrl}${environment.Parcels.delete(parcelId)}`)
+      .pipe(map(() => undefined));
   }
 }

@@ -1,9 +1,11 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { ParcelApiService } from './parcel-api.service';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, tap } from 'rxjs';
 import { ToastService } from '../../../shared/services/toaster.service';
 import { CreateParcelRequest } from '../interfaces/parcel-new/create-parcel-request';
 import { CreateParcelResponse } from '../interfaces/parcel-new/create-parcel-response';
+import { ParcelDetailResponse } from '../interfaces/parcel-detail/parcel-detail-response';
+import { ParcelListResponse } from '../interfaces/parcel-list/parcel-list-response';
 
 @Injectable({ providedIn: 'root' })
 export class ParcelFacadeService {
@@ -41,6 +43,56 @@ export class ParcelFacadeService {
         this.error.set(message);
 
         return of(null);
+      }),
+    );
+  }
+
+  getMyParcels(): Observable<ParcelListResponse[] | null> {
+    return this.api.getMyParcels().pipe(
+      catchError((err) => {
+        const envelope = err?.error;
+        const message = envelope?.message ?? 'Failed to load parcels';
+        const errors: any[] = envelope?.errors ?? [];
+        if (errors.length > 0) {
+          errors.forEach((e) => this.toast.error(e.message));
+        } else {
+          this.toast.error(message);
+        }
+        this.error.set(message);
+        return of(null);
+      }),
+    );
+  }
+
+  getParcelById(parcelId: string): Observable<ParcelDetailResponse | null> {
+    return this.api.getParcelById(parcelId).pipe(
+      catchError((err) => {
+        const envelope = err?.error;
+        const message = envelope?.message ?? 'Failed to load parcel details';
+        const errors: any[] = envelope?.errors ?? [];
+        if (errors.length > 0) {
+          errors.forEach((e) => this.toast.error(e.message));
+        } else {
+          this.toast.error(message);
+        }
+        this.error.set(message);
+        return of(null);
+      }),
+    );
+  }
+
+  deleteParcel(parcelId: string): Observable<boolean> {
+    return this.api.deleteParcel(parcelId).pipe(
+      tap(() => {
+        this.toast.success('Parcel deleted successfully');
+      }),
+      map(() => true),
+      catchError((err) => {
+        const envelope = err?.error;
+        const message = envelope?.message ?? 'Failed to delete parcel';
+        this.toast.error(message);
+        this.error.set(message);
+        return of(false);
       }),
     );
   }

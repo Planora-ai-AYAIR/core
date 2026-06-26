@@ -36,7 +36,7 @@
       >
         <option value="" disabled>Choose a registered parcel…</option>
         @for (p of parcels(); track p.id) {
-          <option [value]="p.id">{{ p.name }} ({{ (p.area / 10000).toFixed(1) }} ha)</option>
+          <option [value]="p.id">{{ p.name }} ({{ p.areaHectares }} ha)</option>
         }
       </select>
       <div class="flex justify-end">
@@ -50,7 +50,6 @@
       </div>
     </div>
 
-    <!-- Selected parcel overview (if any) -->
     @if (selectedParcel(); as parcel) {
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="p-4 bg-planora-limestone rounded-xl">
@@ -60,7 +59,7 @@
         <div class="p-4 bg-planora-limestone rounded-xl">
           <span class="text-[9px] font-bold text-planora-basalt-400 uppercase">Area</span>
           <p class="text-sm font-semibold text-planora-basalt-800 mt-1">
-            {{ parcel.area.toLocaleString() }} m²
+            {{ parcel.areaM2.toLocaleString() }} m²
           </p>
         </div>
         <div class="p-4 bg-planora-limestone rounded-xl">
