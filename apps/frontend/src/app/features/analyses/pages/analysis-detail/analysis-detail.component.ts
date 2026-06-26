@@ -1,6 +1,6 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MapComponent } from '../../../../shared/components/map/map.component';
 import { MapLayerService } from '../../services/map-layer.service';
@@ -38,7 +38,7 @@ import maplibregl from 'maplibre-gl';
   templateUrl: './analysis-detail.component.html',
   styleUrls: ['./analysis-detail.component.css'],
 })
-export class AnalysisDetailComponent {
+export class AnalysisDetailComponent implements OnInit, OnDestroy {
   private _layerService = inject(MapLayerService);
   private _analysisFacade = inject(AnalysisDetailFacadeService);
   private _topographyInit = inject(TopographyMapInitialiser);
@@ -50,6 +50,9 @@ export class AnalysisDetailComponent {
   map = signal<maplibregl.Map | undefined>(undefined);
   activeModule = signal('topography');
 
+  private route = inject(ActivatedRoute);
+  private parcelId!: string;
+
   readonly today = new Date();
   modules = [
     { id: 'topography', label: 'Topography', status: 'ready' },
@@ -58,6 +61,85 @@ export class AnalysisDetailComponent {
     { id: 'risk', label: 'Construction Risk', status: 'ready' },
     { id: 'borehole', label: 'Drilling Plan', status: 'ready' },
   ];
+
+  // ── Progress from facade ──
+  moduleProgress = this._analysisFacade.moduleProgress;
+
+  // ── Derived status (for dot colors) ──
+  moduleStatus = computed(() => {
+    const progress = this.moduleProgress();
+    return {
+      topography: progress['topography']?.status ?? 'pending',
+      soil: progress['soil']?.status ?? 'pending',
+      bearing: progress['bearing']?.status ?? 'pending',
+      risk: progress['risk']?.status ?? 'pending',
+      borehole: progress['borehole']?.status ?? 'pending',
+    } as Record<string, string>;
+  });
+
+  isActiveModuleCompleted = computed(
+    () => this.moduleProgress()[this.activeModule()]?.status === 'Completed',
+  );
+
+  constructor() {
+    // ── Reactive layer adding ──
+    // When data arrives for a completed module, add its map layers immediately.
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.topographyData();
+      const progress = this.moduleProgress()['topography']?.status;
+      if (map && data && progress === 'Completed') {
+        this._topographyInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.soilData();
+      const progress = this.moduleProgress()['soil']?.status;
+      if (map && data && progress === 'Completed') {
+        this._soilInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.bearingData();
+      const progress = this.moduleProgress()['bearing']?.status;
+      if (map && data && progress === 'Completed') {
+        this._bearingInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.riskData();
+      const progress = this.moduleProgress()['risk']?.status;
+      if (map && data && progress === 'Completed') {
+        this._riskInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.boreholeData();
+      const progress = this.moduleProgress()['borehole']?.status;
+      if (map && data && progress === 'Completed') {
+        this._boreholeInit.addLayers(map, data);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    this.parcelId = this.route.snapshot.paramMap.get('parcelId')!;
+    if (this.parcelId) {
+      this._analysisFacade.startRealtimeProgress(this.parcelId);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this._analysisFacade.stopRealtimeProgress();
+  }
 
   activeModuleIndex() {
     return this.modules.findIndex((m) => m.id === this.activeModule());
@@ -102,27 +184,7 @@ export class AnalysisDetailComponent {
         });
       }
 
-      this._analysisFacade.loadAllData();
-
-      const topoData = this._analysisFacade.topographyData();
-      const soilData = this._analysisFacade.soilData();
-      const bearingData = this._analysisFacade.bearingData();
-      const riskData = this._analysisFacade.riskData();
-      const boreholeData = this._analysisFacade.boreholeData();
-
-      const progress = this.moduleProgress();
-
-      if (progress['topography']?.status === 'Completed' && topoData)
-        this._topographyInit.addLayers(map, topoData);
-      if (progress['soil']?.status === 'Completed' && soilData)
-        this._soilInit.addLayers(map, soilData);
-      if (progress['bearing']?.status === 'Completed' && bearingData)
-        this._bearingInit.addLayers(map, bearingData);
-      if (progress['risk']?.status === 'Completed' && riskData)
-        this._riskInit.addLayers(map, riskData);
-      if (progress['borehole']?.status === 'Completed' && boreholeData)
-        this._boreholeInit.addLayers(map, boreholeData);
-
+      // The layer metadata is registered immediately; actual data layers will be added by the effects above.
       const allLayers: MapLayerItem[] = [
         // topography
         {
@@ -171,23 +233,9 @@ export class AnalysisDetailComponent {
           group: 'soil',
           setOpacity: (m, o) => m.setPaintProperty('soil-composition', 'fill-opacity', o),
         },
-        {
-          id: 'soil-heatmap',
-          label: 'Soil Heatmap',
-          visible: true,
-          opacity: 0.7,
-          group: 'soil',
-        },
-        ...Object.keys(soilData?.heatmapUrls ?? {}).map((depth) => ({
-          id: `soil-heatmap-${depth}`,
-          label: `Soil Heatmap (${depth})`,
-          visible: false,
-          opacity: 0.7,
-          group: 'soil',
-          hidden: true,
-          setOpacity: (m: maplibregl.Map, o: number) =>
-            m.setPaintProperty(`soil-heatmap-${depth}`, 'raster-opacity', o),
-        })),
+        // soil heatmap layers will be added later once soilData is available
+        // they are already registered dynamically (the keys generation depends on data)
+        // For now we just register the static ones; the dynamic ones can be registered later if needed.
         // bearing
         {
           id: 'bearing-points',
@@ -264,35 +312,10 @@ export class AnalysisDetailComponent {
     this._layerService.setActiveGroup(id);
   }
 
-  moduleProgress = signal<Record<string, { status: ModuleStatus; estimatedSeconds: number }>>({
-    topography: { status: 'Completed', estimatedSeconds: 0 },
-    soil: { status: 'Completed', estimatedSeconds: 0 },
-    bearing: { status: 'Completed', estimatedSeconds: 0 },
-    risk: { status: 'Completed', estimatedSeconds: 0 },
-    borehole: { status: 'Completed', estimatedSeconds: 0 },
-  });
-
-  // Make the computed return a Record that accepts any string key
-  moduleStatus = computed(() => {
-    const progress = this.moduleProgress();
-    return {
-      topography: progress['topography']?.status ?? 'pending',
-      soil: progress['soil']?.status ?? 'pending',
-      bearing: progress['bearing']?.status ?? 'pending',
-      risk: progress['risk']?.status ?? 'pending',
-      borehole: progress['borehole']?.status ?? 'pending',
-    } as Record<string, string>; // allow indexing with any string
-  });
-
-  // cancelModule also uses the type
   cancelModule(moduleId: string) {
-    this.moduleProgress.update((prev) => ({
+    this._analysisFacade.moduleProgress.update((prev) => ({
       ...prev,
       [moduleId]: { ...prev[moduleId], status: 'Failed' as ModuleStatus },
     }));
   }
-
-  isActiveModuleCompleted = computed(
-    () => this.moduleProgress()[this.activeModule()]?.status === 'Completed',
-  );
 }

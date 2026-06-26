@@ -26,6 +26,11 @@ export const environment = {
 
   Analysis: {
     start: (parcelId: string) => `parcels/${parcelId}/analysis`,
+    status: (parcelId: string) => `parcels/${parcelId}/analysis-status`,
+    topography: (parcelId: string) => `topography/${parcelId}`,
+    soil: (parcelId: string) => `soil/${parcelId}`,
+    risk: (parcelId: string) => `risk/${parcelId}`,
+    borehole: (parcelId: string) => `borehole/${parcelId}`,
     dashboard: `analysis/jobs`,
   },
 
