@@ -1,7 +1,9 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Planora.Application.Common.Helpers;
 using Planora.Application.Features.Analysis.Dtos;
 using Planora.Application.Features.Notifications.Dtos;
+using Planora.Application.Features.Parcels.Dtos.Webhook;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Analysis;
@@ -94,6 +96,9 @@ public sealed class RiskCompletedHandler(
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
 
         await PublishCompletionNotificationAsync(analysisJob, ct);
+
+        await AnalysisNotificationHelper.PublishAnalysisResultAsync(
+            analysisJob, AiWebhookEventTypes.RiskCompleted, request.Payload, notificationPublisher, ct);
 
         logger.LogInformation("Successfully processed risk completed webhook for AnalysisJob {AnalysisJobId}, PythonJobId: {PythonJobId}", analysisJob.Id, request.PythonJobId);
 
