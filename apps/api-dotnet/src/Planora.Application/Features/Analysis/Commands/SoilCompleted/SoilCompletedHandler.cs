@@ -107,10 +107,7 @@ public sealed class SoilCompletedHandler(
         await analysisJobRepository.SaveChangesAsync(ct);
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
-
-        await AnalysisNotificationHelper.PublishCompletionNotificationAsync(
-            analysisJob, parcelRepository, notificationRepository, notificationPublisher, ct);
-
+        
         await AnalysisNotificationHelper.PublishAnalysisResultAsync(
             analysisJob, AiWebhookEventTypes.SoilCompleted, request.Payload, notificationPublisher, ct);
 

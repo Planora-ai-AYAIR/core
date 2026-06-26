@@ -19,8 +19,6 @@ public sealed class AnalysisCompletedHandler(
     ISoilResultRepository soilResultRepository,
     IRiskResultRepository riskResultRepository,
     IBoreholeResultRepository boreholeResultRepository,
-    IParcelRepository parcelRepository,
-    INotificationRepository notificationRepository,
     INotificationPublisher notificationPublisher,
     IHybridCacheService cacheService,
     ILogger<AnalysisCompletedHandler> logger) : IRequestHandler<AnalysisCompletedCommand, Result<AnalysisJobProcessedResponse>>
@@ -201,9 +199,6 @@ public sealed class AnalysisCompletedHandler(
         await analysisJobRepository.SaveChangesAsync(ct);
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
-
-        await AnalysisNotificationHelper.PublishCompletionNotificationAsync(
-            analysisJob, parcelRepository, notificationRepository, notificationPublisher, ct);
 
         await AnalysisNotificationHelper.PublishAnalysisResultAsync(
             analysisJob, AiWebhookEventTypes.AnalysisCompleted, request.Payload, notificationPublisher, ct);
