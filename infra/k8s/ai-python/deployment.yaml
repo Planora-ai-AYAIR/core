@@ -31,6 +31,8 @@ metadata:
   labels:
     app: ai-python
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
