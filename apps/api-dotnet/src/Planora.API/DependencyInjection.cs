@@ -102,9 +102,7 @@ public static class DependencyInjection
                 // {
                     builder.AllowAnyOrigin()
                         .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                        
+                        .AllowAnyMethod();
                 // }
             });
         });
