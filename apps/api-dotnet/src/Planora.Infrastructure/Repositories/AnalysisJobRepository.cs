@@ -51,6 +51,12 @@ public sealed class AnalysisJobRepository(PlanoraDbContext context) : IAnalysisJ
             .OrderByDescending(x => x.CompletedAt)
             .FirstOrDefaultAsync(ct);
     }
+    public async Task<IReadOnlyList<AnalysisJob>> GetByUserIdAsync(Guid userId, CancellationToken ct) =>
+        await context.AnalysisJobs
+            .Where(j => context.Parcels.Any(p => p.Id == j.ParcelId && p.UserId == userId && p.DeletedAt == null))
+            .OrderByDescending(j => j.CreatedAt)
+            .ToListAsync(ct);
+
     public async Task SaveChangesAsync(CancellationToken ct) =>
         await context.SaveChangesAsync(ct);
 }
