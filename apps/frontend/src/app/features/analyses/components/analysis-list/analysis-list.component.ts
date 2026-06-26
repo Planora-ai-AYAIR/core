@@ -1,18 +1,10 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StatCardComponent } from '../../../../shared/components/stat-card/stat-card.component';
-
-interface AnalysisData {
-  id: string;
-  parcelId: string;
-  parcelName: string;
-  status: 'Completed' | 'Running' | 'Pending' | 'Failed';
-  modulesCompleted: string[];
-  totalModules: number;
-  createdAt: string;
-}
+import { AnalysisListFacadeService } from '../../services/analysis-dashboard/analysis-list-facade.service.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-analysis-list',
@@ -22,25 +14,25 @@ interface AnalysisData {
   styleUrls: ['./analysis-list.component.css'],
 })
 export class AnalysisListComponent {
-  analyses = signal<AnalysisData[]>([]);
+  private readonly analysisDashboard = inject(AnalysisListFacadeService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  analyses = signal<AnalysisJobSummaryItem[]>([]);
   searchTerm = signal('');
   isLoading = signal(true);
 
   readonly allModules = ['topography', 'soil', 'risk', 'bearing', 'boreholes', 'report'];
 
-  // ── Summary KPIs ──
-  totalAnalyses = computed(() => this.analyses().length);
-  completedAnalyses = computed(
-    () => this.analyses().filter((a) => a.status === 'Completed').length,
-  );
-  runningAnalyses = computed(() => this.analyses().filter((a) => a.status === 'Running').length);
-  failedAnalyses = computed(() => this.analyses().filter((a) => a.status === 'Failed').length);
+  totalAnalyses = signal(0);
+  completedAnalyses = signal(0);
+  runningAnalyses = signal(0);
+  failedAnalyses = signal(0);
 
   filteredAnalyses = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.analyses();
     return this.analyses().filter(
-      (a) => a.parcelName.toLowerCase().includes(term) || a.parcelId.toLowerCase().includes(term),
+      (a) => a.name.toLowerCase().includes(term) || a.id.toLowerCase().includes(term),
     );
   });
 
@@ -49,57 +41,24 @@ export class AnalysisListComponent {
   }
 
   private loadAnalyses() {
-    // Simulate API call - replace with real backend data
-    const mockData: AnalysisData[] = [
-      {
-        id: 'ana_001',
-        parcelId: 'parcel_550e8400',
-        parcelName: 'Talaat Moustafa Group',
-        status: 'Completed',
-        modulesCompleted: ['topography', 'soil', 'risk'],
-        totalModules: this.allModules.length,
-        createdAt: '2026-05-25T01:38:00Z',
-      },
-      {
-        id: 'ana_002',
-        parcelId: 'parcel_1a2b3c4d',
-        parcelName: 'Orascom Construction',
-        status: 'Running',
-        modulesCompleted: ['topography', 'soil'],
-        totalModules: this.allModules.length,
-        createdAt: '2026-05-20T10:00:00Z',
-      },
-      {
-        id: 'ana_003',
-        parcelId: 'parcel_9z8y7x6w',
-        parcelName: 'Egyptian Resorts Company',
-        status: 'Pending',
-        modulesCompleted: [],
-        totalModules: this.allModules.length,
-        createdAt: '2026-05-28T08:30:00Z',
-      },
-      {
-        id: 'ana_004',
-        parcelId: 'parcel_xxx',
-        parcelName: 'Cairo Site 12',
-        status: 'Failed',
-        modulesCompleted: ['topography'],
-        totalModules: this.allModules.length,
-        createdAt: '2026-05-19T14:00:00Z',
-      },
-      {
-        id: 'ana_005',
-        parcelId: 'parcel_yyy',
-        parcelName: 'Alex West Marina 7',
-        status: 'Completed',
-        modulesCompleted: ['topography', 'soil', 'risk', 'bearing'],
-        totalModules: this.allModules.length,
-        createdAt: '2026-05-22T09:15:00Z',
-      },
-    ];
-
-    this.analyses.set(mockData);
-    this.isLoading.set(false);
+    this.analysisDashboard
+      .getAnalysisDashboard()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.isLoading.set(false);
+          if (response) {
+            this.analyses.set([...response.analysis]);
+            this.totalAnalyses.set(response.total);
+            this.completedAnalyses.set(response.completed);
+            this.runningAnalyses.set(response.running);
+            this.failedAnalyses.set(response.failed);
+          }
+        },
+        error: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 
   formatDate(dateStr: string): string {
