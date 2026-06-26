@@ -59,51 +59,38 @@ public sealed class GetParcelAnalysisQueryHandler(
 
         logger.LogInformation("Cache miss — assembling full analysis for ParcelId: {ParcelId}", request.ParcelId);
 
-        // 2. Load the latest aggregated analysis job for this parcel
-        //    (results are no longer split across per-module jobs — everything
-        //    is linked to a single AnalysisType.Aggregated job)
+        // 2. Load all analysis jobs for this parcel
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
 
-        var aggregatedJob = jobs
-            .Where(j => j.Type == AnalysisType.Aggregated)
-            .OrderByDescending(j => j.CreatedAt)
-            .FirstOrDefault();
-
-        if (aggregatedJob is null)
+        // 3. Determine aggregate status — if not all completed, return 409 Conflict
+        var aggregateStatus = ComputeAggregateStatus(jobs);
+        if (aggregateStatus != "Completed")
         {
+            var progress = ComputeProgress(jobs);
             logger.LogInformation(
-                "No aggregated analysis job found for ParcelId: {ParcelId}", request.ParcelId);
-            return AnalysisJobErrors.NotFound;
+                "Analysis not completed for ParcelId: {ParcelId}. Status: {Status}, Progress: {Progress}%",
+                request.ParcelId, aggregateStatus, progress);
+
+            return AnalysisJobErrors.AnalysisNotCompletedWithProgress(aggregateStatus, progress);
         }
 
-        // 3. If not completed yet, just return the job's own status.
-        //    NOTE: no percentage/progress calculation here on purpose —
-        //    with a single job there's no meaningful "X of Y modules done" ratio.
-        //    ComputeAggregateStatus/ComputeProgress are KEPT below (unused here)
-        //    for future use (e.g. a multi-job/status-polling flow).
-        if (aggregatedJob.Status != AnalysisJobStatus.Completed)
-        {
-            logger.LogInformation(
-                "Aggregated analysis not completed for ParcelId: {ParcelId}. Status: {Status}",
-                request.ParcelId, aggregatedJob.Status);
-
-            return AnalysisJobErrors.AnalysisNotCompleted;
-        }
-
-        // 4. All 4 module results are linked to the SAME AnalysisJobId now —
-        //    no per-type FindCompletedJob lookup needed anymore.
+        // 4. Find completed job IDs per module
+        var topoJob  = FindCompletedJob(jobs, AnalysisType.Topography);
+        var soilJob  = FindCompletedJob(jobs, AnalysisType.Soil);
+        var riskJob  = FindCompletedJob(jobs, AnalysisType.Risk);
+        var boreJob  = FindCompletedJob(jobs, AnalysisType.Borehole);
 
         // 5. Load module results sequentially (DbContext is not thread-safe).
-        var topographyResult = await LoadResultAsync(aggregatedJob, topographyResultRepository.GetByAnalysisJobIdAsync, ct);
-        var soilResult = await LoadResultAsync(aggregatedJob, soilResultRepository.GetByAnalysisJobIdAsync, ct);
-        var riskResult = await LoadResultAsync(aggregatedJob, riskResultRepository.GetByAnalysisJobIdAsync, ct);
-        var boreholeResult = await LoadResultAsync(aggregatedJob, boreholeResultRepository.GetByAnalysisJobIdAsync, ct);
+        var topographyResult = await LoadResultAsync(topoJob, topographyResultRepository.GetByAnalysisJobIdAsync, ct);
+        var soilResult       = await LoadResultAsync(soilJob, soilResultRepository.GetByAnalysisJobIdAsync, ct);
+        var riskResult       = await LoadResultAsync(riskJob, riskResultRepository.GetByAnalysisJobIdAsync, ct);
+        var boreholeResult   = await LoadResultAsync(boreJob, boreholeResultRepository.GetByAnalysisJobIdAsync, ct);
 
         // 6. Generate presigned URLs concurrently for each module
-        var topoAssetsTask = PresignTopographyAssetsAsync(topographyResult, ct);
-        var soilAssetsTask = PresignSoilAssetsAsync(soilResult, ct);
-        var riskAssetsTask = PresignRiskAssetsAsync(riskResult, ct);
-        var boreAssetsTask = PresignBoreholeAssetsAsync(boreholeResult, ct);
+        var topoAssetsTask  = PresignTopographyAssetsAsync(topographyResult, ct);
+        var soilAssetsTask  = PresignSoilAssetsAsync(soilResult, ct);
+        var riskAssetsTask  = PresignRiskAssetsAsync(riskResult, ct);
+        var boreAssetsTask  = PresignBoreholeAssetsAsync(boreholeResult, ct);
 
         await Task.WhenAll(topoAssetsTask, soilAssetsTask, riskAssetsTask, boreAssetsTask);
 
@@ -114,11 +101,14 @@ public sealed class GetParcelAnalysisQueryHandler(
 
         var expireAt = DateTime.UtcNow.Add(UrlExpiry);
 
-        // 7. Build the aggregated job metadata — directly from the single job now
-        var primaryJob = aggregatedJob;
+        // 7. Build the aggregated job metadata
+        var primaryJob = jobs.FirstOrDefault(j => j.Type == AnalysisType.Aggregated)
+                         ?? jobs.First();
 
-        var startedAt = aggregatedJob.CreatedAt;
-        var completedAt = aggregatedJob.CompletedAt;
+        var startedAt = jobs.Min(j => j.CreatedAt);
+        var completedAt = jobs
+            .Where(j => j.CompletedAt.HasValue)
+            .Max(j => j.CompletedAt);
         var processingSeconds = completedAt.HasValue
             ? (int)(completedAt.Value - startedAt).TotalSeconds
             : 0;
