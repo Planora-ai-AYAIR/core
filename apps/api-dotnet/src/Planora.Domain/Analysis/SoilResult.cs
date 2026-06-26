@@ -61,6 +61,42 @@ public sealed class SoilResult : AuditableEntity
     public double? BearingTrainingR2 { get; private set; }
     public bool? BearingShapEnabled { get; private set; }
 
+    public void SetBearingResult(
+        double bearingCapacityEstimate,
+        string bearingCapacityCategory,
+        double? bearingConfidence = null,
+        string? bearingRange = null,
+        string? bearingTrafficLight = null,
+        string? recommendedFoundation = null,
+        int? maxFloorsWithoutDeepFoundation = null,
+        string? floorCountCategory = null,
+        double? bearingMinKpa = null,
+        double? bearingMaxKpa = null,
+        string? featureImportanceJson = null,
+        string? soilFactorsJson = null,
+        string? bearingModelName = null,
+        string? bearingFramework = null,
+        double? bearingTrainingR2 = null,
+        bool? bearingShapEnabled = null)
+    {
+        BearingCapacityEstimate = bearingCapacityEstimate;
+        BearingCapacityCategory = bearingCapacityCategory;
+        BearingConfidence = bearingConfidence;
+        BearingRange = bearingRange;
+        BearingTrafficLight = bearingTrafficLight;
+        RecommendedFoundation = recommendedFoundation;
+        MaxFloorsWithoutDeepFoundation = maxFloorsWithoutDeepFoundation;
+        FloorCountCategory = floorCountCategory;
+        BearingMinKpa = bearingMinKpa;
+        BearingMaxKpa = bearingMaxKpa;
+        FeatureImportanceJson = featureImportanceJson;
+        SoilFactorsJson = soilFactorsJson;
+        BearingModelName = bearingModelName;
+        BearingFramework = bearingFramework;
+        BearingTrainingR2 = bearingTrainingR2;
+        BearingShapEnabled = bearingShapEnabled;
+    }
+
     private SoilResult() { }
 
     public SoilResult(
