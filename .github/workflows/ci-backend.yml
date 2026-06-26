@@ -6,8 +6,6 @@ on:
       - 'apps/api-dotnet/**'
   push:
     branches: [dev, main]
-    paths:
-      - 'apps/api-dotnet/**'
 
 permissions:
   contents: read

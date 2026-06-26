@@ -6,8 +6,6 @@ on:
       - 'apps/ai-python/**'
   push:
     branches: [dev, main]
-    paths:
-      - 'apps/ai-python/**'
 
 permissions:
   contents: read
