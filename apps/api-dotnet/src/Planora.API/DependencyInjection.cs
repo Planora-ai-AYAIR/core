@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services
-            .AddApiDocumentation()
+            .AddApiDocumentation(configuration)
             .AddAppCors(configuration)
             .AddAppOutputCaching()
             .AddAppHealthChecks(configuration)
@@ -35,7 +36,8 @@ public static class DependencyInjection
     }
 
     public static IServiceCollection AddApiDocumentation(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddEndpointsApiExplorer();
 
@@ -68,10 +70,15 @@ public static class DependencyInjection
                         Array.Empty<string>()
                     }
                 });
-            options.AddServer(new OpenApiServer
+            var connectionMode = configuration.GetValue<string>("ConnectionMode");
+
+            if (string.Equals(connectionMode, "Prod", StringComparison.OrdinalIgnoreCase))
             {
-                Url = "/v1"
-            });
+                options.AddServer(new OpenApiServer
+                {
+                    Url = "/v1"
+                });
+            }
         });
 
         return services;
