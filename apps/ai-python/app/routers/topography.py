@@ -249,7 +249,7 @@ async def _run_pipeline(python_job_id: str, req: TopographyJobRequest):
 
         upd("completed", 100, results=results)
         _jobs[python_job_id]["completedAt"] = utc_now_iso()
-        await send_analysis_webhook(python_job_id, results)
+        await send_analysis_webhook(python_job_id, results, "topography.completed")
 
     except Exception as e:
         logger.error(f"Pipeline failed for {python_job_id}: {e}", exc_info=True)

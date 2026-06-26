@@ -51,7 +51,7 @@ async def run_job(job_id: str, module: str, parcel_id: str) -> None:
         completedAt=utc_now_iso(),
         message=f"{module} analysis completed successfully",
     )
-    await send_analysis_webhook(job_id, result)
+    await send_analysis_webhook(job_id, result, "analysis.completed")
 
 
 # ── Guards ────────────────────────────────────────────────────

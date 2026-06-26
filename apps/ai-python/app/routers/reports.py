@@ -113,7 +113,7 @@ async def _run_report_pipeline(python_job_id: str, req: ReportJobRequest):
             "status": "completed",
             "results": results,
         })
-        await send_analysis_webhook(python_job_id, results)
+        await send_analysis_webhook(python_job_id, results, "pdf.completed")
 
     except Exception as e:
         logger.error(f"Report pipeline failed for {python_job_id}: {e}", exc_info=True)

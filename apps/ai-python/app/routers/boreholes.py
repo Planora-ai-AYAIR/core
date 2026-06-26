@@ -114,7 +114,7 @@ async def _run_borehole_pipeline(python_job_id: str, req: BoreholeJobRequest):
             "status": "completed",
             "results": results,
         })
-        await send_analysis_webhook(python_job_id, results)
+        await send_analysis_webhook(python_job_id, results, "borehole.completed")
 
     except Exception as e:
         logger.error(f"Borehole pipeline failed for {python_job_id}: {e}", exc_info=True)

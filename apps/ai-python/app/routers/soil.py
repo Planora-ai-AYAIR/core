@@ -164,7 +164,7 @@ async def _run_soil_pipeline(python_job_id: str, req: SoilJobRequest):
             "status": "completed",
             "results": results,
         })
-        await send_analysis_webhook(python_job_id, results)
+        await send_analysis_webhook(python_job_id, results, "soil.completed")
 
     except Exception as e:
         logger.error(f"Soil pipeline failed for {python_job_id}: {e}", exc_info=True)

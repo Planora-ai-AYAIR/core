@@ -21,9 +21,9 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _build_envelope(job_id: str, data: dict[str, Any]) -> dict[str, Any]:
+def _build_envelope(job_id: str, data: dict[str, Any], eventType: str) -> dict[str, Any]:
     return {
-        "eventType": "analysis.completed",
+        "eventType": eventType,
         "jobId": job_id,
         "data": data,
         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -41,6 +41,7 @@ def _compute_signature(body: bytes, secret: str) -> str:
 async def send_analysis_webhook(
     job_id: str,
     result_data: dict[str, Any],
+    eventType: str
 ) -> None:
     """Send a signed webhook notification for a completed job.
 
@@ -51,7 +52,7 @@ async def send_analysis_webhook(
     if not url or not secret:
         return
 
-    envelope = _build_envelope(job_id, result_data)
+    envelope = _build_envelope(job_id, result_data, eventType)
     body = json.dumps(envelope, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     signature = _compute_signature(body, secret)
 
