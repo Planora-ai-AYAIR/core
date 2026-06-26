@@ -91,19 +91,19 @@ public static class DependencyInjection
             options.AddPolicy("DefaultCorsPolicy", builder =>
             {
                 var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-                if (allowedOrigins.Length > 0)
-                {
-                    builder.WithOrigins(allowedOrigins)
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                }
-                else
-                {
+                // if (allowedOrigins.Length > 0)
+                // {
+                //     builder.WithOrigins(allowedOrigins)
+                //         .AllowAnyHeader()
+                //         .AllowAnyMethod()
+                //         .AllowCredentials();
+                // }
+                // else
+                // {
                     builder.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod();
-                }
+                // }
             });
         });
 
