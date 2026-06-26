@@ -1,3 +1,4 @@
+using Planora.Application.Features.Analysis.Dtos.Realtime;
 using Planora.Application.Features.Notifications.Dtos;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Domain.AnalysisJob;
@@ -123,6 +124,29 @@ internal static class AnalysisNotificationHelper
             result.Value.CreatedAt, result.Value.IsRead);
         await notificationPublisher.PublishAsync(parcel.UserId, dto, ct);
         await notificationPublisher.PublishToGroupAsync($"parcel:{parcel.Id}", dto, ct);
+    }
+
+    /// <summary>
+    /// Broadcasts the full typed analysis result to the <c>parcel:{id}</c> SignalR group
+    /// so the frontend can render instantly without re-fetching.
+    /// No parcel lookup required — all needed identifiers come from the job entity.
+    /// </summary>
+    public static Task PublishAnalysisResultAsync(
+        AnalysisJob job,
+        string eventType,
+        object resultPayload,
+        INotificationPublisher notificationPublisher,
+        CancellationToken ct)
+    {
+        var envelope = new AnalysisResultEnvelope(
+            EventType: eventType,
+            ParcelId: job.ParcelId,
+            AnalysisJobId: job.Id,
+            AnalysisType: job.Type.ToString(),
+            Result: resultPayload,
+            Timestamp: DateTime.UtcNow);
+
+        return notificationPublisher.PublishAnalysisResultAsync(job.ParcelId, envelope, ct);
     }
 
     public static string? ExtractLink(string? data) =>
