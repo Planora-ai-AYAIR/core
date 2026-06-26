@@ -19,8 +19,6 @@ namespace Planora.Application.Features.Analysis.Commands.RiskCompleted;
 public sealed class RiskCompletedHandler(
     IAnalysisJobRepository analysisJobRepository,
     IRiskResultRepository riskResultRepository,
-    IParcelRepository parcelRepository,
-    INotificationRepository notificationRepository,
     INotificationPublisher notificationPublisher,
     IHybridCacheService cacheService,
     ILogger<RiskCompletedHandler> logger) : IRequestHandler<RiskCompletedCommand, Result<AnalysisJobProcessedResponse>>
@@ -95,8 +93,6 @@ public sealed class RiskCompletedHandler(
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
 
-        await PublishCompletionNotificationAsync(analysisJob, ct);
-
         await AnalysisNotificationHelper.PublishAnalysisResultAsync(
             analysisJob, AiWebhookEventTypes.RiskCompleted, request.Payload, notificationPublisher, ct);
 
@@ -104,40 +100,4 @@ public sealed class RiskCompletedHandler(
 
         return new AnalysisJobProcessedResponse(analysisJob.Id, request.PythonJobId);
     }
-
-    private async Task PublishCompletionNotificationAsync(AnalysisJob job, CancellationToken ct)
-    {
-        var parcel = await parcelRepository.GetByIdAsync(job.ParcelId, ct);
-        if (parcel is null) return;
-
-        var data = JsonSerializer.Serialize(new
-        {
-            parcelId = parcel.Id,
-            moduleType = job.Type.ToString(),
-            analysisJobId = job.Id,
-            link = $"/parcels/{parcel.Id}/reports/{job.Type.ToString().ToLower()}"
-        });
-
-        var result = Notification.Create(
-            id: Guid.NewGuid(),
-            userId: parcel.UserId,
-            type: NotificationType.ModuleCompleted,
-            title: $"{job.Type} analysis complete",
-            message: $"{job.Type} analysis complete for Parcel #{parcel.Id.ToString()[..8]}",
-            data: data);
-
-        if (result.IsError) return;
-
-        await notificationRepository.AddAsync(result.Value, ct);
-        var dto = new NotificationDto(
-            result.Value.Id, result.Value.Type,
-            result.Value.Title, result.Value.Message,
-            Link: ExtractLink(data), Data: data,
-            result.Value.CreatedAt, result.Value.IsRead);
-        await notificationPublisher.PublishAsync(parcel.UserId, dto, ct);
-    }
-
-    private static string? ExtractLink(string? data) =>
-        data is null ? null : JsonDocument.Parse(data).RootElement
-            .TryGetProperty("link", out var l) ? l.GetString() : null;
 }

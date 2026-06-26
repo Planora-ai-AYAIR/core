@@ -16,8 +16,6 @@ namespace Planora.Application.Features.Analysis.Commands.TopographyCompleted;
 public sealed class TopographyCompletedHandler(
     IAnalysisJobRepository analysisJobRepository,
     ITopographyResultRepository topographyResultRepository,
-    IParcelRepository parcelRepository,
-    INotificationRepository notificationRepository,
     INotificationPublisher notificationPublisher,
     IHybridCacheService cacheService,
     ILogger<TopographyCompletedHandler> logger) : IRequestHandler<TopographyCompletedCommand, Result<AnalysisJobProcessedResponse>>
@@ -78,9 +76,6 @@ public sealed class TopographyCompletedHandler(
         await analysisJobRepository.SaveChangesAsync(ct);
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
-
-        await AnalysisNotificationHelper.PublishCompletionNotificationAsync(
-            analysisJob, parcelRepository, notificationRepository, notificationPublisher, ct);
 
         await AnalysisNotificationHelper.PublishAnalysisResultAsync(
             analysisJob, AiWebhookEventTypes.TopographyCompleted, request.Payload, notificationPublisher, ct);

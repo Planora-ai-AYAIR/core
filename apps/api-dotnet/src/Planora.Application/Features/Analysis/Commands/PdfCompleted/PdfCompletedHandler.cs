@@ -15,8 +15,6 @@ namespace Planora.Application.Features.Analysis.Commands.PdfCompleted;
 public sealed class PdfCompletedHandler(
     IAnalysisJobRepository analysisJobRepository,
     IReportRepository reportRepository,
-    IParcelRepository parcelRepository,
-    INotificationRepository notificationRepository,
     INotificationPublisher notificationPublisher,
     IHybridCacheService cacheService,
     ILogger<PdfCompletedHandler> logger) : IRequestHandler<PdfCompletedCommand, Result<AnalysisJobProcessedResponse>>
@@ -61,9 +59,6 @@ public sealed class PdfCompletedHandler(
         await analysisJobRepository.SaveChangesAsync(ct);
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
-
-        await AnalysisNotificationHelper.PublishCompletionNotificationAsync(
-            analysisJob, parcelRepository, notificationRepository, notificationPublisher, ct);
 
         await AnalysisNotificationHelper.PublishAnalysisResultAsync(
             analysisJob, AiWebhookEventTypes.PdfCompleted, request.Payload, notificationPublisher, ct);

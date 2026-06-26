@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 namespace Planora.Application.Common.Dtos;
 
 public sealed record SubmitAiAnalysisJobRequest(
+    [property: JsonPropertyName("jobId")] string JobId,
     [property: JsonPropertyName("parcelId")] string ParcelId,
     [property: JsonPropertyName("parcel")] ParcelInfo Parcel,
     [property: JsonPropertyName("boundingBox")] BoundingBoxInfo BoundingBox,
@@ -14,10 +15,10 @@ public sealed record ParcelInfo(
     [property: JsonPropertyName("areaM2")] decimal AreaM2);
 
 public sealed record BoundingBoxInfo(
-    [property: JsonPropertyName("minLatitude")] double MinLatitude,
-    [property: JsonPropertyName("minLongitude")] double MinLongitude,
-    [property: JsonPropertyName("maxLatitude")] double MaxLatitude,
-    [property: JsonPropertyName("maxLongitude")] double MaxLongitude);
+    [property: JsonPropertyName("minY")] double MinLatitude,
+    [property: JsonPropertyName("minX")] double MinLongitude,
+    [property: JsonPropertyName("maxY")] double MaxLatitude,
+    [property: JsonPropertyName("maxX")] double MaxLongitude);
 
 public sealed record GeometryInfo(
     [property: JsonPropertyName("type")] string Type,

@@ -16,8 +16,6 @@ namespace Planora.Application.Features.Analysis.Commands.BoreholeCompleted;
 public sealed class BoreholeCompletedHandler(
     IAnalysisJobRepository analysisJobRepository,
     IBoreholeResultRepository boreholeResultRepository,
-    IParcelRepository parcelRepository,
-    INotificationRepository notificationRepository,
     INotificationPublisher notificationPublisher,
     IHybridCacheService cacheService,
     ILogger<BoreholeCompletedHandler> logger) : IRequestHandler<BoreholeCompletedCommand, Result<AnalysisJobProcessedResponse>>
@@ -72,9 +70,6 @@ public sealed class BoreholeCompletedHandler(
         await analysisJobRepository.SaveChangesAsync(ct);
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
-
-        await AnalysisNotificationHelper.PublishCompletionNotificationAsync(
-            analysisJob, parcelRepository, notificationRepository, notificationPublisher, ct);
 
         await AnalysisNotificationHelper.PublishAnalysisResultAsync(
             analysisJob, AiWebhookEventTypes.BoreholeCompleted, request.Payload, notificationPublisher, ct);
