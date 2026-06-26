@@ -68,6 +68,10 @@ public static class DependencyInjection
                         Array.Empty<string>()
                     }
                 });
+            options.AddServer(new OpenApiServer
+            {
+                Url = "/v1"
+            });
         });
 
         return services;
