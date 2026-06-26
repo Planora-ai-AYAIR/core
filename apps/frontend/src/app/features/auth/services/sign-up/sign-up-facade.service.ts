@@ -37,7 +37,7 @@ export class SignUpFacadeService {
 
           if (status === 409) {
             const code = errResponse.errors?.[0]?.code;
-            if (code === 'EMAIL_ALREADY_EXISTS') {
+            if (code === 'EMAILALREADYEXISTS') {
               this.toaster.error('An account with this email already exists.');
             } else if (code === 'PHONE_ALREADY_EXISTS') {
               this.toaster.error('This phone number is already in use.');

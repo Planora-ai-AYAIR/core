@@ -1,178 +1,196 @@
-<div class="space-y-5 mx-auto p-6 sm:p-8">
-  <!-- HEADER -->
-  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-    <div>
-      <h1 class="text-3xl font-display font-bold text-planora-basalt-900 tracking-tight">
-        Site Register
-      </h1>
-      <p class="text-sm text-planora-basalt-400 mt-1">
-        Manage and audit tracked geological parcel footprints.
-      </p>
+@if (isLoading()) {
+  <div class="flex items-center justify-center h-64">
+    <div class="flex flex-col items-center gap-3">
+      <i class="pi pi-spin pi-spinner text-3xl text-planora-clay-500"></i>
+      <p class="text-sm text-planora-basalt-500">Loading parcels…</p>
     </div>
-    <a
-      routerLink="/app/parcels/new"
-      class="px-5 py-3 bg-planora-clay-500 text-white text-sm font-bold rounded-xl shadow-md shadow-planora-clay-500/10 hover:bg-planora-clay-600 hover:shadow-lg transition-all flex items-center gap-2"
-    >
-      <i class="pi pi-plus text-xs"></i> New Survey Footprint
-    </a>
   </div>
-
-  <!-- SUMMARY TILES -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-    <!-- Total Parcels -->
-    <app-stat-card
-      icon="pi-map"
-      label="Total Registered"
-      [value]="totalParcels() + ' Parcels'"
-      iconTextClass="text-planora-clay-600"
-    >
-    </app-stat-card>
-
-    <!-- Total Area (m²) -->
-    <app-stat-card
-      icon="pi-chart-line"
-      label="Surveyed Area"
-      [value]="(totalAreaM2() | number: '1.0-0') + ' m²'"
-      iconTextClass="text-planora-silt-600"
-    >
-    </app-stat-card>
-
-    <!-- Geotechnical Analyses (modules completed) -->
-    <app-stat-card
-      icon="pi-database"
-      label="Geotechnical Analyses"
-      [value]="totalModulesCompleted() + ' Layers'"
-      iconTextClass="text-planora-gold-600"
-    >
-    </app-stat-card>
-  </div>
-
-  <!-- SEARCH BAR -->
-  <div class="relative group">
-    <i
-      class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-planora-basalt-400 text-sm transition-colors group-focus-within:text-planora-clay-500"
-    ></i>
-    <input
-      type="text"
-      [ngModel]="searchTerm()"
-      (ngModelChange)="searchTerm.set($event)"
-      placeholder="Filter by identifier, project tag or coordinates..."
-      class="w-full pl-12 pr-4 py-3.5 bg-white border border-planora-desert-200 rounded-2xl text-planora-basalt-800 placeholder:text-planora-basalt-400 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-planora-clay-500/20 focus:border-planora-clay-500 transition-all duration-200"
-    />
-  </div>
-
-  <!-- PARCEL LIST -->
-  <div class="space-y-3">
-    <!-- Column Headers (hidden on mobile) -->
-    <div
-      class="hidden md:grid grid-cols-12 gap-4 px-6 text-[10px] font-black text-planora-basalt-400 uppercase tracking-[0.15em]"
-    >
-      <div class="col-span-5">Parcel / Client</div>
-      <div class="col-span-2">Area (m²)</div>
-      <div class="col-span-2">Registered</div>
-      <div class="col-span-2">Analysis Modules</div>
-      <div class="col-span-1 text-right">Actions</div>
+} @else if (error()) {
+  <div class="flex items-center justify-center h-64">
+    <div class="flex flex-col items-center gap-3">
+      <i class="pi pi-exclamation-triangle text-3xl text-planora-risk"></i>
+      <p class="text-sm text-planora-risk">{{ error() }}</p>
     </div>
-
-    @for (parcel of filteredParcels(); track parcel.id) {
-      <div
-        class="parcel-strip bg-white border border-planora-desert-200 rounded-2xl px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center transition-all duration-200 hover:border-planora-clay-500/40 relative overflow-hidden"
-      >
-        <!-- Risk accent bar -->
-        <div
-          class="absolute left-0 top-0 bottom-0 w-1"
-          [class.bg-green-500]="parcel.riskProfile === 'Low'"
-          [class.bg-planora-gold-500]="parcel.riskProfile === 'Medium'"
-          [class.bg-red-500]="parcel.riskProfile === 'High'"
-        ></div>
-
-        <!-- Parcel name & location -->
-        <div class="col-span-1 md:col-span-5 flex flex-col min-w-0">
-          <span class="text-sm font-bold text-planora-basalt-800 truncate">
-            {{ parcel.name }}
-          </span>
-          <span class="text-xs font-mono text-planora-basalt-400 mt-0.5 flex items-center gap-1.5">
-            <i class="pi pi-map-marker text-[10px]"></i> {{ parcel.location }}
-          </span>
-        </div>
-
-        <!-- Area in m² -->
-        <div class="col-span-1 md:col-span-2 flex items-center gap-2">
-          <span
-            class="text-xs font-bold text-planora-basalt-400 md:hidden uppercase tracking-wider w-24"
-            >Area:</span
-          >
-          <span
-            class="text-sm font-semibold text-planora-basalt-700 bg-planora-limestone px-2.5 py-1 rounded-lg border border-planora-desert-100 font-mono"
-          >
-            {{ parcel.areaM2 | number: '1.0-0' }} m²
-          </span>
-        </div>
-
-        <!-- Registration date -->
-        <div class="col-span-1 md:col-span-2 flex items-center gap-2">
-          <span
-            class="text-xs font-bold text-planora-basalt-400 md:hidden uppercase tracking-wider w-24"
-            >Registered:</span
-          >
-          <span class="text-sm text-planora-basalt-600 font-mono">{{ parcel.created }}</span>
-        </div>
-
-        <!-- Analysis Modules -->
-        <div class="col-span-1 md:col-span-2 flex items-center gap-2">
-          <span
-            class="text-xs font-bold text-planora-basalt-400 md:hidden uppercase tracking-wider w-24"
-            >Modules:</span
-          >
-          <div class="flex items-center gap-1.5">
-            <span
-              class="w-2 h-2 rounded-full"
-              [class.bg-green-500]="parcel.modulesCompletedCount > 0"
-              [class.bg-planora-basalt-300]="parcel.modulesCompletedCount === 0"
-            ></span>
-            <span class="text-sm font-medium text-planora-basalt-700">
-              {{ parcel.modulesCompletedCount }}/{{ parcel.totalModules }} modules
-            </span>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div
-          class="col-span-1 md:col-span-1 flex items-center justify-end gap-3 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-planora-desert-100 md:border-t-0"
-        >
-          <a
-            [routerLink]="['/app/parcels', parcel.id]"
-            class="w-8 h-8 rounded-lg bg-planora-limestone hover:bg-planora-clay-500 hover:text-white text-planora-basalt-600 text-xs font-bold flex items-center justify-center transition-all shadow-sm"
-            title="View Parcel Details"
-          >
-            <i class="pi pi-arrow-right"></i>
-          </a>
-          <button
-            (click)="$event.stopPropagation()"
-            aria-label="Delete Parcel"
-            class="w-8 h-8 rounded-lg border border-transparent hover:border-red-200 hover:bg-red-50/50 text-planora-basalt-400 hover:text-red-600 text-xs flex items-center justify-center transition-all"
-          >
-            <i class="pi pi-trash"></i>
-          </button>
-        </div>
-      </div>
-    }
-
-    <!-- Empty state -->
-    @if (filteredParcels().length === 0) {
-      <div
-        class="border border-dashed border-planora-desert-300 bg-white/50 rounded-2xl px-5 py-16 text-center text-planora-basalt-400 max-w-md mx-auto mt-8"
-      >
-        <div
-          class="w-12 h-12 rounded-full bg-planora-limestone flex items-center justify-center mx-auto mb-4 text-planora-basalt-400 shadow-inner"
-        >
-          <i class="pi pi-map-outline text-xl"></i>
-        </div>
-        <h3 class="font-bold text-planora-basalt-800 text-base">No Parcels Found</h3>
-        <p class="text-xs text-planora-basalt-400 mt-1 max-w-xs mx-auto">
-          Your search returned no results. Clear the filter or register a new parcel.
+  </div>
+} @else {
+  <div class="space-y-5 mx-auto p-6 sm:p-8">
+    <!-- HEADER -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-display font-bold text-planora-basalt-900 tracking-tight">
+          Site Register
+        </h1>
+        <p class="text-sm text-planora-basalt-400 mt-1">
+          Manage and audit tracked geological parcel footprints.
         </p>
       </div>
-    }
+      <a
+        routerLink="/app/parcels/new"
+        class="px-5 py-3 bg-planora-clay-500 text-white text-sm font-bold rounded-xl shadow-md shadow-planora-clay-500/10 hover:bg-planora-clay-600 hover:shadow-lg transition-all flex items-center gap-2"
+      >
+        <i class="pi pi-plus text-xs"></i> New Survey Footprint
+      </a>
+    </div>
+
+    <!-- SUMMARY TILES -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <app-stat-card
+        icon="pi-map"
+        label="Total Registered"
+        [value]="totalParcels() + ' Parcels'"
+        iconTextClass="text-planora-clay-600"
+      ></app-stat-card>
+
+      <app-stat-card
+        icon="pi-chart-line"
+        label="Surveyed Area"
+        [value]="(totalAreaM2() | number: '1.0-0') + ' m²'"
+        iconTextClass="text-planora-silt-600"
+      ></app-stat-card>
+
+      <app-stat-card
+        icon="pi-spin pi-spinner"
+        label="Processing"
+        [value]="processingCount() + ' Parcels'"
+        iconTextClass="text-planora-gold-600"
+      ></app-stat-card>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="relative group">
+      <i
+        class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-planora-basalt-400 text-sm transition-colors group-focus-within:text-planora-clay-500"
+      ></i>
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        placeholder="Filter by identifier, project tag or coordinates..."
+        class="w-full pl-12 pr-4 py-3.5 bg-white border border-planora-desert-200 rounded-2xl text-planora-basalt-800 placeholder:text-planora-basalt-400 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-planora-clay-500/20 focus:border-planora-clay-500 transition-all duration-200"
+      />
+    </div>
+
+    <!-- PARCEL LIST -->
+    <div class="space-y-3">
+      <!-- Column Headers (hidden on mobile) -->
+      <div
+        class="hidden md:grid grid-cols-12 gap-4 px-6 text-[10px] font-black text-planora-basalt-400 uppercase tracking-[0.15em]"
+      >
+        <div class="col-span-5">Parcel / Client</div>
+        <div class="col-span-2">Area (m²)</div>
+        <div class="col-span-2">Registered</div>
+        <div class="col-span-2">Status</div>
+        <div class="col-span-1 text-right">Actions</div>
+      </div>
+
+      @for (parcel of filteredParcels(); track parcel.id) {
+        <div
+          class="parcel-strip bg-white border border-planora-desert-200 rounded-2xl px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center transition-all duration-200 hover:border-planora-clay-500/40 relative overflow-hidden"
+        >
+          <!-- Risk accent bar -->
+          <div
+            class="absolute left-0 top-0 bottom-0 w-1"
+            [class.bg-green-500]="getRiskProfile(parcel) === 'Low'"
+            [class.bg-planora-gold-500]="getRiskProfile(parcel) === 'Medium'"
+            [class.bg-red-500]="getRiskProfile(parcel) === 'High'"
+          ></div>
+
+          <!-- Parcel name & location -->
+          <div class="col-span-1 md:col-span-5 flex flex-col min-w-0">
+            <span class="text-sm font-bold text-planora-basalt-800 truncate">
+              {{ parcel.name }}
+            </span>
+            <span
+              class="text-xs font-mono text-planora-basalt-400 mt-0.5 flex items-center gap-1.5"
+            >
+              <i class="pi pi-map-marker text-[10px]"></i> {{ getLocation(parcel) }}
+            </span>
+          </div>
+
+          <!-- Area in m² -->
+          <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+            <span
+              class="text-xs font-bold text-planora-basalt-400 md:hidden uppercase tracking-wider w-24"
+              >Area:</span
+            >
+            <span
+              class="text-sm font-semibold text-planora-basalt-700 bg-planora-limestone px-2.5 py-1 rounded-lg border border-planora-desert-100 font-mono"
+            >
+              {{ getAreaM2(parcel) | number: '1.0-0' }} m²
+            </span>
+          </div>
+
+          <!-- Registration date -->
+          <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+            <span
+              class="text-xs font-bold text-planora-basalt-400 md:hidden uppercase tracking-wider w-24"
+              >Registered:</span
+            >
+            <span class="text-sm text-planora-basalt-600 font-mono">{{ getCreated(parcel) }}</span>
+          </div>
+
+          <!-- Status -->
+          <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+            <span
+              class="text-xs font-bold text-planora-basalt-400 md:hidden uppercase tracking-wider w-24"
+              >Status:</span
+            >
+            <span
+              class="px-2.5 py-1 rounded-full text-xs font-semibold"
+              [ngClass]="getStatusClass(parcel.status)"
+            >
+              {{ parcel.status }}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div
+            class="col-span-1 md:col-span-1 flex items-center justify-end gap-3 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-planora-desert-100 md:border-t-0"
+          >
+            <a
+              [routerLink]="['/app/parcels', parcel.id]"
+              class="w-8 h-8 rounded-lg bg-planora-limestone hover:bg-planora-clay-500 hover:text-white text-planora-basalt-600 text-xs font-bold flex items-center justify-center transition-all shadow-sm"
+              title="View Parcel Details"
+            >
+              <i class="pi pi-arrow-right"></i>
+            </a>
+            <button
+              (click)="requestDelete(parcel.id); $event.stopPropagation()"
+              aria-label="Delete Parcel"
+              class="w-8 h-8 rounded-lg border border-transparent hover:border-red-200 hover:bg-red-50/50 text-planora-basalt-400 hover:text-red-600 text-xs flex items-center justify-center transition-all"
+              title="Delete"
+            >
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Empty state -->
+      @if (filteredParcels().length === 0) {
+        <div
+          class="border border-dashed border-planora-desert-300 bg-white/50 rounded-2xl px-5 py-16 text-center text-planora-basalt-400 max-w-md mx-auto mt-8"
+        >
+          <div
+            class="w-12 h-12 rounded-full bg-planora-limestone flex items-center justify-center mx-auto mb-4 text-planora-basalt-400 shadow-inner"
+          >
+            <i class="pi pi-map-outline text-xl"></i>
+          </div>
+          <h3 class="font-bold text-planora-basalt-800 text-base">No Parcels Found</h3>
+          <p class="text-xs text-planora-basalt-400 mt-1 max-w-xs mx-auto">
+            Your search returned no results. Clear the filter or register a new parcel.
+          </p>
+        </div>
+      }
+    </div>
   </div>
-</div>
+}
+
+<!-- Confirmation dialog -->
+<app-confirm-dialog
+  [visible]="showDeleteConfirm()"
+  title="Delete Parcel"
+  message="Are you sure you want to delete this parcel? This action cannot be undone."
+  (confirm)="onDeleteConfirmed()"
+  (cancel)="onDeleteCancel()"
+/>

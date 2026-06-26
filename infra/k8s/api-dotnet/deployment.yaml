@@ -20,6 +20,8 @@ metadata:
     app: api-dotnet
     project: planora-ai
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:

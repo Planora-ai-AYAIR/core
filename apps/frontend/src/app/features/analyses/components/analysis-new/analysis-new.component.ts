@@ -1,15 +1,13 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { AnalysisApiService } from '../../services/start-analysis/start-analysis-api.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-
-interface ParcelOption {
-  id: string;
-  name: string;
-  area: number; // m²
-  location: string;
-}
+import { ParcelListResponse } from '../../../parcels/interfaces/parcel-list/parcel-list-response';
+import { ParcelApiService } from '../../../parcels/services/parcel-api.service';
+import { ROUTES } from '../../../../shared/config/constants';
+import { AnalysisOptionsDto } from '../../interfaces/start-analysis/analysis-options-dto';
 
 @Component({
   selector: 'app-analysis-new',
@@ -18,32 +16,15 @@ interface ParcelOption {
   templateUrl: './analysis-new.component.html',
   styleUrls: ['./analysis-new.component.css'],
 })
-export class AnalysisNewComponent {
-  parcels = signal<ParcelOption[]>([
-    {
-      id: 'parcel_550e8400',
-      name: 'Talaat Moustafa Group',
-      area: 50000,
-      location: '30.044°N, 31.236°E',
-    },
-    {
-      id: 'parcel_1a2b3c4d',
-      name: 'Orascom Construction',
-      area: 120000,
-      location: '29.981°N, 31.112°E',
-    },
-    {
-      id: 'parcel_9z8y7x6w',
-      name: 'Egyptian Resorts Company',
-      area: 30000,
-      location: '31.198°N, 29.914°E',
-    },
-  ]);
+export class AnalysisNewComponent implements OnInit {
+  private parcelApi = inject(ParcelApiService);
+  private analysisApi = inject(AnalysisApiService);
+  private router = inject(Router);
 
+  parcels = signal<ParcelListResponse[]>([]);
   selectedParcelId = signal('');
   launching = signal(false);
 
-  // The six geotechnical modules that will run
   readonly modules = [
     { name: 'Topography', icon: 'pi-chart-line', color: 'text-planora-clay-500' },
     { name: 'Soil Composition', icon: 'pi-database', color: 'text-planora-silt-500' },
@@ -53,26 +34,51 @@ export class AnalysisNewComponent {
     { name: 'PDF Report', icon: 'pi-file-pdf', color: 'text-planora-clay-600' },
   ];
 
-  // The currently selected parcel object (if any)
-  selectedParcel = signal<ParcelOption | undefined>(undefined);
+  selectedParcel = computed(() => {
+    const p = this.parcels().find((p) => p.id === this.selectedParcelId());
+    if (!p) return null;
+    return {
+      ...p,
+      areaM2: p.areaHectares * 10000, // m²
+      location: this.formatLocation(p.centroidLatitude, p.centroidLongitude),
+    };
+  });
 
-  constructor(private router: Router) {
-    // When the selection changes, update the selected parcel detail
-    // (We'll do this via a reactive signal or simple method)
+  private formatLocation(lat?: number, lng?: number): string {
+    if (lat == null || lng == null) return 'Location not provided';
+    const latDir = lat >= 0 ? 'N' : 'S';
+    const lngDir = lng >= 0 ? 'E' : 'W';
+    return `${Math.abs(lat).toFixed(3)}°${latDir}, ${Math.abs(lng).toFixed(3)}°${lngDir}`;
+  }
+
+  ngOnInit(): void {
+    this.parcelApi.getMyParcels().subscribe((parcels) => this.parcels.set(parcels));
   }
 
   selectParcel(id: string) {
     this.selectedParcelId.set(id);
-    this.selectedParcel.set(this.parcels().find((p) => p.id === id));
   }
 
   launchAnalysis() {
     if (!this.selectedParcelId()) return;
     this.launching.set(true);
-    // Simulate API call
-    setTimeout(() => {
-      this.launching.set(false);
-      this.router.navigate(['/app/analyses']);
-    }, 2000);
+
+    const options: AnalysisOptionsDto = {
+      includeTopography: true,
+      includeSoil: true,
+      includeBearing: true,
+      includeRisk: true,
+      includeBorehole: true,
+    };
+
+    this.analysisApi.startAnalysis(this.selectedParcelId(), options).subscribe({
+      next: (response) => {
+        this.launching.set(false);
+        this.router.navigate([ROUTES.analysis]);
+      },
+      error: () => {
+        this.launching.set(false);
+      },
+    });
   }
 }

@@ -31,6 +31,7 @@ export const PUBLIC_AUTH_ENDPOINTS = [
 export const REG_EXP = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PASSWORD: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
+  phoneNumber: /^\+?[0-9]\d{1,14}$/,
   OTP: /^\d{6}$/,
   OTP_DIGIT: /^[0-9]$/,
 } as const;

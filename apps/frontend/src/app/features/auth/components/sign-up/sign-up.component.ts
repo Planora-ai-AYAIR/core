@@ -39,6 +39,7 @@ export class SignUpComponent implements OnInit {
         firstName: ['', Validators.required],
         lastName: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
+        phoneNumber: ['', [Validators.required, Validators.pattern(REG_EXP.phoneNumber)]],
         password: ['', [Validators.required, Validators.pattern(REG_EXP.PASSWORD)]],
         confirmPassword: ['', Validators.required],
         acceptTerms: [false, Validators.requiredTrue],
@@ -59,6 +60,8 @@ export class SignUpComponent implements OnInit {
 
     if (control.errors['required']) return VALIDATION_ERROR_MESSAGES.REQUIRED;
     if (control.errors['email']) return VALIDATION_ERROR_MESSAGES.EMAIL;
+    if (control.hasError('pattern') && controlName === 'phoneNumber')
+      return 'Please enter a valid phone number';
     if (control.errors['pattern']) {
       if (controlName === 'password') {
         return 'Must be 8+ characters, with upper, lower, number & special character.';
@@ -88,7 +91,7 @@ export class SignUpComponent implements OnInit {
       lastName: formValue.lastName,
       email: formValue.email,
       password: formValue.password,
-      phoneNumber: null,
+      phoneNumber: formValue.phoneNumber.trim(),
     };
 
     this.signUpFacade.register(request);

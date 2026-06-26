@@ -12,6 +12,7 @@ from app.services import client_mocks, store
 from app.routers.client._helpers import (
     make_job, require_parcel, require_result, ESTIMATED_DURATION,
 )
+from app.services.webhook_service import send_analysis_webhook
 
 router = APIRouter(prefix="/api/bearing", tags=["client: bearing"])
 MODULE = "bearing"
@@ -36,7 +37,7 @@ async def submit_bearing_job(req: BearingJobSubmit, bg: BackgroundTasks):
     )
 
 
-def _run_bearing(job_id: str, parcel_id: str, foundation_type: str) -> None:
+async def _run_bearing(job_id: str, parcel_id: str, foundation_type: str) -> None:
     store.update_job(job_id, status="processing", progressPercentage=50,
                      message="bearing analysis in progress")
     result = client_mocks.bearing_result(parcel_id, foundation_type=foundation_type)
@@ -45,6 +46,7 @@ def _run_bearing(job_id: str, parcel_id: str, foundation_type: str) -> None:
     store.update_job(job_id, status="completed", progressPercentage=100,
                      completedAt=utc_now_iso(),
                      message="bearing analysis completed successfully")
+    await send_analysis_webhook(job_id, result, "bearing.completed")
 
 
 @router.get("/{parcelId}", response_model=Envelope[BearingClientResult])

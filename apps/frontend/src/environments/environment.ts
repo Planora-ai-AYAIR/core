@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
 
+  //apiUrl: 'https://n8ng4pqeob.execute-api.us-east-1.amazonaws.com/v1/api/',
   apiUrl: 'https://planora-ai.runasp.net/api/',
 
   // APIs
@@ -19,9 +20,16 @@ export const environment = {
   Parcels: {
     create: 'parcels',
     list: 'parcels',
+    details: (id: string) => `parcels/${id}`,
+    delete: (id: string) => `parcels/${id}`,
   },
 
   Analysis: {
     start: (parcelId: string) => `parcels/${parcelId}/analysis`,
+  },
+
+  Notifications: {
+    list: 'notifications',
+    markAsRead: (id: string) => `notifications/${id}/read`,
   },
 };

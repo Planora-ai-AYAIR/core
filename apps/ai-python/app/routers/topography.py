@@ -27,6 +27,7 @@ from app.schemas.common import (
     utc_now_iso,
 )
 from app.services.gee_service import validate_bbox_egypt, export_dem_for_parcel
+from app.services.webhook_service import send_analysis_webhook
 from app.services.topography_service import run_analysis, load_model_b
 from app.config import settings
 
@@ -248,6 +249,7 @@ async def _run_pipeline(python_job_id: str, req: TopographyJobRequest):
 
         upd("completed", 100, results=results)
         _jobs[python_job_id]["completedAt"] = utc_now_iso()
+        await send_analysis_webhook(python_job_id, results, "topography.completed")
 
     except Exception as e:
         logger.error(f"Pipeline failed for {python_job_id}: {e}", exc_info=True)
