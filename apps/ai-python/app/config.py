@@ -79,6 +79,16 @@ class Settings(BaseSettings):
         description="S3 bucket name (provisioned by DevOps)"
     )
 
+    # ── Webhook Configuration ────────────────────────────────────────────
+    webhook_url: str = Field(
+        default="",
+        description="URL to POST analysis-completed webhooks to"
+    )
+    webhook_secret: str = Field(
+        default="",
+        description="HMAC-SHA256 shared secret for signing webhook payloads"
+    )
+
     def validate_gee_credentials(self) -> bool:
         """
         Validate that GEE credentials are configured.

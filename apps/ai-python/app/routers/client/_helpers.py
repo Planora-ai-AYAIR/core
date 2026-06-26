@@ -13,6 +13,7 @@ from fastapi import HTTPException
 
 from app.services import store
 from app.services import client_mocks
+from app.services.webhook_service import send_analysis_webhook
 from app.schemas.common import ErrorCode, error_response, utc_now_iso
 
 ESTIMATED_DURATION = "2-6 hours"
@@ -37,7 +38,7 @@ def make_job(module: str, parcel_id: str) -> dict:
     return job
 
 
-def run_job(job_id: str, module: str, parcel_id: str) -> None:
+async def run_job(job_id: str, module: str, parcel_id: str) -> None:
     """Background task: process the job and persist a contract-shaped result."""
     store.update_job(
         job_id, status="processing", progressPercentage=50,
@@ -50,6 +51,7 @@ def run_job(job_id: str, module: str, parcel_id: str) -> None:
         completedAt=utc_now_iso(),
         message=f"{module} analysis completed successfully",
     )
+    await send_analysis_webhook(job_id, module, result)
 
 
 # ── Guards ────────────────────────────────────────────────────
