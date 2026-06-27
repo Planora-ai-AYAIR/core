@@ -1,0 +1,39 @@
+<div class="bg-white rounded-xl border border-planora-desert-200 p-5 shadow-sm space-y-4 mb-4">
+  <h3 class="text-xs font-bold uppercase tracking-wider text-planora-basalt-600">
+    Cost Comparison
+  </h3>
+  <div class="grid grid-cols-2 gap-4 text-center">
+    <div class="p-3 bg-planora-limestone rounded-lg">
+      <div class="text-[10px] uppercase text-planora-basalt-400">Traditional</div>
+      <div class="text-lg font-bold text-planora-basalt-800">{{ traditionalCount }} boreholes</div>
+      <div class="text-sm text-red-600">{{ traditionalCost | number }} EGP</div>
+    </div>
+    <div class="p-3 bg-green-50 rounded-lg">
+      <div class="text-[10px] uppercase text-planora-basalt-400">Optimized</div>
+      <div class="text-lg font-bold text-planora-basalt-800">{{ optimizedCount }} boreholes</div>
+      <div class="text-sm text-green-600">{{ optimizedCost | number }} EGP</div>
+    </div>
+  </div>
+  <!-- Savings bar -->
+  <div>
+    <div class="flex justify-between text-xs mb-1">
+      <span>Savings</span>
+      <span class="font-bold text-green-600"
+        >{{ savingsAmount | number }} EGP ({{ savingsPercent }}%)</span
+      >
+    </div>
+    <div class="h-2 bg-planora-desert-100 rounded-full overflow-hidden">
+      <div class="h-full bg-green-500 rounded-full" [style.width.%]="savingsPercent"></div>
+    </div>
+  </div>
+  <!-- Editable rate -->
+  <div class="flex items-center gap-2 text-xs">
+    <label class="text-planora-basalt-600">Rate (EGP/m):</label>
+    <input
+      type="number"
+      [ngModel]="rate"
+      (ngModelChange)="rateChange.emit($event)"
+      class="w-20 px-2 py-1 border rounded-md text-xs"
+    />
+  </div>
+</div>

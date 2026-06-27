@@ -1,0 +1,14 @@
+<div class="flex bg-planora-limestone rounded-lg p-1 gap-1">
+  @for (depth of depths; track depth) {
+    <button
+      class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all"
+      [class.bg-white]="selected === depth"
+      [class.shadow-sm]="selected === depth"
+      [class.text-planora-basalt-700]="selected === depth"
+      [class.text-planora-basalt-400]="selected !== depth"
+      (click)="select.emit(depth)"
+    >
+      {{ depth }}
+    </button>
+  }
+</div>

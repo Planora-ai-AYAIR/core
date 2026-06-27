@@ -1,0 +1,136 @@
+<form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <!-- Heading group -->
+  <div class="text-center">
+    <h1 class="font-display text-3xl font-bold text-planora-basalt-900">Create Account</h1>
+    <p class="text-sm text-planora-basalt-500 mt-1">Start your site intelligence journey</p>
+  </div>
+
+  <!-- Form fields -->
+  <div class="space-y-5">
+    <!-- First Name -->
+    <app-input
+      formControlName="firstName"
+      type="text"
+      placeholder="First name"
+      [showError]="signUpForm.get('firstName')!.touched && signUpForm.get('firstName')!.invalid"
+      [errorMessage]="getErrorMessage('firstName')"
+    ></app-input>
+
+    <!-- Last Name -->
+    <app-input
+      formControlName="lastName"
+      type="text"
+      placeholder="Last name"
+      [showError]="signUpForm.get('lastName')!.touched && signUpForm.get('lastName')!.invalid"
+      [errorMessage]="getErrorMessage('lastName')"
+    ></app-input>
+
+    <!-- Email -->
+    <app-input
+      formControlName="email"
+      type="email"
+      placeholder="Email address"
+      [showError]="signUpForm.get('email')!.touched && signUpForm.get('email')!.invalid"
+      [errorMessage]="getErrorMessage('email')"
+    ></app-input>
+
+    <!-- Phone Number -->
+    <app-input
+      formControlName="phoneNumber"
+      type="tel"
+      placeholder="Phone number"
+      [showError]="signUpForm.get('phoneNumber')!.touched && signUpForm.get('phoneNumber')!.invalid"
+      [errorMessage]="getErrorMessage('phoneNumber')"
+    ></app-input>
+
+    <!-- Password -->
+    <app-input
+      formControlName="password"
+      type="password"
+      placeholder="Password (8+ chars, upper, lower, number, symbol)"
+      [showError]="signUpForm.get('password')!.touched && signUpForm.get('password')!.invalid"
+      [errorMessage]="getErrorMessage('password')"
+    ></app-input>
+
+    <!-- Confirm Password -->
+    <div>
+      <app-input
+        formControlName="confirmPassword"
+        type="password"
+        placeholder="Confirm password"
+        [showError]="
+          (signUpForm.get('confirmPassword')!.touched &&
+            signUpForm.get('confirmPassword')!.invalid) ||
+          formHasMismatch
+        "
+        [errorMessage]="
+          formHasMismatch ? 'Passwords do not match' : getErrorMessage('confirmPassword')
+        "
+      ></app-input>
+    </div>
+
+    <!-- Terms checkbox -->
+    <div class="flex items-start gap-2 mb-0">
+      <input
+        type="checkbox"
+        formControlName="acceptTerms"
+        id="acceptTerms"
+        class="mt-1 h-4 w-4 rounded border-planora-desert-300 text-planora-clay-500 focus:ring-planora-clay-400"
+      />
+      <label for="acceptTerms" class="text-xs text-planora-basalt-600 leading-snug">
+        I agree to the
+        <a
+          [routerLink]="ROUTES.terms"
+          class="underline text-planora-clay-600 hover:text-planora-clay-500"
+          >Terms of Service</a
+        >
+        and
+        <a
+          [routerLink]="ROUTES.privacy"
+          class="underline text-planora-clay-600 hover:text-planora-clay-500"
+          >Privacy Policy</a
+        >.
+      </label>
+    </div>
+    <div
+      class="terms-error text-xs text-planora-risk"
+      [class.visible]="
+        signUpForm.get('acceptTerms')!.touched && signUpForm.get('acceptTerms')!.invalid
+      "
+    >
+      {{ getErrorMessage('acceptTerms') }}
+    </div>
+  </div>
+
+  <!-- Submit button -->
+  <app-button
+    type="submit"
+    variant="primary"
+    [fullWidth]="true"
+    [disabled]="signUpForm.invalid"
+    [isLoading]="isLoading()"
+    loadingText="Creating account..."
+    class="mt-2"
+  >
+    Create Account
+    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M17 8l4 4m0 0l-4 4m4-4H3"
+      />
+    </svg>
+  </app-button>
+
+  <!-- Sign-in prompt -->
+  <p class="text-center text-sm text-planora-basalt-500 mt-6">
+    Already have an account?
+    <a
+      [routerLink]="[ROUTES.signIn]"
+      class="text-planora-clay-600 hover:text-planora-clay-500 font-semibold transition-colors"
+    >
+      Sign in
+    </a>
+  </p>
+</form>

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-python
+  namespace: planora
+  labels:
+    app: ai-python
+spec:
+  selector:
+    app: ai-python
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP

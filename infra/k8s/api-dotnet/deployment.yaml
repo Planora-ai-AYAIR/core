@@ -1,6 +1,160 @@
 apiVersion: v1
-kind: ConfigMap
+kind: Namespace
 metadata:
-  name: api-dotnet-placeholder
-data:
-  status: "pending"
+  name: planora
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-dotnet
+  namespace: planora
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::536728890307:role/planora-api-irsa-production"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-dotnet
+  namespace: planora
+  labels:
+    app: api-dotnet
+    project: planora-ai
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-dotnet
+  template:
+    metadata:
+      labels:
+        app: api-dotnet
+    spec:
+      serviceAccountName: api-dotnet
+      containers:
+        - name: api-dotnet
+          image: ghcr.io/planora-ai-ayair/planora-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: api-dotnet-config
+          env:
+            - name: ConnectionMode
+              value: "Prod"
+            - name: ConnectionStrings__ProdCS
+              valueFrom:
+                secretKeyRef:
+                  name: planora-db-secret
+                  key: ConnectionStrings__ProdCS
+            - name: ConnectionStrings__HangfireConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: planora-db-secret
+                  key: ConnectionStrings__HangfireConnectionString
+            - name: ConnectionStrings__RedisConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: planora-redis-secret
+                  key: ConnectionStrings__RedisConnectionString
+            - name: JWTSETTINGS__SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-jwt-secret
+                  key: JWTSETTINGS__SECRETKEY
+            - name: EMAILSETTINGS__SMTPHOST
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SMTPHOST
+            - name: EMAILSETTINGS__SMTPPORT
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SMTPPORT
+            - name: EMAILSETTINGS__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__USERNAME
+            - name: EMAILSETTINGS__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__PASSWORD
+            - name: EMAILSETTINGS__SENDEREMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SENDEREMAIL
+            - name: EMAILSETTINGS__SENDERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-smtp-secret
+                  key: EMAILSETTINGS__SENDERNAME
+            - name: EMAILSETTINGS__USESSL
+              value: "true"
+            - name: HANGFIRESETTINGS__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-hangfire-secret
+                  key: HANGFIRESETTINGS__USERNAME
+            - name: HANGFIRESETTINGS__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: planora-hangfire-secret
+                  key: HANGFIRESETTINGS__PASSWORD
+            - name: AIOPTIONS__BASEURL
+              valueFrom:
+                secretKeyRef:
+                  name: planora-ai-secret
+                  key: AIOPTIONS__BASEURL
+            - name: AIOPTIONS__APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-ai-secret
+                  key: AIOPTIONS__APIKEY
+            - name: AWS__REGION
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS__REGION
+            - name: AWS__BUCKETNAME
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS__BUCKETNAME
+            - name: AWS__ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS__ACCESSKEY
+            - name: AWS__SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: planora-s3-secret
+                  key: AWS__SECRETKEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      terminationGracePeriodSeconds: 60

@@ -1,0 +1,55 @@
+@if (boreholeData(); as data) {
+  <div class="space-y-6">
+    <app-borehole-summary
+      [minRequired]="data.minRequired"
+      [recommended]="data.recommended"
+      [coveragePercent]="data.coveragePercent"
+      [gridSize]="data.gridSize"
+      [strategy]="data.strategy"
+    />
+
+    <app-cost-comparison
+      [traditionalCount]="data.costAnalysis.traditionalCount"
+      [traditionalCost]="data.costAnalysis.traditionalCost"
+      [optimizedCount]="data.costAnalysis.optimizedCount"
+      [optimizedCost]="data.costAnalysis.optimizedCost"
+      [savingsAmount]="data.costAnalysis.savingsAmount"
+      [savingsPercent]="data.costAnalysis.savingsPercent"
+      [rate]="data.costAnalysis.ratePerMeter"
+      (rateChange)="onRateChange($event)"
+    />
+
+    <app-borehole-params
+      [params]="data.parameters"
+      (paramsChange)="onParamsChange($event)"
+      (recalculate)="onRecalculate()"
+    />
+
+    <!-- Map Overlays (already a card) -->
+    <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+      <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+        <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+          Map Overlays
+        </h3>
+      </div>
+      @for (layer of mapLayers(); track layer.id) {
+        <app-layer-control
+          [layer]="layer"
+          (toggle)="onToggleLayer($event)"
+          (opacityChange)="onLayerOpacityChange(layer.id, $event)"
+        ></app-layer-control>
+      }
+      <div class="pb-1"></div>
+    </div>
+
+    <!-- GeoJSON download button -->
+    <button
+      (click)="downloadGeoJSON()"
+      class="w-full py-2.5 bg-planora-clay-500 text-white text-xs font-bold rounded-lg hover:bg-planora-clay-600 transition-colors"
+    >
+      <i class="pi pi-download mr-1.5"></i> Download Borehole GeoJSON
+    </button>
+  </div>
+} @else {
+  <div class="text-center text-planora-basalt-400 py-12">Loading borehole data…</div>
+}

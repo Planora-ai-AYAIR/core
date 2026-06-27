@@ -1,0 +1,19 @@
+<div class="flex gap-3 justify-center" dir="ltr">
+  @for (i of digits; track i; let idx = $index) {
+    <input
+      #otpInput
+      [id]="'otp-' + idx"
+      type="text"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      maxlength="1"
+      autocomplete="one-time-code"
+      [value]="values()[idx]"
+      (input)="onInput(idx, $event)"
+      (keydown)="onKeydown(idx, $event)"
+      (paste)="onPaste($event)"
+      (focus)="onFocus(idx)"
+      class="w-12 h-14 text-center text-xl font-bold rounded-lg border-2 transition-colors duration-200 bg-white text-planora-basalt-800 border-planora-desert-300 focus:border-planora-clay-500 focus:ring-2 focus:ring-planora-clay-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    />
+  }
+</div>

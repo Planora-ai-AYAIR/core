@@ -15,8 +15,20 @@ __pycache__/
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfvars
 
 # OS/IDE
 .DS_Store
 .vscode/
+.vs/
 .idea/
+apps/api-dotnet/src/CLAUDE.md
+/apps/api-dotnet/src/CLAUDE.md
+**/.vs/
+*.user
+*.suo
+apps/api-dotnet/src/Planora.Api/appsettings.Development.Local.json
+apps/api-dotnet/src/Planora.Api/appsettings.Production.json
+apps/api-dotnet/src/Planora.Api/web.config
+/apps/api-dotnet/src/RULES.md
+/apps/api-dotnet/.claude

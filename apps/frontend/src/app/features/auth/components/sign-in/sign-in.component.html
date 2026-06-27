@@ -1,0 +1,76 @@
+<form [formGroup]="signInForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <!-- Heading group -->
+  <div class="text-center">
+    <h1 class="font-display text-3xl font-bold text-planora-basalt-900">Sign In</h1>
+    <p class="text-sm text-planora-basalt-500 mt-1">
+      Welcome back to your site intelligence dashboard
+    </p>
+  </div>
+
+  <!-- Form fields -->
+  <div class="space-y-5">
+    <app-input
+      formControlName="email"
+      type="email"
+      placeholder="Email address"
+      [showError]="
+        (signInForm.get('email')?.touched || false) && (signInForm.get('email')?.invalid || false)
+      "
+      [errorMessage]="getErrorMessage('email')"
+    ></app-input>
+
+    <div>
+      <app-input
+        formControlName="password"
+        type="password"
+        placeholder="Password"
+        [showError]="
+          (signInForm.get('password')?.touched || false) &&
+          (signInForm.get('password')?.invalid || false)
+        "
+        [errorMessage]="getErrorMessage('password')"
+      ></app-input>
+      <!-- Forgot password link -->
+      <div class="mt-2 text-right">
+        <a
+          [routerLink]="[ROUTES.forgotPassword]"
+          class="text-xs text-planora-clay-600 hover:text-planora-clay-500 font-medium transition-colors"
+        >
+          Forgot password?
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit button -->
+  <app-button
+    type="submit"
+    variant="primary"
+    [fullWidth]="true"
+    [disabled]="signInForm.invalid"
+    [isLoading]="isLoading()"
+    loadingText="Signing In..."
+    class="mt-2"
+  >
+    Sign In
+    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M17 8l4 4m0 0l-4 4m4-4H3"
+      />
+    </svg>
+  </app-button>
+
+  <!-- Sign-up prompt -->
+  <p class="text-center text-sm text-planora-basalt-500 mt-6">
+    Don't have an account?
+    <a
+      [routerLink]="[ROUTES.signUp]"
+      class="text-planora-clay-600 hover:text-planora-clay-500 font-semibold transition-colors"
+    >
+      Sign up
+    </a>
+  </p>
+</form>

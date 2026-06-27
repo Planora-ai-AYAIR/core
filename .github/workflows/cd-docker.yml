@@ -1,0 +1,135 @@
+name: CD — Build & Push Docker Images
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  ORG: planora-ai-ayair
+
+jobs:
+  build-push-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API
+        uses: docker/build-push-action@v7
+        with:
+          context: apps/api-dotnet/src
+          file: apps/api-dotnet/src/Planora.API/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/planora-api:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/planora-api:${{ github.sha }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name planora-eks-production
+
+      - name: Restart API Deployment
+        run: |
+          kubectl rollout restart deployment/api-dotnet -n planora
+
+  build-push-ai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push AI
+        uses: docker/build-push-action@v7
+        with:
+          context: apps/ai-python
+          file: apps/ai-python/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/planora-ai:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/planora-ai:${{ github.sha }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name planora-eks-production
+
+      - name: Restart AI Deployment
+        run: |
+          kubectl rollout restart deployment/ai-python -n planora
+
+  build-push-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v7
+        with:
+          context: apps/frontend
+          file: apps/frontend/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/planora-frontend:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/planora-frontend:${{ github.sha }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name planora-eks-production
+
+      - name: Restart Frontend Deployment
+        run: |
+          kubectl rollout restart deployment/frontend -n planora

@@ -1,0 +1,59 @@
+@if (riskData(); as data) {
+  <div class="space-y-5">
+    <div class="pb-2 border-b border-planora-desert-100">
+      <app-risk-gauge
+        [score]="data.overallRiskScore"
+        [level]="data.overallRiskLevel"
+        [description]="gaugeDescription()"
+        [benchmark]="data.benchmarkComparison"
+      />
+    </div>
+
+    <div class="grid grid-cols-1 gap-5">
+      <app-risk-card label="Flood" [risk]="data.floodRisk" />
+      <app-risk-card label="Seismic" [risk]="data.seismicRisk" />
+      <app-risk-card label="Expansive Soil" [risk]="data.expansiveSoilRisk" />
+      <app-risk-card label="Liquefaction" [risk]="data.liquefactionRisk" />
+    </div>
+
+    @if (relevantMitigations().length) {
+      <app-mitigation-suggestions [mitigations]="relevantMitigations()" />
+    }
+
+    <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+      <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+        <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+          Map Overlays
+        </h3>
+      </div>
+      @for (layer of mapLayers(); track layer.id) {
+        <app-layer-control
+          [layer]="layer"
+          (toggle)="onToggleLayer($event)"
+          (opacityChange)="onLayerOpacityChange(layer.id, $event)"
+        ></app-layer-control>
+      }
+      <div class="pb-1"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="rounded-lg border border-planora-desert-200 bg-white p-3 shadow-sm">
+      <h4 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-500 mb-2">
+        Legend
+      </h4>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+        @for (item of legend(); track item.label) {
+          <div class="flex items-center gap-1.5">
+            <span
+              class="inline-block h-2.5 w-2.5 rounded-sm"
+              [style.background-color]="item.color"
+            ></span>
+            <span class="text-[10px] text-planora-basalt-600">{{ item.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center text-planora-basalt-400 py-12">Loading risk data…</div>
+}

@@ -1,0 +1,7 @@
+.section-separator {
+  width: 60px;
+  height: 2px;
+  background: #d4c9a8; /* planora-desert-200 */
+  margin: 0 auto;
+  opacity: 0.4;
+}
