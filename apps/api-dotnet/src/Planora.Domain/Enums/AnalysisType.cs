@@ -4,7 +4,6 @@ public enum AnalysisType
 {
     Topography,
     Soil,
-    Bearing,
     Risk,
     Borehole,
     Pdf,

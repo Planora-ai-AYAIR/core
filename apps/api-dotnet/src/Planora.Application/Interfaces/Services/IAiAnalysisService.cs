@@ -8,7 +8,6 @@ public interface IAiAnalysisService
     Task<string> ProccessSoilAsync(ProccessSoilJobAiRequest request, CancellationToken ct = default);
     Task<string> ProccessRiskAsync(ProccessRiskJobAiRequest request, CancellationToken ct = default);
     Task<string> ProccessBoreholeAsync(ProccessBoreholeJobAiRequest request, CancellationToken ct = default);
-    Task<string> ProccessBearingAsync(ProccessBearingJobAiRequest request, CancellationToken ct = default);
     Task<string> ProccessPdfAsync(ProccessPdfJobAiRequest request, CancellationToken ct = default);
-    Task<string> SubmitAnalysisJobAsync(SubmitAiAnalysisJobRequest request, CancellationToken ct = default);
+    Task<AiAnalysisJobResponse> SubmitAnalysisJobAsync(SubmitAiAnalysisJobRequest request, CancellationToken ct = default);
 }

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Helpers;
@@ -9,13 +8,14 @@ using Planora.Application.Interfaces.Services;
 using Planora.Domain.Analysis;
 using Planora.Domain.AnalysisJob;
 using Planora.Domain.Shared.Results;
+using System.Text.Json;
 using INotificationPublisher = Planora.Application.Interfaces.Services.INotificationPublisher;
 
 namespace Planora.Application.Features.Analysis.Commands.BearingCompleted;
 
 public sealed class BearingCompletedHandler(
     IAnalysisJobRepository analysisJobRepository,
-    IBearingResultRepository bearingResultRepository,
+    ISoilResultRepository soilResultRepository,
     INotificationPublisher notificationPublisher,
     IHybridCacheService cacheService,
     ILogger<BearingCompletedHandler> logger) : IRequestHandler<BearingCompletedCommand, Result<AnalysisJobProcessedResponse>>
@@ -46,23 +46,21 @@ public sealed class BearingCompletedHandler(
         }
 
         var payload = request.Payload;
+        var featureImportanceJson = payload.FeatureImportance is not null
+            ? JsonSerializer.Serialize(payload.FeatureImportance) : null;
+        var soilFactorsJson = payload.SoilFactors is not null
+            ? JsonSerializer.Serialize(payload.SoilFactors) : null;
 
-        var existingBearingResult = await bearingResultRepository.GetByAnalysisJobIdAsync(analysisJob.Id, ct);
+        var existingSoilResult = await soilResultRepository.GetByAnalysisJobIdAsync(analysisJob.Id, ct);
 
-        if (existingBearingResult is null)
+        if (existingSoilResult is not null)
         {
-            var featureImportanceJson = payload.FeatureImportance is not null
-                ? JsonSerializer.Serialize(payload.FeatureImportance) : null;
-            var soilFactorsJson = payload.SoilFactors is not null
-                ? JsonSerializer.Serialize(payload.SoilFactors) : null;
-
-            var bearingResult = new BearingResult(
-                analysisJobId: analysisJob.Id,
-                bearingCapacityKpa: payload.BearingCapacityKpa,
-                classification: payload.Classification,
-                confidence: payload.Confidence,
-                range: payload.Range,
-                trafficLight: payload.TrafficLight,
+            existingSoilResult.SetBearingResult(
+                payload.BearingCapacityKpa,
+                payload.Classification ?? "",
+                bearingConfidence: payload.Confidence,
+                bearingRange: payload.Range,
+                bearingTrafficLight: payload.TrafficLight,
                 recommendedFoundation: payload.RecommendedFoundation,
                 maxFloorsWithoutDeepFoundation: payload.MaxFloorsWithoutDeepFoundation,
                 floorCountCategory: payload.FloorCountCategory,
@@ -70,13 +68,32 @@ public sealed class BearingCompletedHandler(
                 bearingMaxKpa: payload.UncertaintyRange?.MaximumKpa,
                 featureImportanceJson: featureImportanceJson,
                 soilFactorsJson: soilFactorsJson,
-                disclaimer: payload.Disclaimer,
-                modelName: payload.ModelMetadata?.ModelName,
-                framework: payload.ModelMetadata?.Framework,
-                trainingR2: payload.ModelMetadata?.TrainingR2,
-                shapEnabled: payload.ModelMetadata?.ShapEnabled);
+                bearingModelName: payload.ModelMetadata?.ModelName,
+                bearingFramework: payload.ModelMetadata?.Framework,
+                bearingTrainingR2: payload.ModelMetadata?.TrainingR2,
+                bearingShapEnabled: payload.ModelMetadata?.ShapEnabled);
+        }
+        else
+        {
+            var soilResult = new SoilResult(
+                analysisJob.Id, 0, 0, 0, 0, 0, 0,
+                payload.BearingCapacityKpa, payload.Classification ?? "",
+                bearingConfidence: payload.Confidence,
+                bearingRange: payload.Range,
+                bearingTrafficLight: payload.TrafficLight,
+                recommendedFoundation: payload.RecommendedFoundation,
+                maxFloorsWithoutDeepFoundation: payload.MaxFloorsWithoutDeepFoundation,
+                floorCountCategory: payload.FloorCountCategory,
+                bearingMinKpa: payload.UncertaintyRange?.MinimumKpa,
+                bearingMaxKpa: payload.UncertaintyRange?.MaximumKpa,
+                featureImportanceJson: featureImportanceJson,
+                soilFactorsJson: soilFactorsJson,
+                bearingModelName: payload.ModelMetadata?.ModelName,
+                bearingFramework: payload.ModelMetadata?.Framework,
+                bearingTrainingR2: payload.ModelMetadata?.TrainingR2,
+                bearingShapEnabled: payload.ModelMetadata?.ShapEnabled);
 
-            await bearingResultRepository.AddAsync(bearingResult, ct);
+            await soilResultRepository.AddAsync(soilResult, ct);
         }
 
         await analysisJobRepository.SaveChangesAsync(ct);

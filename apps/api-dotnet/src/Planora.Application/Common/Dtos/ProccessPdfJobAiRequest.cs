@@ -1,14 +1,13 @@
-using System.Text.Json.Serialization;
-
 namespace Planora.Application.Common.Dtos;
 
-public sealed record ProccessPdfJobAiRequest(
-    [property: JsonPropertyName("jobId")] string JobId,
-    [property: JsonPropertyName("parcelId")] string ParcelId,
-    [property: JsonPropertyName("moduleResults")] Dictionary<string, object>? ModuleResults = null,
-    [property: JsonPropertyName("reportOptions")] PdfReportOptions? ReportOptions = null);
-
-public sealed record PdfReportOptions(
-    [property: JsonPropertyName("companyName")] string? CompanyName = null,
-    [property: JsonPropertyName("projectName")] string? ProjectName = null,
-    [property: JsonPropertyName("language")] string Language = "en");
+public record ProccessPdfJobAiRequest(
+    Guid ParcelId,
+    Guid ReportId,
+    string? Language = "en",
+    bool IncludeMaps = true,
+    bool IncludeTables = true,
+    bool IncludeRiskMatrix = true,
+    string? DisclaimerLevel = "full",
+    string? CompanyName = null,
+    string? ProjectName = null
+);
