@@ -1,0 +1,53 @@
+/* ── Premium Geological Textures ── */
+.topo-texture-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.03; /* Highly subtle structural lines flowing underneath */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 80 Q 50 50 100 80 T 200 80 M0 120 Q 50 90 100 120 T 200 120' fill='none' stroke='%232B2D31' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Mixed overlay to give components a sand/grain tactile depth */
+.content-view-container {
+  position: relative;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
+  scroll-behavior: smooth;
+}
+
+/* ── Heavy Animations: Mobile Backdrop Transition ── */
+.mobile-backdrop {
+  background-color: rgba(26, 28, 30, 0.4); /* Deep basalt translucent blend */
+  animation: backdropFadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: opacity;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Fluid Page Entry Micro-interaction */
+router-outlet + * {
+  display: block;
+  animation: pageSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes pageSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,87 @@
+<div class="features-section py-20 lg:py-28">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <!-- Section heading -->
+    <div class="text-center mb-16 animate-fade-up">
+      <span
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-semibold tracking-widest uppercase bg-planora-basalt-800 text-planora-limestone mb-4"
+      >
+        <span class="w-1.5 h-1.5 bg-planora-gold-400 rotate-45"></span>
+        What you get
+      </span>
+      <h2 class="text-4xl lg:text-5xl font-display font-bold text-planora-basalt-900 mb-4">
+        Everything you need<br />
+        <span class="text-planora-clay-500">before breaking ground.</span>
+      </h2>
+      <p class="text-base sm:text-lg text-planora-basalt-600 max-w-2xl mx-auto">
+        Select any land parcel — Planora instantly delivers a complete geotechnical intelligence
+        dashboard.
+      </p>
+    </div>
+
+    <!-- Dashboard layout -->
+    <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+      <!-- Left: Simulated map -->
+      <div class="map-container h-[500px] lg:h-auto relative">
+        <div class="map-contours"></div>
+        <div class="parcel-polygon"></div>
+        <div class="scan-ring"></div>
+
+        <!-- Floating analysis badges on map -->
+        <div class="map-badge" style="top: 15%; left: 10%">
+          <i class="pi pi-chart-line text-xs"></i> Elevation OK
+        </div>
+        <div class="map-badge" style="top: 60%; right: 8%">
+          <i class="pi pi-sort-amount-down text-xs"></i> Silty Clay
+        </div>
+        <div class="map-badge" style="bottom: 20%; left: 15%">
+          <i class="pi pi-arrow-down text-xs"></i> 245 kPa
+        </div>
+        <div class="map-badge" style="top: 35%; right: 20%">
+          <i class="pi pi-exclamation-triangle text-xs"></i> Low risk
+        </div>
+      </div>
+
+      <!-- Right: Feature cards grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5 content-start">
+        @for (feature of features; track feature.id) {
+          <div
+            class="feature-card"
+            (mouseenter)="activeFeature.set(feature.id)"
+            [class.ring-2]="activeFeature() === feature.id"
+            [class.ring-planora-clay-500]="activeFeature() === feature.id"
+          >
+            <!-- Icon + title -->
+            <div class="flex items-center gap-3 mb-2">
+              <div class="feature-icon {{ feature.color }}">
+                <i
+                  class="pi {{ feature.icon }}"
+                  [class.text-white]="feature.color === 'bg-[#2B2D31]'"
+                  [class.text-planora-basalt-800]="feature.color !== 'bg-[#2B2D31]'"
+                ></i>
+              </div>
+              <h3 class="{{ feature.textColor }}">{{ feature.title }}</h3>
+            </div>
+            <!-- Description (truncated by default, expands on hover) -->
+            <p
+              class="text-planora-basalt-600 text-sm leading-relaxed line-clamp-2 group-hover:line-clamp-none"
+            >
+              {{ feature.description }}
+            </p>
+            <!-- Depth indicator -->
+            <div class="mt-3 flex items-center gap-2">
+              <span class="text-[10px] uppercase tracking-wider text-planora-basalt-500 font-mono"
+                >Depth:</span
+              >
+              <span class="text-xs font-semibold {{ feature.textColor }}">{{ feature.depth }}</span>
+            </div>
+            <!-- Map badge hint -->
+            <div class="mt-2 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full {{ feature.badgeColor }}"></span>
+              <span class="text-[11px] text-planora-basalt-600">{{ feature.mapBadge }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

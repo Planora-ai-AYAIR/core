@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.error-message,
+.helper-message {
+  display: block;
+  font-size: 0.75rem; 
+  padding-left: 0.25rem; 
+  padding-right: 0.25rem;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.2s ease-out,
+    opacity 0.2s ease-out,
+    margin-top 0.2s ease-out;
+}
+
+.error-message.error-visible {
+  max-height: 3rem;
+  opacity: 1;
+  margin-top: 0.375rem;
+  color: #a13e3a;
+}
+
+.helper-message.helper-visible {
+  max-height: 3rem;
+  opacity: 1;
+  margin-top: 0.375rem;
+  color: #6b7280;
+}
+
+/* Hide in Edge / IE */
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+/* Hide in Chrome, Safari, and most WebKit browsers */
+input[type='password']::-webkit-credentials-auto-fill-button,
+input[type='password']::-webkit-clear-button,
+input[type='password']::-webkit-reveal {
+  display: none;
+}
+
+/* Optional: just to be safe */
+input[type='password']::-webkit-inner-spin-button,
+input[type='password']::-webkit-outer-spin-button {
+  display: none;
+}

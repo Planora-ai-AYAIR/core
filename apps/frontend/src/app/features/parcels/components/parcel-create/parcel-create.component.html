@@ -1,0 +1,364 @@
+<div class="h-full w-full bg-planora-desert-50 relative overflow-hidden flex flex-col lg:flex-row">
+  <!-- Map area (flex-1 on desktop, fullscreen on mobile) -->
+  <div class="flex-1 relative min-w-0">
+    <app-map
+      #mapComponent
+      [center]="initialCenter"
+      [zoom]="initialZoom"
+      [pitch]="45"
+      [showSatelliteToggle]="true"
+      [enableDrawing]="true"
+      [enableGeocoder]="true"
+      [showLabels]="true"
+      [points]="polygonPoints()"
+      [highlightedIndex]="highlightedIndex()"
+      (mapReady)="onMapReady($event)"
+      (satelliteToggled)="isSatelliteActive.set($event)"
+      (pointsChange)="onPointsChanged($event)"
+      (pointClicked)="focusPoint($event)"
+      class="h-full w-full"
+    ></app-map>
+
+    @if (isSatelliteActive()) {
+      <div
+        class="absolute bottom-15 left-1/2 -translate-x-1/2 z-20 w-48 sm:w-64 bg-planora-basalt-900/80 backdrop-blur-md border border-white/10 p-3 sm:p-4 rounded-2xl shadow-2xl"
+      >
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[9px] sm:text-[10px] font-black text-white uppercase tracking-widest"
+            >Satellite Opacity</span
+          >
+          <span class="text-[9px] sm:text-[10px] font-mono text-planora-gold-400"
+            >{{ mapOpacity() }}%</span
+          >
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          [ngModel]="mapOpacity()"
+          (input)="updateOpacity($event)"
+          class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-planora-gold-500"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Mobile toggle button -->
+  <button
+    (click)="sidebarOpen.set(!sidebarOpen())"
+    class="lg:hidden absolute top-22 right-4 z-30 w-10 h-10 bg-white border border-planora-desert-200 rounded-full shadow-lg flex items-center justify-center text-planora-basalt-700 hover:bg-planora-limestone transition-colors"
+    [attr.aria-label]="sidebarOpen() ? 'Close panel' : 'Open panel'"
+  >
+    @if (sidebarOpen()) {
+      <i class="pi pi-times text-xl"></i>
+    } @else {
+      <i class="pi pi-cog text-xl"></i>
+    }
+  </button>
+
+  <!-- Desktop sidebar (always visible on lg) -->
+  <div
+    class="hidden lg:flex lg:w-100 lg:h-full bg-white border-l border-planora-desert-200 flex-col overflow-hidden"
+  >
+    <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
+  </div>
+
+  <!-- Mobile sidebar overlay (absolute, slides in from right) -->
+  @if (sidebarOpen()) {
+    <!-- Backdrop -->
+    <div
+      class="lg:hidden fixed inset-0 z-20 bg-black/40 backdrop-blur-sm"
+      (click)="sidebarOpen.set(false)"
+    ></div>
+    <div
+      class="lg:hidden absolute top-0 right-0 z-20 h-full w-full max-w-md bg-white border-l border-planora-desert-200 shadow-2xl overflow-hidden transition-transform duration-300 flex flex-col"
+    >
+      <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
+    </div>
+  }
+</div>
+
+<!-- Sidebar content template (shared) -->
+<ng-template #sidebarContent>
+  <div class="p-8 pb-4 shrink-0">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-2 h-2 rounded-full bg-planora-clay-500"></div>
+      <h2 class="text-xl font-display font-bold text-planora-basalt-900">Parcel Configuration</h2>
+    </div>
+    <p class="text-xs text-planora-basalt-400 leading-relaxed font-medium">
+      Define and save your site boundary coordinates.
+    </p>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-8 space-y-6 min-h-0 py-2">
+    <!-- Parcel name -->
+    <div class="space-y-2">
+      <label class="text-[10px] font-black text-planora-basalt-400 uppercase tracking-widest"
+        >Parcel Label</label
+      >
+      <input
+        [ngModel]="parcelName()"
+        (ngModelChange)="parcelName.set($event)"
+        placeholder="e.g. North Sector Site A"
+        class="w-full px-5 py-4 bg-white border border-planora-desert-100 rounded-2xl text-sm font-bold text-planora-basalt-800 outline-none focus:border-planora-clay-500 transition-all"
+      />
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div class="p-4 bg-white border border-planora-desert-100 rounded-2xl shadow-sm">
+        <span class="text-[9px] font-bold text-planora-basalt-400 uppercase block mb-1"
+          >Total Area</span
+        >
+        <div class="flex flex-col">
+          <span class="text-lg font-mono font-bold text-planora-basalt-900 leading-tight">
+            {{ parcelStats().sqMeters }}
+          </span>
+          <span class="text-[10px] font-bold text-planora-clay-600">m² (sq meters)</span>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white border border-planora-desert-100 rounded-2xl shadow-sm">
+        <span class="text-[9px] font-bold text-planora-basalt-400 uppercase block mb-1"
+          >Hectares</span
+        >
+        <div class="flex flex-col">
+          <span class="text-lg font-mono font-bold text-planora-basalt-900 leading-tight">
+            {{ parcelStats().hectares }}
+          </span>
+          <span class="text-[10px] font-bold text-planora-clay-600">ha</span>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white border border-planora-desert-100 rounded-2xl shadow-sm">
+        <span class="text-[9px] font-bold text-planora-basalt-400 uppercase block mb-1"
+          >Perimeter</span
+        >
+        <div class="flex flex-col">
+          <span class="text-lg font-mono font-bold text-planora-basalt-900 leading-tight">
+            {{ parcelStats().perimeter }}
+          </span>
+          <span class="text-[10px] font-bold text-planora-clay-600">meters (m)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nodes header + tools -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between border-b border-planora-desert-100 pb-2">
+        <label class="text-[10px] font-black text-planora-basalt-400 uppercase tracking-widest"
+          >Nodes ({{ polygonPoints().length }})</label
+        >
+        <div class="flex gap-3">
+          <button
+            (click)="dmsMode.set(!dmsMode())"
+            class="text-[10px] font-bold px-2 py-0.5 rounded transition-colors"
+            [class.bg-planora-clay-100]="dmsMode()"
+            [class.text-planora-clay-700]="dmsMode()"
+            [class.text-planora-basalt-400]="!dmsMode()"
+          >
+            DMS
+          </button>
+          <button
+            (click)="addManualPoint()"
+            class="text-[10px] font-bold text-planora-clay-600 hover:underline"
+          >
+            + Add
+          </button>
+          <button
+            (click)="fileInput.click()"
+            [disabled]="isGeoJsonLoading()"
+            class="text-[10px] font-bold text-planora-clay-600 hover:underline flex items-center gap-1"
+          >
+            <i class="pi pi-upload text-xs"></i> GeoJSON
+          </button>
+        </div>
+      </div>
+
+      <input
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept=".geojson,.json"
+        class="hidden"
+      />
+
+      @if (geoJsonError()) {
+        <div class="text-xs text-red-600 mt-1">
+          {{ geoJsonError() }}
+        </div>
+      }
+
+      <div class="space-y-2 pb-4 overflow-y-auto">
+        @for (point of polygonPoints(); track $index) {
+          <div
+            class="group flex flex-col gap-1 p-2 rounded-2xl transition-all duration-200 border border-transparent hover:border-planora-desert-200"
+            [class.bg-planora-desert-50]="highlightedIndex() === $index"
+            [class.border-planora-clay-200]="highlightedIndex() === $index"
+            (mouseenter)="highlightPoint($index)"
+            (mouseleave)="highlightPoint(null)"
+            (click)="focusPoint($index)"
+          >
+            <div class="flex items-center gap-2">
+              <div
+                class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors"
+                [class.bg-planora-clay-500]="highlightedIndex() === $index"
+                [class.text-white]="highlightedIndex() === $index"
+                [class.bg-planora-desert-100]="highlightedIndex() !== $index"
+                [class.text-planora-basalt-500]="highlightedIndex() !== $index"
+              >
+                {{ $index + 1 }}
+              </div>
+
+              <div
+                class="flex-1 bg-white border border-planora-desert-100 rounded-xl p-3 shadow-sm"
+              >
+                <div class="grid grid-cols-[30px_1fr] gap-y-3 items-center">
+                  <span class="text-[9px] font-black text-planora-basalt-300 uppercase">Lng</span>
+                  <div class="flex justify-end">
+                    @if (!dmsMode()) {
+                      <input
+                        type="number"
+                        step="0.000001"
+                        [(ngModel)]="point[0]"
+                        (input)="mapComponent?.setPoints(polygonPoints())"
+                        class="w-full text-xs font-mono font-bold outline-none bg-transparent text-right"
+                      />
+                    } @else {
+                      <div
+                        class="flex items-center gap-1 text-[10px] font-mono font-bold text-planora-basalt-900"
+                      >
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lng.degrees"
+                          (input)="onDmsChange($index, 'lng', 'degrees', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">°</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lng.minutes"
+                          (input)="onDmsChange($index, 'lng', 'minutes', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">'</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lng.seconds"
+                          (input)="onDmsChange($index, 'lng', 'seconds', $event)"
+                          class="w-10 bg-transparent outline-none text-right"
+                          step="0.01"
+                        />
+                        <span class="text-planora-basalt-400">"</span>
+                        <span class="ml-1 text-planora-clay-600 w-3 text-center">{{
+                          dmsPoints()[$index].lng.direction
+                        }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="col-span-2 border-t border-planora-desert-50"></div>
+
+                  <span class="text-[9px] font-black text-planora-basalt-300 uppercase">Lat</span>
+                  <div class="flex justify-end">
+                    @if (!dmsMode()) {
+                      <input
+                        type="number"
+                        step="0.000001"
+                        [(ngModel)]="point[1]"
+                        (input)="mapComponent?.setPoints(polygonPoints())"
+                        class="w-full text-xs font-mono font-bold outline-none bg-transparent text-right"
+                      />
+                    } @else {
+                      <div
+                        class="flex items-center gap-1 text-[10px] font-mono font-bold text-planora-basalt-900"
+                      >
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lat.degrees"
+                          (input)="onDmsChange($index, 'lat', 'degrees', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">°</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lat.minutes"
+                          (input)="onDmsChange($index, 'lat', 'minutes', $event)"
+                          class="w-7 bg-transparent outline-none text-right"
+                        />
+                        <span class="text-planora-basalt-400">'</span>
+                        <input
+                          type="number"
+                          [value]="dmsPoints()[$index].lat.seconds"
+                          (input)="onDmsChange($index, 'lat', 'seconds', $event)"
+                          class="w-10 bg-transparent outline-none text-right"
+                          step="0.01"
+                        />
+                        <span class="text-planora-basalt-400">"</span>
+                        <span class="ml-1 text-planora-clay-600 w-3 text-center">{{
+                          dmsPoints()[$index].lat.direction
+                        }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+              <button
+                (click)="removePoint($index); $event.stopPropagation()"
+                class="opacity-0 group-hover:opacity-100 text-planora-basalt-300 hover:text-red-500 transition-opacity"
+                title="Remove point"
+              >
+                <i class="pi pi-times-circle text-lg"></i>
+              </button>
+            </div>
+            @if (polygonPoints().length >= 2) {
+              <div
+                class="flex items-center gap-1 text-[10px] font-mono text-planora-basalt-500 pl-9"
+              >
+                <i class="pi pi-arrow-right text-[8px]"></i>
+                <span>{{ edgeLengths()[$index]?.toFixed(2) ?? '—' }} m</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom actions -->
+  <div class="p-8 bg-white border-t border-planora-desert-100 space-y-3 shrink-0">
+    @let pointsCount = polygonPoints().length;
+    @let isValid = pointsCount >= 3 && parcelName().length > 0;
+    <button
+      (click)="saveParcel()"
+      [disabled]="!isValid || saving()"
+      class="w-full py-4 bg-planora-basalt-900 text-white font-bold rounded-2xl disabled:bg-planora-desert-100 disabled:text-planora-basalt-300 transition-all flex flex-col items-center justify-center"
+    >
+      <div class="flex items-center gap-2">
+        @if (saving()) {
+          <i class="pi pi-spin pi-spinner text-sm"></i>
+        }
+        <span>{{ saving() ? 'Saving...' : 'Confirm & Save' }}</span>
+      </div>
+      @if (pointsCount > 0 && pointsCount < 3) {
+        <span class="text-[9px] font-medium opacity-60"
+          >Need {{ 3 - pointsCount }} more nodes to form area</span
+        >
+      }
+    </button>
+    <div class="flex gap-2">
+      <button
+        (click)="clearDrawing()"
+        class="flex-1 py-2 text-[10px] font-black uppercase text-planora-basalt-400 hover:bg-planora-desert-50 rounded-xl transition-all"
+      >
+        Clear All
+      </button>
+      <button
+        (click)="locateMe()"
+        class="px-5 py-2 border border-planora-desert-200 rounded-xl text-planora-basalt-600 hover:bg-planora-desert-50"
+      >
+        <i class="pi pi-directions"></i>
+      </button>
+    </div>
+  </div>
+</ng-template>

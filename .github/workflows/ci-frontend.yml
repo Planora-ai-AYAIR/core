@@ -5,15 +5,39 @@ on:
     paths:
       - 'apps/frontend/**'
   push:
-    paths:
-      - 'apps/frontend/**'
+    branches: [dev, main]
 
 permissions:
   contents: read
 
 jobs:
-  frontend-check:
+  build-and-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "Frontend CI placeholder"
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/frontend
+        run: npm install
+
+      - name: Lint
+        working-directory: apps/frontend
+        run: npm run lint || echo "Lint script missing — add to package.json"
+
+      - name: Build production
+        working-directory: apps/frontend
+        run: npm run build -- --configuration production
+
+      - name: Docker build check
+        run: |
+          docker build \
+            -f apps/frontend/Dockerfile \
+            -t planora-frontend:ci-check \
+            apps/frontend

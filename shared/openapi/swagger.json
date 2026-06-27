@@ -1,8 +1,4606 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "info": {
     "title": "GeoSense Shared Contract",
+    "description": "GeoSense AI — Internal AI Engine API (Python FastAPI)",
     "version": "0.1.0"
   },
-  "paths": {}
+  "paths": {
+    "/api/v1/topography/jobs": {
+      "post": {
+        "tags": [
+          "topography"
+        ],
+        "summary": "Submit Topography Job",
+        "description": "Submit a topography analysis job (§3.1.1).",
+        "operationId": "submit_topography_job_api_v1_topography_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopographyJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobAccepted_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topography/jobs/{pythonJobId}": {
+      "get": {
+        "tags": [
+          "topography"
+        ],
+        "summary": "Get Topography Status",
+        "description": "Poll topography job status (§3.1.2).",
+        "operationId": "get_topography_status_api_v1_topography_jobs__pythonJobId__get",
+        "parameters": [
+          {
+            "name": "pythonJobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pythonjobid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_TopographyJobData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/soil/jobs": {
+      "post": {
+        "tags": [
+          "soil"
+        ],
+        "summary": "Submit Soil Job",
+        "description": "Submit a soil analysis job (§3.2.1).",
+        "operationId": "submit_soil_job_api_v1_soil_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SoilJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobAccepted_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/soil/jobs/{pythonJobId}": {
+      "get": {
+        "tags": [
+          "soil"
+        ],
+        "summary": "Get Soil Status",
+        "description": "Poll soil job status (§3.2.2).",
+        "operationId": "get_soil_status_api_v1_soil_jobs__pythonJobId__get",
+        "parameters": [
+          {
+            "name": "pythonJobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pythonjobid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SoilJobData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/risks/jobs": {
+      "post": {
+        "tags": [
+          "risks"
+        ],
+        "summary": "Submit Risk Job",
+        "description": "Submit a risk assessment job (§3.3.1).",
+        "operationId": "submit_risk_job_api_v1_risks_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobAccepted_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/risks/jobs/{pythonJobId}": {
+      "get": {
+        "tags": [
+          "risks"
+        ],
+        "summary": "Get Risk Status",
+        "description": "Poll risk job status (§3.3.2).",
+        "operationId": "get_risk_status_api_v1_risks_jobs__pythonJobId__get",
+        "parameters": [
+          {
+            "name": "pythonJobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pythonjobid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_RiskJobData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/boreholes/jobs": {
+      "post": {
+        "tags": [
+          "boreholes"
+        ],
+        "summary": "Submit Borehole Job",
+        "description": "Submit a borehole optimization job (§3.4.1).",
+        "operationId": "submit_borehole_job_api_v1_boreholes_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoreholeJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobAccepted_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/boreholes/jobs/{pythonJobId}": {
+      "get": {
+        "tags": [
+          "boreholes"
+        ],
+        "summary": "Get Borehole Status",
+        "description": "Poll borehole job status (§3.4.2).",
+        "operationId": "get_borehole_status_api_v1_boreholes_jobs__pythonJobId__get",
+        "parameters": [
+          {
+            "name": "pythonJobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pythonjobid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BoreholeJobData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/jobs": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Submit Report Job",
+        "description": "Submit a PDF report generation job (§3.5.1).",
+        "operationId": "submit_report_job_api_v1_reports_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobAccepted_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/jobs/{pythonJobId}": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Get Report Status",
+        "description": "Poll report job status (§3.5.2).",
+        "operationId": "get_report_status_api_v1_reports_jobs__pythonJobId__get",
+        "parameters": [
+          {
+            "name": "pythonJobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pythonjobid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ReportJobData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/parcels": {
+      "post": {
+        "tags": [
+          "client: parcels"
+        ],
+        "summary": "Create Parcel",
+        "description": "Register a new land parcel boundary for analysis (§2.1.1).",
+        "operationId": "create_parcel_api_parcels_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParcelCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ParcelCreatedData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/parcels/{parcelId}": {
+      "get": {
+        "tags": [
+          "client: parcels"
+        ],
+        "summary": "Get Parcel",
+        "description": "Retrieve a registered parcel (§2.1.2).",
+        "operationId": "get_parcel_api_parcels__parcelId__get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ParcelData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/topography/jobs": {
+      "post": {
+        "tags": [
+          "client: topography"
+        ],
+        "summary": "Submit Topography Job",
+        "description": "Submit a topography analysis job (§2.2.1).",
+        "operationId": "submit_topography_job_api_topography_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopographyJobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobQueued_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/topography/{parcelId}": {
+      "get": {
+        "tags": [
+          "client: topography"
+        ],
+        "summary": "Get Topography Results",
+        "description": "Retrieve topography results (§2.2.2).",
+        "operationId": "get_topography_results_api_topography__parcelId__get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          },
+          {
+            "name": "includeTiles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include S3 signed URLs for raster tiles",
+              "default": true,
+              "title": "Includetiles"
+            },
+            "description": "Include S3 signed URLs for raster tiles"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "json | geojson",
+              "default": "json",
+              "title": "Format"
+            },
+            "description": "json | geojson"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_TopographyClientResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/soil/jobs": {
+      "post": {
+        "tags": [
+          "client: soil"
+        ],
+        "summary": "Submit Soil Job",
+        "description": "Submit a soil analysis job (§2.3.1).",
+        "operationId": "submit_soil_job_api_soil_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SoilJobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobQueued_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/soil/{parcelId}": {
+      "get": {
+        "tags": [
+          "client: soil"
+        ],
+        "summary": "Get Soil Results",
+        "description": "Retrieve soil results (§2.3.2).",
+        "operationId": "get_soil_results_api_soil__parcelId__get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "0-20cm | 20-50cm | 50-100cm | 100-200cm",
+              "default": "0-20cm",
+              "title": "Depth"
+            },
+            "description": "0-20cm | 20-50cm | 50-100cm | 100-200cm"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SoilClientResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bearing/jobs": {
+      "post": {
+        "tags": [
+          "client: bearing"
+        ],
+        "summary": "Submit Bearing Job",
+        "description": "Submit a bearing capacity job (§2.4.1).",
+        "operationId": "submit_bearing_job_api_bearing_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BearingJobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobQueued_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bearing/{parcelId}": {
+      "get": {
+        "tags": [
+          "client: bearing"
+        ],
+        "summary": "Get Bearing Results",
+        "description": "Retrieve bearing capacity results (§2.4.2).",
+        "operationId": "get_bearing_results_api_bearing__parcelId__get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BearingClientResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/risks/jobs": {
+      "post": {
+        "tags": [
+          "client: risks"
+        ],
+        "summary": "Submit Risk Job",
+        "description": "Submit a risk assessment job (§2.5.1).",
+        "operationId": "submit_risk_job_api_risks_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskJobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobQueued_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/risks/{parcelId}": {
+      "get": {
+        "tags": [
+          "client: risks"
+        ],
+        "summary": "Get Risk Results",
+        "description": "Retrieve risk results (§2.5.2).",
+        "operationId": "get_risk_results_api_risks__parcelId__get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_RiskClientResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boreholes/jobs": {
+      "post": {
+        "tags": [
+          "client: boreholes"
+        ],
+        "summary": "Submit Borehole Job",
+        "description": "Submit a borehole optimization job (§2.6.1).",
+        "operationId": "submit_borehole_job_api_boreholes_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoreholeJobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobQueued_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boreholes/{parcelId}": {
+      "get": {
+        "tags": [
+          "client: boreholes"
+        ],
+        "summary": "Get Borehole Results",
+        "description": "Retrieve borehole campaign plan (§2.6.2).",
+        "operationId": "get_borehole_results_api_boreholes__parcelId__get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_BoreholeClientResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/jobs": {
+      "post": {
+        "tags": [
+          "client: reports"
+        ],
+        "summary": "Submit Report Job",
+        "description": "Submit a PDF report generation job (§2.7.1).",
+        "operationId": "submit_report_job_api_reports_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportJobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobQueued_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/{parcelId}/pdf": {
+      "get": {
+        "tags": [
+          "client: reports"
+        ],
+        "summary": "Download Report",
+        "description": "Download the generated PDF report (§2.7.2).",
+        "operationId": "download_report_api_reports__parcelId__pdf_get",
+        "parameters": [
+          {
+            "name": "parcelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Parcelid"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force download vs inline view",
+              "default": true,
+              "title": "Download"
+            },
+            "description": "Force download vs inline view"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Report version timestamp",
+              "default": "latest",
+              "title": "Version"
+            },
+            "description": "Report version timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary PDF stream",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/pdf": {}
+            }
+          },
+          "404": {
+            "description": "Report not ready / parcel not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{jobId}/status": {
+      "get": {
+        "tags": [
+          "client: jobs"
+        ],
+        "summary": "Get Job Status",
+        "description": "Check the processing status of any asynchronous job (§2.8.1).",
+        "operationId": "get_job_status_api_jobs__jobId__status_get",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Jobid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_JobStatusData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyze": {
+      "post": {
+        "tags": [
+          "analyze"
+        ],
+        "summary": "Analyze",
+        "operationId": "analyze_api_v1_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Analyze Api V1 Analyze Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalyzeRequest": {
+        "properties": {
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "points"
+        ],
+        "title": "AnalyzeRequest"
+      },
+      "BearingCapacityClient": {
+        "properties": {
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": "kPa"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "range": {
+            "type": "string",
+            "title": "Range"
+          },
+          "trafficLight": {
+            "type": "string",
+            "title": "Trafficlight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "category",
+          "range",
+          "trafficLight"
+        ],
+        "title": "BearingCapacityClient"
+      },
+      "BearingClientResult": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "bearingCapacity": {
+            "$ref": "#/components/schemas/BearingCapacityClient"
+          },
+          "foundationRecommendation": {
+            "$ref": "#/components/schemas/FoundationRecommendation"
+          },
+          "soilFactors": {
+            "$ref": "#/components/schemas/BearingSoilFactors"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "bearingCapacity",
+          "foundationRecommendation",
+          "soilFactors",
+          "disclaimer",
+          "generatedAt"
+        ],
+        "title": "BearingClientResult"
+      },
+      "BearingJobSubmit": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "foundationType": {
+            "$ref": "#/components/schemas/FoundationType",
+            "default": "shallow"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId"
+        ],
+        "title": "BearingJobSubmit"
+      },
+      "BearingSoilFactors": {
+        "properties": {
+          "clayContent": {
+            "type": "number",
+            "title": "Claycontent"
+          },
+          "sandContent": {
+            "type": "number",
+            "title": "Sandcontent"
+          },
+          "moistureIndex": {
+            "type": "number",
+            "title": "Moistureindex"
+          },
+          "depthToWaterTable": {
+            "type": "number",
+            "title": "Depthtowatertable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clayContent",
+          "sandContent",
+          "moistureIndex",
+          "depthToWaterTable"
+        ],
+        "title": "BearingSoilFactors"
+      },
+      "BoreholeClientResult": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "recommendation": {
+            "$ref": "#/components/schemas/BoreholeRecommendation"
+          },
+          "placement": {
+            "$ref": "#/components/schemas/BoreholePlacement"
+          },
+          "costAnalysis": {
+            "$ref": "#/components/schemas/CostAnalysis"
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "recommendation",
+          "placement",
+          "costAnalysis",
+          "generatedAt"
+        ],
+        "title": "BoreholeClientResult"
+      },
+      "BoreholeJobData": {
+        "properties": {
+          "pythonJobId": {
+            "type": "string",
+            "title": "Pythonjobid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoreholeResults"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "pythonJobId",
+          "status"
+        ],
+        "title": "BoreholeJobData"
+      },
+      "BoreholeJobRequest": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "geoJson": {
+            "$ref": "#/components/schemas/GeoJsonPolygon"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoundingBox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "soilVariability": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SoilVariability"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/app__schemas__boreholes__BoreholeParameters",
+            "default": {
+              "maxSpacing": 30,
+              "minBoreholes": 12,
+              "targetDepth": 20
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId",
+          "geoJson"
+        ],
+        "title": "BoreholeJobRequest"
+      },
+      "BoreholeJobSubmit": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/app__schemas__client__BoreholeParameters",
+            "default": {
+              "maxSpacing": 30,
+              "minBoreholes": 12,
+              "targetDepth": 20,
+              "unit": "m"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId"
+        ],
+        "title": "BoreholeJobSubmit"
+      },
+      "BoreholePlacement": {
+        "properties": {
+          "strategy": {
+            "type": "string",
+            "title": "Strategy"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/PlacementPointClient"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "geoJsonUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geojsonurl"
+          }
+        },
+        "type": "object",
+        "required": [
+          "strategy",
+          "points"
+        ],
+        "title": "BoreholePlacement"
+      },
+      "BoreholeRecommendation": {
+        "properties": {
+          "minimumRequired": {
+            "type": "integer",
+            "title": "Minimumrequired"
+          },
+          "optimalCount": {
+            "type": "integer",
+            "title": "Optimalcount"
+          },
+          "coveragePercentage": {
+            "type": "integer",
+            "title": "Coveragepercentage"
+          },
+          "gridSize": {
+            "type": "string",
+            "title": "Gridsize"
+          }
+        },
+        "type": "object",
+        "required": [
+          "minimumRequired",
+          "optimalCount",
+          "coveragePercentage",
+          "gridSize"
+        ],
+        "title": "BoreholeRecommendation"
+      },
+      "BoreholeResults": {
+        "properties": {
+          "minimumRequired": {
+            "type": "integer",
+            "title": "Minimumrequired"
+          },
+          "optimalCount": {
+            "type": "integer",
+            "title": "Optimalcount"
+          },
+          "placementPoints": {
+            "items": {
+              "$ref": "#/components/schemas/PlacementPoint"
+            },
+            "type": "array",
+            "title": "Placementpoints",
+            "default": []
+          },
+          "costComparison": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CostComparison"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "minimumRequired",
+          "optimalCount"
+        ],
+        "title": "BoreholeResults"
+      },
+      "BoundingBox": {
+        "properties": {
+          "minX": {
+            "type": "number",
+            "title": "Minx"
+          },
+          "minY": {
+            "type": "number",
+            "title": "Miny"
+          },
+          "maxX": {
+            "type": "number",
+            "title": "Maxx"
+          },
+          "maxY": {
+            "type": "number",
+            "title": "Maxy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "minX",
+          "minY",
+          "maxX",
+          "maxY"
+        ],
+        "title": "BoundingBox",
+        "description": "WGS84 bounding box (Appendix B.1)."
+      },
+      "ContourLines": {
+        "properties": {
+          "geoJsonUrl": {
+            "type": "string",
+            "title": "Geojsonurl"
+          },
+          "interval": {
+            "type": "number",
+            "title": "Interval"
+          }
+        },
+        "type": "object",
+        "required": [
+          "geoJsonUrl",
+          "interval"
+        ],
+        "title": "ContourLines"
+      },
+      "CostAnalysis": {
+        "properties": {
+          "traditionalApproach": {
+            "$ref": "#/components/schemas/CostApproachClient"
+          },
+          "optimizedApproach": {
+            "$ref": "#/components/schemas/CostApproachClient"
+          },
+          "savings": {
+            "$ref": "#/components/schemas/CostSavings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "traditionalApproach",
+          "optimizedApproach",
+          "savings"
+        ],
+        "title": "CostAnalysis"
+      },
+      "CostApproach": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "cost": {
+            "type": "integer",
+            "title": "Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "cost"
+        ],
+        "title": "CostApproach"
+      },
+      "CostApproachClient": {
+        "properties": {
+          "boreholes": {
+            "type": "integer",
+            "title": "Boreholes"
+          },
+          "estimatedCost": {
+            "type": "integer",
+            "title": "Estimatedcost"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "EGP"
+          }
+        },
+        "type": "object",
+        "required": [
+          "boreholes",
+          "estimatedCost"
+        ],
+        "title": "CostApproachClient"
+      },
+      "CostComparison": {
+        "properties": {
+          "traditional": {
+            "$ref": "#/components/schemas/CostApproach"
+          },
+          "optimized": {
+            "$ref": "#/components/schemas/CostApproach"
+          },
+          "savings": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Savings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "traditional",
+          "optimized",
+          "savings"
+        ],
+        "title": "CostComparison"
+      },
+      "CostSavings": {
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "EGP"
+          },
+          "percentage": {
+            "type": "integer",
+            "title": "Percentage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "percentage"
+        ],
+        "title": "CostSavings"
+      },
+      "CutFillResult": {
+        "properties": {
+          "cut": {
+            "type": "number",
+            "title": "Cut"
+          },
+          "fill": {
+            "type": "number",
+            "title": "Fill"
+          },
+          "net": {
+            "type": "number",
+            "title": "Net"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cut",
+          "fill",
+          "net"
+        ],
+        "title": "CutFillResult"
+      },
+      "CutFillVolume": {
+        "properties": {
+          "cutVolume": {
+            "type": "number",
+            "title": "Cutvolume"
+          },
+          "fillVolume": {
+            "type": "number",
+            "title": "Fillvolume"
+          },
+          "netVolume": {
+            "type": "number",
+            "title": "Netvolume"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": "m³"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cutVolume",
+          "fillVolume",
+          "netVolume"
+        ],
+        "title": "CutFillVolume"
+      },
+      "ElevationResult": {
+        "properties": {
+          "min": {
+            "type": "number",
+            "title": "Min"
+          },
+          "max": {
+            "type": "number",
+            "title": "Max"
+          },
+          "mean": {
+            "type": "number",
+            "title": "Mean"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min",
+          "max",
+          "mean"
+        ],
+        "title": "ElevationResult"
+      },
+      "ElevationStats": {
+        "properties": {
+          "min": {
+            "type": "number",
+            "title": "Min"
+          },
+          "max": {
+            "type": "number",
+            "title": "Max"
+          },
+          "mean": {
+            "type": "number",
+            "title": "Mean"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": "m"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min",
+          "max",
+          "mean"
+        ],
+        "title": "ElevationStats"
+      },
+      "Envelope_BearingClientResult_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BearingClientResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[BearingClientResult]"
+      },
+      "Envelope_BoreholeClientResult_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoreholeClientResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[BoreholeClientResult]"
+      },
+      "Envelope_BoreholeJobData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoreholeJobData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[BoreholeJobData]"
+      },
+      "Envelope_JobAccepted_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobAccepted"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[JobAccepted]"
+      },
+      "Envelope_JobQueued_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobQueued"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[JobQueued]"
+      },
+      "Envelope_JobStatusData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobStatusData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[JobStatusData]"
+      },
+      "Envelope_ParcelCreatedData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParcelCreatedData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[ParcelCreatedData]"
+      },
+      "Envelope_ParcelData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParcelData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[ParcelData]"
+      },
+      "Envelope_ReportJobData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReportJobData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[ReportJobData]"
+      },
+      "Envelope_RiskClientResult_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskClientResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[RiskClientResult]"
+      },
+      "Envelope_RiskJobData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskJobData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[RiskJobData]"
+      },
+      "Envelope_SoilClientResult_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SoilClientResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[SoilClientResult]"
+      },
+      "Envelope_SoilJobData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SoilJobData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[SoilJobData]"
+      },
+      "Envelope_TopographyClientResult_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TopographyClientResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[TopographyClientResult]"
+      },
+      "Envelope_TopographyJobData_": {
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "title": "Statuscode"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TopographyJobData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusCode",
+          "message"
+        ],
+        "title": "Envelope[TopographyJobData]"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "description": "Individual error object within the errors array (§1.5)."
+      },
+      "FoundationRecommendation": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "suitable": {
+            "type": "boolean",
+            "title": "Suitable"
+          },
+          "maxFloorsWithoutDeepFoundation": {
+            "type": "integer",
+            "title": "Maxfloorswithoutdeepfoundation"
+          },
+          "floorCountCategory": {
+            "type": "string",
+            "title": "Floorcountcategory"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "suitable",
+          "maxFloorsWithoutDeepFoundation",
+          "floorCountCategory"
+        ],
+        "title": "FoundationRecommendation"
+      },
+      "FoundationType": {
+        "type": "string",
+        "enum": [
+          "shallow",
+          "deep",
+          "pile",
+          "mat"
+        ],
+        "title": "FoundationType"
+      },
+      "GeoJsonPolygon": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "Polygon"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Coordinates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coordinates"
+        ],
+        "title": "GeoJsonPolygon",
+        "description": "GeoJSON Polygon geometry (Appendix B.2)."
+      },
+      "GeoJsonUrls": {
+        "properties": {
+          "contours": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contours"
+          },
+          "ponding": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ponding"
+          }
+        },
+        "type": "object",
+        "title": "GeoJsonUrls"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "JobAccepted": {
+        "properties": {
+          "pythonJobId": {
+            "type": "string",
+            "title": "Pythonjobid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus",
+            "default": "queued"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "title": "Acceptedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pythonJobId",
+          "acceptedAt"
+        ],
+        "title": "JobAccepted",
+        "description": "202 Accepted payload for internal AI-engine job submission (§3.x.1)."
+      },
+      "JobQueued": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus",
+            "default": "queued"
+          },
+          "estimatedDuration": {
+            "type": "string",
+            "title": "Estimatedduration",
+            "default": "2-6 hours"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId"
+        ],
+        "title": "JobQueued",
+        "description": "Async job accepted payload (§1.3 / all §2 POST /jobs)."
+      },
+      "JobStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "processing",
+          "completed",
+          "failed"
+        ],
+        "title": "JobStatus"
+      },
+      "JobStatusData": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "progressPercentage": {
+            "type": "integer",
+            "title": "Progresspercentage",
+            "default": 0
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completedat"
+          },
+          "nextModule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextmodule"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId",
+          "module",
+          "status"
+        ],
+        "title": "JobStatusData",
+        "description": "§2.8 GET /api/jobs/{jobId}/status."
+      },
+      "MultiDepthItem": {
+        "properties": {
+          "depth": {
+            "type": "string",
+            "title": "Depth"
+          },
+          "sand": {
+            "type": "number",
+            "title": "Sand"
+          },
+          "clay": {
+            "type": "number",
+            "title": "Clay"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "depth",
+          "sand",
+          "clay",
+          "type"
+        ],
+        "title": "MultiDepthItem"
+      },
+      "ParcelCreateRequest": {
+        "properties": {
+          "clientName": {
+            "type": "string",
+            "title": "Clientname"
+          },
+          "geoJson": {
+            "$ref": "#/components/schemas/GeoJsonPolygon"
+          },
+          "area": {
+            "type": "number",
+            "title": "Area"
+          },
+          "areaUnit": {
+            "type": "string",
+            "title": "Areaunit",
+            "default": "m2"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clientName",
+          "geoJson",
+          "area"
+        ],
+        "title": "ParcelCreateRequest",
+        "description": "POST /api/parcels (§2.1.1).\n\n``areaUnit`` is a free string (not the ``AreaUnit`` enum) so the router can\nreturn the contracted ``INVALID_UNIT`` 400 rather than a generic 422."
+      },
+      "ParcelCreatedData": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "boundingBox": {
+            "$ref": "#/components/schemas/BoundingBox"
+          },
+          "area": {
+            "type": "number",
+            "title": "Area"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "boundingBox",
+          "area",
+          "createdAt"
+        ],
+        "title": "ParcelCreatedData",
+        "description": "§2.1.1 response (201)."
+      },
+      "ParcelData": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "clientName": {
+            "type": "string",
+            "title": "Clientname"
+          },
+          "area": {
+            "type": "number",
+            "title": "Area"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "modulesCompleted": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Modulescompleted",
+            "default": []
+          },
+          "boundingBox": {
+            "$ref": "#/components/schemas/BoundingBox"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "clientName",
+          "area",
+          "status",
+          "boundingBox",
+          "createdAt"
+        ],
+        "title": "ParcelData",
+        "description": "§2.1.2 response (200)."
+      },
+      "PlacementPoint": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lng": {
+            "type": "number",
+            "title": "Lng"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "lat",
+          "lng",
+          "priority",
+          "reason"
+        ],
+        "title": "PlacementPoint"
+      },
+      "PlacementPointClient": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "latitude": {
+            "type": "number",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "estimatedDepth": {
+            "type": "integer",
+            "title": "Estimateddepth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "latitude",
+          "longitude",
+          "priority",
+          "reason",
+          "estimatedDepth"
+        ],
+        "title": "PlacementPointClient"
+      },
+      "PondingRisk": {
+        "properties": {
+          "zonesCount": {
+            "type": "integer",
+            "title": "Zonescount"
+          },
+          "totalArea": {
+            "type": "number",
+            "title": "Totalarea"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": "m²"
+          },
+          "geoJsonUrl": {
+            "type": "string",
+            "title": "Geojsonurl"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zonesCount",
+          "totalArea",
+          "geoJsonUrl"
+        ],
+        "title": "PondingRisk"
+      },
+      "RasterTiles": {
+        "properties": {
+          "elevation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elevation"
+          },
+          "slope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slope"
+          }
+        },
+        "type": "object",
+        "title": "RasterTiles"
+      },
+      "ReportJobData": {
+        "properties": {
+          "pythonJobId": {
+            "type": "string",
+            "title": "Pythonjobid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReportResults"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "pythonJobId",
+          "status"
+        ],
+        "title": "ReportJobData"
+      },
+      "ReportJobRequest": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "moduleResults": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Moduleresults",
+            "default": {}
+          },
+          "reportOptions": {
+            "$ref": "#/components/schemas/app__schemas__reports__ReportOptions",
+            "default": {
+              "language": "en"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId"
+        ],
+        "title": "ReportJobRequest"
+      },
+      "ReportJobSubmit": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "reportOptions": {
+            "$ref": "#/components/schemas/app__schemas__client__ReportOptions",
+            "default": {
+              "language": "en",
+              "includeMaps": true,
+              "includeTables": true,
+              "includeRiskMatrix": true,
+              "disclaimerLevel": "full"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId"
+        ],
+        "title": "ReportJobSubmit"
+      },
+      "ReportResults": {
+        "properties": {
+          "pdfUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdfurl"
+          },
+          "pageCount": {
+            "type": "integer",
+            "title": "Pagecount",
+            "default": 0
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "title": "Sizebytes",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "ReportResults"
+      },
+      "RiskBreakdown": {
+        "properties": {
+          "flood": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskBreakdownItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seismic": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskBreakdownItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expansiveSoil": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskBreakdownItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "liquefaction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskBreakdownItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "RiskBreakdown"
+      },
+      "RiskBreakdownItem": {
+        "properties": {
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "factors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Factors",
+            "default": []
+          },
+          "geoJsonUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geojsonurl"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "replacementDepth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacementdepth"
+          },
+          "susceptibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Susceptibility"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "level"
+        ],
+        "title": "RiskBreakdownItem"
+      },
+      "RiskClientResult": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "overallScore": {
+            "type": "integer",
+            "title": "Overallscore"
+          },
+          "overallRiskLevel": {
+            "type": "string",
+            "title": "Overallrisklevel"
+          },
+          "maxScore": {
+            "type": "integer",
+            "title": "Maxscore",
+            "default": 100
+          },
+          "riskBreakdown": {
+            "$ref": "#/components/schemas/RiskBreakdown"
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "overallScore",
+          "overallRiskLevel",
+          "riskBreakdown",
+          "generatedAt"
+        ],
+        "title": "RiskClientResult"
+      },
+      "RiskJobData": {
+        "properties": {
+          "pythonJobId": {
+            "type": "string",
+            "title": "Pythonjobid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskResults"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "pythonJobId",
+          "status"
+        ],
+        "title": "RiskJobData"
+      },
+      "RiskJobRequest": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "geoJson": {
+            "$ref": "#/components/schemas/GeoJsonPolygon"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoundingBox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "riskTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Risktypes",
+            "default": [
+              "flood",
+              "seismic",
+              "expansiveSoil",
+              "liquefaction"
+            ]
+          },
+          "soilData": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SoilData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId",
+          "geoJson"
+        ],
+        "title": "RiskJobRequest"
+      },
+      "RiskJobSubmit": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "riskTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Risktypes",
+            "default": [
+              "flood",
+              "seismic",
+              "expansiveSoil",
+              "liquefaction"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId"
+        ],
+        "title": "RiskJobSubmit"
+      },
+      "RiskResults": {
+        "properties": {
+          "overallScore": {
+            "type": "integer",
+            "title": "Overallscore"
+          },
+          "flood": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskTypeResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seismic": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskTypeResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expansiveSoil": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskTypeResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "liquefaction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskTypeResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "overallScore"
+        ],
+        "title": "RiskResults"
+      },
+      "RiskTypeResult": {
+        "properties": {
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "zonesGeoJson": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zonesgeojson"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "level"
+        ],
+        "title": "RiskTypeResult"
+      },
+      "SlopeAnalysis": {
+        "properties": {
+          "distribution": {
+            "items": {
+              "$ref": "#/components/schemas/SlopeDistItem"
+            },
+            "type": "array",
+            "title": "Distribution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distribution"
+        ],
+        "title": "SlopeAnalysis"
+      },
+      "SlopeDistItem": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "range": {
+            "type": "string",
+            "title": "Range"
+          },
+          "percentage": {
+            "type": "number",
+            "title": "Percentage"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "range",
+          "percentage",
+          "color"
+        ],
+        "title": "SlopeDistItem"
+      },
+      "SlopeDistributionItem": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "percentage": {
+            "type": "number",
+            "title": "Percentage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "percentage"
+        ],
+        "title": "SlopeDistributionItem"
+      },
+      "SoilClassificationClient": {
+        "properties": {
+          "primaryType": {
+            "type": "string",
+            "title": "Primarytype"
+          },
+          "usdaClass": {
+            "type": "string",
+            "title": "Usdaclass"
+          },
+          "aiConfidence": {
+            "type": "number",
+            "title": "Aiconfidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "primaryType",
+          "usdaClass",
+          "aiConfidence"
+        ],
+        "title": "SoilClassificationClient"
+      },
+      "SoilClientResult": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "depth": {
+            "type": "string",
+            "title": "Depth"
+          },
+          "composition": {
+            "$ref": "#/components/schemas/SoilComposition"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/SoilPropertiesClient"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/SoilClassificationClient"
+          },
+          "multiDepthProfile": {
+            "items": {
+              "$ref": "#/components/schemas/MultiDepthItem"
+            },
+            "type": "array",
+            "title": "Multidepthprofile"
+          },
+          "heatmapTileUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heatmaptileurl"
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "depth",
+          "composition",
+          "properties",
+          "classification",
+          "multiDepthProfile",
+          "generatedAt"
+        ],
+        "title": "SoilClientResult"
+      },
+      "SoilComposition": {
+        "properties": {
+          "sand": {
+            "type": "number",
+            "title": "Sand"
+          },
+          "silt": {
+            "type": "number",
+            "title": "Silt"
+          },
+          "clay": {
+            "type": "number",
+            "title": "Clay"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": "%"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sand",
+          "silt",
+          "clay"
+        ],
+        "title": "SoilComposition"
+      },
+      "SoilData": {
+        "properties": {
+          "clayContent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claycontent"
+          },
+          "sandContent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sandcontent"
+          },
+          "waterTableDepth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Watertabledepth"
+          }
+        },
+        "type": "object",
+        "title": "SoilData",
+        "description": "Soil data passed to risk assessment."
+      },
+      "SoilDepthProfile": {
+        "properties": {
+          "depth": {
+            "type": "string",
+            "title": "Depth"
+          },
+          "sand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sand"
+          },
+          "silt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silt"
+          },
+          "clay": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clay"
+          },
+          "bulkDensity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bulkdensity"
+          },
+          "organicCarbon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organiccarbon"
+          },
+          "ph": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ph"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "depth"
+        ],
+        "title": "SoilDepthProfile"
+      },
+      "SoilJobData": {
+        "properties": {
+          "pythonJobId": {
+            "type": "string",
+            "title": "Pythonjobid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SoilResults"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "pythonJobId",
+          "status"
+        ],
+        "title": "SoilJobData"
+      },
+      "SoilJobRequest": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "geoJson": {
+            "$ref": "#/components/schemas/GeoJsonPolygon"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoundingBox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "depths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Depths",
+            "default": [
+              "0-20cm",
+              "20-50cm",
+              "50-100cm",
+              "100-200cm"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId",
+          "geoJson"
+        ],
+        "title": "SoilJobRequest"
+      },
+      "SoilJobSubmit": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "options": {
+            "$ref": "#/components/schemas/SoilOptions",
+            "default": {
+              "depths": [
+                "0-20cm",
+                "20-50cm",
+                "50-100cm",
+                "100-200cm"
+              ],
+              "includeHeatmap": true
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId"
+        ],
+        "title": "SoilJobSubmit"
+      },
+      "SoilOptions": {
+        "properties": {
+          "depths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Depths",
+            "default": [
+              "0-20cm",
+              "20-50cm",
+              "50-100cm",
+              "100-200cm"
+            ]
+          },
+          "includeHeatmap": {
+            "type": "boolean",
+            "title": "Includeheatmap",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "SoilOptions"
+      },
+      "SoilPropertiesClient": {
+        "properties": {
+          "bulkDensity": {
+            "type": "number",
+            "title": "Bulkdensity"
+          },
+          "bulkDensityUnit": {
+            "type": "string",
+            "title": "Bulkdensityunit",
+            "default": "g/cm³"
+          },
+          "organicCarbon": {
+            "type": "number",
+            "title": "Organiccarbon"
+          },
+          "organicCarbonUnit": {
+            "type": "string",
+            "title": "Organiccarbonunit",
+            "default": "%"
+          },
+          "ph": {
+            "type": "number",
+            "title": "Ph"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bulkDensity",
+          "organicCarbon",
+          "ph"
+        ],
+        "title": "SoilPropertiesClient"
+      },
+      "SoilResults": {
+        "properties": {
+          "surface": {
+            "$ref": "#/components/schemas/SoilSurface"
+          },
+          "depthProfiles": {
+            "items": {
+              "$ref": "#/components/schemas/SoilDepthProfile"
+            },
+            "type": "array",
+            "title": "Depthprofiles",
+            "default": []
+          },
+          "heatmapTileUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heatmaptileurl"
+          },
+          "dataSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Datasources",
+            "default": [
+              "ISRIC SoilGrids v2.0"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "surface"
+        ],
+        "title": "SoilResults"
+      },
+      "SoilSurface": {
+        "properties": {
+          "sand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sand"
+          },
+          "silt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silt"
+          },
+          "clay": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clay"
+          },
+          "bulkDensity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bulkdensity"
+          },
+          "organicCarbon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organiccarbon"
+          },
+          "ph": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ph"
+          },
+          "classification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Classification"
+          }
+        },
+        "type": "object",
+        "title": "SoilSurface"
+      },
+      "SoilVariability": {
+        "properties": {
+          "hotspotZones": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Hotspotzones",
+            "default": []
+          },
+          "homogeneousZones": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Homogeneouszones",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "SoilVariability"
+      },
+      "TileUrls": {
+        "properties": {
+          "elevation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elevation"
+          },
+          "slope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slope"
+          }
+        },
+        "type": "object",
+        "title": "TileUrls"
+      },
+      "TopographyClientResult": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "elevation": {
+            "$ref": "#/components/schemas/ElevationStats"
+          },
+          "slopeAnalysis": {
+            "$ref": "#/components/schemas/SlopeAnalysis"
+          },
+          "cutFill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CutFillVolume"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contourLines": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ContourLines"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pondingRisk": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PondingRisk"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rasterTiles": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RasterTiles"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId",
+          "elevation",
+          "slopeAnalysis",
+          "generatedAt"
+        ],
+        "title": "TopographyClientResult"
+      },
+      "TopographyContractOptions": {
+        "properties": {
+          "contourInterval": {
+            "type": "number",
+            "title": "Contourinterval",
+            "default": 0.5
+          },
+          "slopeCategories": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Slopecategories",
+            "default": [
+              2,
+              5,
+              15
+            ]
+          },
+          "generateCutFill": {
+            "type": "boolean",
+            "title": "Generatecutfill",
+            "default": true
+          },
+          "referencePlane": {
+            "type": "string",
+            "title": "Referenceplane",
+            "default": "auto"
+          }
+        },
+        "type": "object",
+        "title": "TopographyContractOptions",
+        "description": "Options from §3.1.1 request payload."
+      },
+      "TopographyJobData": {
+        "properties": {
+          "pythonJobId": {
+            "type": "string",
+            "title": "Pythonjobid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "progressPercentage": {
+            "type": "integer",
+            "title": "Progresspercentage",
+            "default": 0
+          },
+          "currentStage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currentstage"
+          },
+          "stageDetails": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stagedetails"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TopographyResults"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pythonJobId",
+          "status"
+        ],
+        "title": "TopographyJobData"
+      },
+      "TopographyJobRequest": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          },
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "geoJson": {
+            "$ref": "#/components/schemas/GeoJsonPolygon"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoundingBox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "options": {
+            "$ref": "#/components/schemas/TopographyContractOptions",
+            "default": {
+              "contourInterval": 0.5,
+              "slopeCategories": [
+                2,
+                5,
+                15
+              ],
+              "generateCutFill": true,
+              "referencePlane": "auto"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "parcelId",
+          "geoJson"
+        ],
+        "title": "TopographyJobRequest"
+      },
+      "TopographyJobSubmit": {
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "title": "Parcelid"
+          },
+          "options": {
+            "$ref": "#/components/schemas/TopographyOptions",
+            "default": {
+              "contourInterval": 0.5,
+              "slopeCategories": [
+                2,
+                5,
+                15
+              ],
+              "generateCutFill": true,
+              "referencePlane": "auto"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "parcelId"
+        ],
+        "title": "TopographyJobSubmit"
+      },
+      "TopographyMetadata": {
+        "properties": {
+          "copernicusDemVersion": {
+            "type": "string",
+            "title": "Copernicusdemversion",
+            "default": "COP-30"
+          },
+          "processingTime": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processingtime"
+          },
+          "pixelResolution": {
+            "type": "integer",
+            "title": "Pixelresolution",
+            "default": 30
+          }
+        },
+        "type": "object",
+        "title": "TopographyMetadata"
+      },
+      "TopographyOptions": {
+        "properties": {
+          "contourInterval": {
+            "type": "number",
+            "title": "Contourinterval",
+            "default": 0.5
+          },
+          "slopeCategories": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Slopecategories",
+            "default": [
+              2,
+              5,
+              15
+            ]
+          },
+          "generateCutFill": {
+            "type": "boolean",
+            "title": "Generatecutfill",
+            "default": true
+          },
+          "referencePlane": {
+            "type": "string",
+            "title": "Referenceplane",
+            "default": "auto"
+          }
+        },
+        "type": "object",
+        "title": "TopographyOptions"
+      },
+      "TopographyResults": {
+        "properties": {
+          "elevation": {
+            "$ref": "#/components/schemas/ElevationResult"
+          },
+          "slopeDistribution": {
+            "items": {
+              "$ref": "#/components/schemas/SlopeDistributionItem"
+            },
+            "type": "array",
+            "title": "Slopedistribution"
+          },
+          "cutFill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CutFillResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tileUrls": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TileUrls"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "geoJsonUrls": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeoJsonUrls"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/TopographyMetadata",
+            "default": {
+              "copernicusDemVersion": "COP-30",
+              "pixelResolution": 30
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "elevation",
+          "slopeDistribution"
+        ],
+        "title": "TopographyResults"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "app__schemas__boreholes__BoreholeParameters": {
+        "properties": {
+          "maxSpacing": {
+            "type": "integer",
+            "title": "Maxspacing",
+            "default": 30
+          },
+          "minBoreholes": {
+            "type": "integer",
+            "title": "Minboreholes",
+            "default": 12
+          },
+          "targetDepth": {
+            "type": "integer",
+            "title": "Targetdepth",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "title": "BoreholeParameters"
+      },
+      "app__schemas__client__BoreholeParameters": {
+        "properties": {
+          "maxSpacing": {
+            "type": "integer",
+            "title": "Maxspacing",
+            "default": 30
+          },
+          "minBoreholes": {
+            "type": "integer",
+            "title": "Minboreholes",
+            "default": 12
+          },
+          "targetDepth": {
+            "type": "integer",
+            "title": "Targetdepth",
+            "default": 20
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": "m"
+          }
+        },
+        "type": "object",
+        "title": "BoreholeParameters"
+      },
+      "app__schemas__client__ReportOptions": {
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "en"
+          },
+          "includeMaps": {
+            "type": "boolean",
+            "title": "Includemaps",
+            "default": true
+          },
+          "includeTables": {
+            "type": "boolean",
+            "title": "Includetables",
+            "default": true
+          },
+          "includeRiskMatrix": {
+            "type": "boolean",
+            "title": "Includeriskmatrix",
+            "default": true
+          },
+          "disclaimerLevel": {
+            "type": "string",
+            "title": "Disclaimerlevel",
+            "default": "full"
+          },
+          "companyName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Companyname"
+          },
+          "projectName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectname"
+          }
+        },
+        "type": "object",
+        "title": "ReportOptions"
+      },
+      "app__schemas__reports__ReportOptions": {
+        "properties": {
+          "companyName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Companyname"
+          },
+          "projectName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectname"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "title": "ReportOptions"
+      }
+    }
+  }
 }

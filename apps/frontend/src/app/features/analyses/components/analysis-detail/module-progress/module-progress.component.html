@@ -1,0 +1,47 @@
+<div class="bg-white rounded-xl border border-planora-desert-200 p-6 shadow-sm space-y-4">
+  <div class="flex items-center justify-between">
+    <h3 class="text-sm font-bold text-planora-basalt-800">{{ moduleName }} Progress</h3>
+    <span class="px-2.5 py-1 rounded-full text-xs font-semibold" [ngClass]="statusColor()">{{
+      status
+    }}</span>
+  </div>
+
+  <!-- Progress steps -->
+  <div class="flex items-center justify-between">
+    @for (step of steps; track step; let i = $index) {
+      <div class="flex items-center gap-2">
+        <div
+          class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2"
+          [ngClass]="stepClass(i)"
+        >
+          @if (currentStep > i) {
+            <span class="text-white">✓</span>
+          } @else if (currentStep === i && status === 'Processing') {
+            <span class="animate-spin">⏳</span>
+          } @else {
+            {{ i + 1 }}
+          }
+        </div>
+        <span class="text-[10px] text-planora-basalt-500 hidden sm:inline">{{ step }}</span>
+      </div>
+      @if (i < steps.length - 1) {
+        <div class="flex-1 h-0.5 mx-2 rounded-full" [ngClass]="connectorClass(i)"></div>
+      }
+    }
+  </div>
+
+  <!-- Estimated time -->
+  @if (estimatedSeconds) {
+    <p class="text-xs text-planora-basalt-500">
+      Estimated time remaining: {{ estimatedSeconds | number: '1.0-0' }} sec
+    </p>
+  }
+
+  <!-- Cancel button -->
+  <button
+    (click)="cancel.emit()"
+    class="text-xs text-red-600 font-medium hover:underline focus:outline-none"
+  >
+    Cancel this module
+  </button>
+</div>

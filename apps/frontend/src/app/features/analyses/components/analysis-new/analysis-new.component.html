@@ -1,0 +1,107 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 space-y-6 p-6 sm:p-8">
+  <!-- Back link -->
+  <a
+    routerLink="/app/analyses"
+    class="inline-flex items-center gap-2 text-sm text-planora-basalt-500 hover:text-planora-clay-500 transition-colors"
+  >
+    <i class="pi pi-arrow-left text-xs"></i>
+    Back to Analyses
+  </a>
+
+  <!-- Page heading -->
+  <div>
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-2 h-2 rounded-full bg-planora-clay-500"></div>
+      <h1 class="text-2xl sm:text-3xl font-display font-bold text-planora-basalt-900">
+        New Analysis
+      </h1>
+    </div>
+    <p class="text-sm text-planora-basalt-500 ml-4">
+      Launch a comprehensive AI geotechnical analysis for a selected parcel.
+    </p>
+  </div>
+
+  <!-- Main card -->
+  <div class="bg-white border border-planora-desert-200 rounded-2xl p-5 sm:p-8 shadow-sm space-y-8">
+    <!-- Parcel selection -->
+    <div class="space-y-2">
+      <label class="text-[10px] font-black text-planora-basalt-400 uppercase tracking-widest">
+        Select Parcel
+      </label>
+      <select
+        title="Select a registered parcel to analyze"
+        [ngModel]="selectedParcelId()"
+        (ngModelChange)="selectParcel($event)"
+        class="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white border border-planora-desert-200 rounded-xl text-sm font-bold text-planora-basalt-800 outline-none focus:border-planora-clay-500 transition-all"
+      >
+        <option value="" disabled>Choose a registered parcel…</option>
+        @for (p of parcels(); track p.id) {
+          <option [value]="p.id">{{ p.name }} ({{ p.areaHectares }} ha)</option>
+        }
+      </select>
+      <div class="flex justify-end">
+        <a
+          routerLink="/app/parcels/new"
+          class="text-xs font-medium text-planora-clay-600 hover:text-planora-clay-500 transition-colors flex items-center gap-1"
+        >
+          <i class="pi pi-plus-circle text-xs"></i>
+          Create a new parcel
+        </a>
+      </div>
+    </div>
+
+    @if (selectedParcel(); as parcel) {
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-4 bg-planora-limestone rounded-xl">
+          <span class="text-[9px] font-bold text-planora-basalt-400 uppercase">Parcel Name</span>
+          <p class="text-sm font-semibold text-planora-basalt-800 mt-1">{{ parcel.name }}</p>
+        </div>
+        <div class="p-4 bg-planora-limestone rounded-xl">
+          <span class="text-[9px] font-bold text-planora-basalt-400 uppercase">Area</span>
+          <p class="text-sm font-semibold text-planora-basalt-800 mt-1">
+            {{ parcel.areaM2.toLocaleString() }} m²
+          </p>
+        </div>
+        <div class="p-4 bg-planora-limestone rounded-xl">
+          <span class="text-[9px] font-bold text-planora-basalt-400 uppercase">Location</span>
+          <p class="text-sm font-semibold text-planora-basalt-800 mt-1">{{ parcel.location }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Modules that will be executed -->
+    <div class="space-y-3">
+      <h3 class="text-xs font-black text-planora-basalt-400 uppercase tracking-widest">
+        Analysis Pipeline (6 modules)
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        @for (mod of modules; track mod.name) {
+          <div
+            class="flex items-center gap-3 p-3 bg-planora-limestone rounded-xl border border-planora-desert-100"
+          >
+            <i class="pi {{ mod.icon }} text-lg {{ mod.color }}"></i>
+            <span class="text-xs font-semibold text-planora-basalt-700">{{ mod.name }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Launch button -->
+    <app-button
+      variant="primary"
+      size="lg"
+      [fullWidth]="true"
+      [disabled]="!selectedParcelId() || launching()"
+      [isLoading]="launching()"
+      loadingText="Launching analysis…"
+      (click)="launchAnalysis()"
+    >
+      <i class="pi pi-play mr-2"></i> Launch Analysis
+    </app-button>
+
+    <!-- Note -->
+    <p class="text-[10px] text-planora-basalt-400 text-center">
+      The analysis will run asynchronously and you will be notified upon completion.
+    </p>
+  </div>
+</div>

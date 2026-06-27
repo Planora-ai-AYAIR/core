@@ -1,0 +1,209 @@
+<div
+  class="min-h-screen bg-planora-limestone-50 font-sans text-planora-basalt-800 antialiased selection:bg-planora-clay-100 selection:text-planora-clay-900"
+>
+  <!-- Decorative Top Multi-gradient Bar -->
+  <div
+    class="h-1.5 w-full bg-gradient-to-r from-planora-silt-500 via-planora-gold-500 to-planora-clay-500"
+  ></div>
+
+  <!-- Main Layout Container -->
+  <div class="max-w-4xl mx-auto px-6 py-12 md:py-20">
+    <!-- Document Header -->
+    <header class="border-b border-planora-desert-200 pb-8 mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <a
+          [routerLink]="['/']"
+          class="inline-flex items-center text-sm font-semibold text-planora-clay-600 hover:text-planora-clay-700 transition-colors gap-2 group"
+        >
+          <i class="pi pi-arrow-left text-xs transition-transform group-hover:-translate-x-1"></i>
+          Back to Home
+        </a>
+        <span
+          class="text-xs font-mono tracking-wider text-planora-silt-600 uppercase bg-planora-silt-50 px-3 py-1 rounded-full border border-planora-silt-100"
+        >
+          Compliance • Egyptian Law 151/2020
+        </span>
+      </div>
+
+      <h1
+        class="font-display text-4xl md:text-5xl font-bold text-planora-basalt-900 tracking-tight mb-3"
+      >
+        Privacy Policy
+      </h1>
+      <p class="text-sm text-planora-basalt-500 font-medium">
+        Last Updated: <time [attr.datetime]="currentDate">{{ currentDate }}</time> &bull; Planora
+        Egypt
+      </p>
+    </header>
+
+    <!-- Document Content Grid -->
+    <main class="space-y-10 text-base leading-relaxed text-planora-basalt-700">
+      <!-- Section 1 -->
+      <section class="space-y-3">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 flex items-center gap-3">
+          <span
+            class="text-sm font-mono text-planora-silt-500 border border-planora-desert-200 w-6 h-6 rounded-md flex items-center justify-center bg-white shadow-xs"
+            >01</span
+          >
+          Introduction
+        </h2>
+        <p>
+          At Planora, we respect the privacy of our business users. This Privacy Policy details how
+          Planora Egypt collects, processes, protects, and stores corporate or personal details when
+          utilizing our spatial visualization and B2B mapping framework.
+        </p>
+      </section>
+
+      <!-- Section 2: What Data is Collected -->
+      <section class="space-y-4">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 flex items-center gap-3">
+          <span
+            class="text-sm font-mono text-planora-silt-500 border border-planora-desert-200 w-6 h-6 rounded-md flex items-center justify-center bg-white shadow-xs"
+            >02</span
+          >
+          Information We Collect
+        </h2>
+        <p>
+          Because Planora is currently an active, free Minimum Viable Product (MVP), we minimize our
+          data perimeter. We collect the following datasets to sustain normal platform operations:
+        </p>
+        <ul class="space-y-2 pl-5 list-disc marker:text-planora-clay-500">
+          <li>
+            <strong class="text-planora-basalt-900 font-semibold">Account Profiles:</strong>
+            Corporate business emails, passwords, usernames, and designated system roles
+            (Client/Admin).
+          </li>
+          <li>
+            <strong class="text-planora-basalt-900 font-semibold"
+              >Spatial Metadata & Assets:</strong
+            >
+            Geographic coordinates, geometric boundary layouts, and custom parcel information files
+            uploaded by clients to run spatial calculations.
+          </li>
+          <li>
+            <strong class="text-planora-basalt-900 font-semibold">Technical Logs:</strong> Device IP
+            addresses, browser variants, and core interaction records compiled automatically during
+            your active session.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="space-y-3">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 flex items-center gap-3">
+          <span
+            class="text-sm font-mono text-planora-silt-500 border border-planora-desert-200 w-6 h-6 rounded-md flex items-center justify-center bg-white shadow-xs"
+            >03</span
+          >
+          How Your Data Is Utilized
+        </h2>
+        <p>
+          Your corporate operational logs and geospatial files are processed strictly for specific
+          engineering targets:
+        </p>
+        <ul class="space-y-2 pl-5 list-disc marker:text-planora-gold-500">
+          <li>To provision, isolate, and authenticate secure B2B client dashboard domains.</li>
+          <li>
+            To run mapping calculations, execute parcel analyses, and output PDF/visual planning
+            logs.
+          </li>
+          <li>
+            To trace software issues, prevent unauthorized mapping scrapers, and upgrade the MVP
+            engine stability.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Section 4: Data Isolation (B2B Critical) -->
+      <section
+        class="p-6 md:p-8 rounded-2xl border border-planora-silt-200 bg-planora-silt-50/40 space-y-3 shadow-xs"
+      >
+        <h3 class="font-display text-xl font-bold text-planora-silt-900 flex items-center gap-2">
+          <i class="pi pi-shield text-planora-silt-500"></i>
+          Strict Third-Party Sharing Rules
+        </h3>
+        <p class="text-sm md:text-base text-planora-basalt-700">
+          Planora does <strong class="text-planora-basalt-900 font-semibold">not</strong> trade,
+          sell, or distribute your proprietary parcel parameters or account profiles to commercial
+          third parties or external data warehouses. Your configurations remain securely tied to
+          your system profile workspace.
+        </p>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="space-y-3">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 flex items-center gap-3">
+          <span
+            class="text-sm font-mono text-planora-silt-500 border border-planora-desert-200 w-6 h-6 rounded-md flex items-center justify-center bg-white shadow-xs"
+            >05</span
+          >
+          Data Security & Regional Hosting
+        </h2>
+        <p>
+          We execute modern administrative encryption tokens to guard access pathways. In line with
+          local regulatory data provisions within Egypt, all server infrastructure stacks,
+          relational user indexes, and uploaded spatial vectors are maintained inside reliable cloud
+          structures protected by modern password-hashing techniques and TLS/SSL encryption blocks
+          during transits.
+        </p>
+      </section>
+
+      <!-- Section 6 -->
+      <section class="space-y-3">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 flex items-center gap-3">
+          <span
+            class="text-sm font-mono text-planora-silt-500 border border-planora-desert-200 w-6 h-6 rounded-md flex items-center justify-center bg-white shadow-xs"
+            >06</span
+          >
+          Your Legal Rights (Egypt Law No. 151 of 2020)
+        </h2>
+        <p>
+          Under the Egyptian Data Protection framework, verified business contact representatives
+          preserve explicit organizational privileges regarding their data profiles:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-white border border-planora-desert-200 shadow-2xs">
+            <h4 class="font-semibold text-planora-basalt-900 mb-1 text-sm">
+              Right to Access & Edit
+            </h4>
+            <p class="text-xs text-planora-basalt-500">
+              You may inspect or update administrative account profiles through your internal client
+              settings panel at any time.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-white border border-planora-desert-200 shadow-2xs">
+            <h4 class="font-semibold text-planora-basalt-900 mb-1 text-sm">Right to Erasure</h4>
+            <p class="text-xs text-planora-basalt-500">
+              You can formally request complete elimination of your profile assets, parsing
+              sequences, and boundary markers when closing corporate partnerships.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7 -->
+      <section class="space-y-3">
+        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 flex items-center gap-3">
+          <span
+            class="text-sm font-mono text-planora-silt-500 border border-planora-desert-200 w-6 h-6 rounded-md flex items-center justify-center bg-white shadow-xs"
+            >07</span
+          >
+          Contact Channels
+        </h2>
+        <p>
+          If your firm holds questions regarding processing mechanics, coordinate safety practices,
+          or wishes to request complete platform database removal, please open a communication
+          ticket with our system administration team at
+          <span class="font-medium text-planora-clay-600 underline">support@planora.com</span>.
+        </p>
+      </section>
+    </main>
+
+    <!-- Document Footer -->
+    <footer
+      class="mt-16 pt-8 border-t border-planora-desert-200 text-center text-xs text-planora-basalt-500"
+    >
+      <p>&copy; 2026 Planora Egypt. Built with maximum compliance security indicators.</p>
+    </footer>
+  </div>
+</div>

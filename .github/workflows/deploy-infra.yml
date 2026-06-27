@@ -1,19 +1,61 @@
-name: Deploy Infra
+name: Deploy — Infra & K8s
 
 on:
-  pull_request:
-    paths:
-      - 'infra/**'
   push:
+    branches: [main]
     paths:
       - 'infra/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "Infra deploy placeholder"
+      - uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init & Apply
+        working-directory: infra/terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name planora-eks-production
+
+      - name: Apply K8s manifests
+        run: |
+          kubectl apply -f infra/k8s/api-dotnet/
+          kubectl apply -f infra/k8s/ai-python/
+          kubectl apply -f infra/k8s/frontend/
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout restart deployment/ai-python -n planora
+          kubectl rollout restart deployment/api-dotnet -n planora
+          kubectl rollout restart deployment/frontend -n planora
+
+      - name: Print public endpoints
+        run: |
+          echo "Waiting for LoadBalancer hostnames to be assigned..."
+          kubectl get svc -n planora -o wide
+          for svc in ai-python-lb api-dotnet-lb frontend-lb; do
+            host=$(kubectl get svc "$svc" -n planora -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+            echo "$svc -> http://${host:-<pending>}"
+          done

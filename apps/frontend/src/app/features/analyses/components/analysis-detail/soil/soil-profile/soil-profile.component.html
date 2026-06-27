@@ -1,0 +1,53 @@
+<div
+  class="space-y-2"
+  [class.grid]="viewMode === 'side-by-side'"
+  [class.grid-cols-1]="viewMode === 'side-by-side'"
+  [class.sm:grid-cols-2]="viewMode === 'side-by-side'"
+  [class.gap-4]="viewMode === 'side-by-side'"
+>
+  @for (layer of profiles; track layer.depthRange) {
+    <div class="bg-white rounded-lg border border-planora-desert-200 p-3 flex items-center gap-4">
+      <div class="w-1.5 self-stretch rounded-full" [style.background-color]="layer.color"></div>
+      <div class="flex-1">
+        <div class="text-xs font-bold text-planora-basalt-800">{{ layer.depthRange }}</div>
+        <div class="text-[10px] text-planora-basalt-500">{{ layer.classification }}</div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div>
+          <div class="text-xs font-bold text-planora-basalt-800">{{ layer.sandPercent }}%</div>
+          <div class="text-[9px] text-planora-basalt-400">Sand</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-planora-basalt-800">{{ layer.siltPercent }}%</div>
+          <div class="text-[9px] text-planora-basalt-400">Silt</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-planora-basalt-800">{{ layer.clayPercent }}%</div>
+          <div class="text-[9px] text-planora-basalt-400">Clay</div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+<div class="mt-3 flex justify-end gap-2">
+  <button
+    (click)="toggleViewMode.emit('stacked')"
+    [class.font-bold]="viewMode === 'stacked'"
+    class="text-xs"
+  >
+    Stacked
+  </button>
+  <button
+    (click)="toggleViewMode.emit('side-by-side')"
+    [class.font-bold]="viewMode === 'side-by-side'"
+    class="text-xs"
+  >
+    Side-by-side
+  </button>
+</div>
+<button
+  (click)="exportCSV.emit()"
+  class="mt-2 text-xs text-planora-basalt-500 hover:underline flex items-center gap-1"
+>
+  <i class="pi pi-download text-[10px]"></i> Export CSV
+</button>
