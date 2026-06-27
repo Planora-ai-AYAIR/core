@@ -4,8 +4,8 @@ Welcome to the Planora platform repository. Planora is a comprehensive, AI-drive
 
 ## Accessing the Project
 
-* **Production Environment:** The application is deployed to AWS EKS. The primary frontend interface can be accessed at `https://app.planora.ai` (ensure you have the necessary credentials or have registered an account to log in).
-* **API Documentation:** The backend OpenAPI (Swagger) documentation is available at `https://api.planora.ai/swagger` when the environment is live.
+* **Production Environment:** The application is deployed to AWS EKS. The primary frontend interface can be accessed at `http://a7eedc9be7e23466c860e5ee063f44b6-7a30bbca489421b5.elb.us-east-1.amazonaws.com` (ensure you have the necessary credentials or have registered an account to log in).
+* **API Documentation:** The backend OpenAPI (Swagger) documentation is available at `https://n8ng4pqeob.execute-api.us-east-1.amazonaws.com/v1/swagger/index.html` when the environment is live.
 
 ## Repository Structure
 
