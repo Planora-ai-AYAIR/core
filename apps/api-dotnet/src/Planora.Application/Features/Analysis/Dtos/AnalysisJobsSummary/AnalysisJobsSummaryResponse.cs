@@ -9,6 +9,7 @@ public sealed record AnalysisJobsSummaryResponse(
 
 public sealed record AnalysisJobSummaryItem(
     Guid Id,
+    Guid ParcelId,
     string Name,
     string Status,
     IReadOnlyList<string> Modules,

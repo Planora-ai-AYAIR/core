@@ -23,6 +23,7 @@ public sealed class GetAnalysisJobsSummaryHandler(
 
         var items = jobs.Select(j => new AnalysisJobSummaryItem(
             Id: j.Id,
+            ParcelId: j.ParcelId,
             Name: parcelNames[j.ParcelId].FirstOrDefault() ?? "",
             Status: j.Status.ToString(),
             Modules: BuildModuleList(j),
