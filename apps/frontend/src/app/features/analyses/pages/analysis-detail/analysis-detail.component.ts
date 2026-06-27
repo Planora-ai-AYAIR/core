@@ -20,6 +20,8 @@ import { BearingTabComponent } from '../../components/analysis-detail/bearing-ta
 import { RiskTabComponent } from '../../components/analysis-detail/risk/risk-tab/risk-tab.component';
 import { ParcelFacadeService } from '../../../parcels/services/parcel-facade.service';
 import maplibregl from 'maplibre-gl';
+import { ReportFacadeService } from '../../services/report/report-facade.service';
+import { SignalRService } from '../../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-analysis-detail',
@@ -43,6 +45,8 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
   private _layerService = inject(MapLayerService);
   private _analysisFacade = inject(AnalysisDetailFacadeService);
   private _parcelFacade = inject(ParcelFacadeService);
+  reportFacade = inject(ReportFacadeService);
+  private signalR = inject(SignalRService);
   private route = inject(ActivatedRoute);
 
   private _topographyInit = inject(TopographyMapInitialiser);
@@ -90,6 +94,11 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
   isActiveModuleCompleted = computed(
     () => this.moduleProgress()[this.activeModule()]?.status === 'Completed',
   );
+
+  allModulesCompleted = computed(() => {
+    const progress = this.moduleProgress();
+    return Object.values(progress).every((m) => m.status === 'Completed');
+  });
 
   constructor() {
     // ── Reactive layer adding ──
@@ -159,6 +168,18 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
           );
           this.mapCenter.set([parcel.centroidLongitude, parcel.centroidLatitude]);
           this._addParcelBoundary(parcel.boundaryCoordinates);
+        }
+      });
+
+      this.signalR.reportGenerated$.subscribe((event: any) => {
+        if (event.ParcelId === this.parcelId) {
+          this.reportFacade.onReportGenerated(this.parcelId, event.ReportJobId);
+        }
+      });
+
+      this.signalR.reportFailed$.subscribe((event: any) => {
+        if (event.ParcelId === this.parcelId) {
+          this.reportFacade.onReportFailed(event.Message);
         }
       });
     } else {
@@ -360,5 +381,19 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       ...prev,
       [moduleId]: { ...prev[moduleId], status: 'Failed' as ModuleStatus },
     }));
+  }
+
+  onGenerateReport() {
+    const options = {
+      language: 'en',
+      companyName: 'Talaat Moustafa Group',
+      projectName: 'New Alamein Phase 3',
+      includeMaps: true,
+      includeTables: true,
+      includeRiskMatrix: true,
+      includeBoreholePlan: true,
+      disclaimerLevel: 'full',
+    };
+    this.reportFacade.generateReport(this.parcelId, options);
   }
 }

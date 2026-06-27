@@ -12,7 +12,7 @@ export class AnalysisApiService {
 
   getFullAnalysis(parcelId: string): Observable<ParcelAnalysisFullResponse> {
     return this.http
-      .get<any>(`${this.baseUrl}/api/parcels/${parcelId}/analysis`)
+      .get<any>(`${this.baseUrl}${environment.Analysis.getCompleted(parcelId)}`)
       .pipe(map((envelope) => envelope.data));
   }
 

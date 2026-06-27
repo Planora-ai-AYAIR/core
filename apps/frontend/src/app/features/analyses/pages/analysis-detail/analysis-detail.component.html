@@ -25,6 +25,49 @@
     </div>
   </header>
 
+  <!-- Report Banner (only when analysis is fully completed) -->
+  @if (allModulesCompleted()) {
+    <div
+      class="bg-white border-b border-planora-desert-200 px-6 py-3 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <i class="pi pi-file-pdf text-planora-clay-500 text-xl"></i>
+        <div>
+          <p class="text-sm font-semibold text-planora-basalt-800">Site Intelligence Report</p>
+          @if (reportFacade.reportStatus() === 'ready') {
+            <p class="text-xs text-green-600 font-mono">Ready for download</p>
+          } @else if (reportFacade.reportStatus() === 'generating') {
+            <p class="text-xs text-amber-600">Generating PDF…</p>
+          } @else if (reportFacade.reportStatus() === 'failed') {
+            <p class="text-xs text-red-600">{{ reportFacade.reportError() }}</p>
+          } @else {
+            <p class="text-xs text-planora-basalt-400">Generate a professional PDF report</p>
+          }
+        </div>
+      </div>
+      <div>
+        @if (reportFacade.reportStatus() === 'ready' && reportFacade.reportDownloadUrl()) {
+          <a
+            [href]="reportFacade.reportDownloadUrl()"
+            target="_blank"
+            class="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-colors"
+          >
+            <i class="pi pi-download mr-1"></i> Download
+          </a>
+        } @else if (
+          reportFacade.reportStatus() === 'idle' || reportFacade.reportStatus() === 'failed'
+        ) {
+          <button
+            (click)="onGenerateReport()"
+            class="px-4 py-2 bg-planora-clay-500 text-white text-sm font-bold rounded-xl hover:bg-planora-clay-600 transition-colors"
+          >
+            <i class="pi pi-cog mr-1"></i> Generate Report
+          </button>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Section navigation (tabs) - styled like chapter tabs -->
   <nav
     class="bg-planora-limestone border-b border-planora-desert-200 px-4 sm:px-8 flex gap-0 overflow-x-auto shadow-inner"
