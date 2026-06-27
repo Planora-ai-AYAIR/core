@@ -1,16 +1,8 @@
-using System.Text.Json.Serialization;
-
 namespace Planora.Application.Common.Dtos;
-
-public sealed record ProccessRiskJobAiRequest(
-    [property: JsonPropertyName("jobId")] string JobId,
-    [property: JsonPropertyName("parcelId")] string ParcelId,
-    [property: JsonPropertyName("geoJson")] AiGeoJsonPolygon GeoJson,
-    [property: JsonPropertyName("bbox")] AiBoundingBox? Bbox = null,
-    [property: JsonPropertyName("riskTypes")] List<string>? RiskTypes = null,
-    [property: JsonPropertyName("soilData")] RiskSoilData? SoilData = null);
-
-public sealed record RiskSoilData(
-    [property: JsonPropertyName("clayContent")] double? ClayContent = null,
-    [property: JsonPropertyName("sandContent")] double? SandContent = null,
-    [property: JsonPropertyName("waterTableDepth")] double? WaterTableDepth = null);
+public record ProccessRiskJobAiRequest(
+    Guid ParcelId,
+    string BoundaryGeoJson,
+    decimal AreaHectares,
+    double CentroidLatitude,
+    double CentroidLongitude
+);

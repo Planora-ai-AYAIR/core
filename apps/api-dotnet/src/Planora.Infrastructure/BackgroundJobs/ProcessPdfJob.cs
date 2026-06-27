@@ -23,7 +23,8 @@ public sealed class ProcessPdfJob(
                 x => x.Execute(request));
 
         logger.LogInformation(
-            "PDF job enqueued with HangfireJobId {JobId}", jobId);
+            "PDF job enqueued for ParcelId {ParcelId} with HangfireJobId {JobId}",
+            request.ParcelId, jobId);
 
         return jobId;
     }
@@ -31,8 +32,8 @@ public sealed class ProcessPdfJob(
     public async Task<Result<Success>> Execute(ProccessPdfJobAiRequest request)
     {
         logger.LogInformation(
-            "PDF job started for JobId {JobId}, ParcelId {ParcelId}",
-            request.JobId, request.ParcelId);
+            "PDF job started for ParcelId {ParcelId}",
+            request.ParcelId);
 
         string pythonJobId;
 
@@ -52,15 +53,9 @@ public sealed class ProcessPdfJob(
             "AI service accepted PDF job for ParcelId {ParcelId}, PythonJobId {PythonJobId}",
             request.ParcelId, pythonJobId);
 
-        if (!Guid.TryParse(request.ParcelId, out var parcelIdGuid))
-        {
-            logger.LogError("Invalid ParcelId format in PDF request: {ParcelId}", request.ParcelId);
-            return AnalysisJobErrors.InvalidParcelId;
-        }
-
         var result = AnalysisJob.Create(
             id: Guid.NewGuid(),
-            parcelId: parcelIdGuid,
+            parcelId: request.ParcelId,
             pythonJobId: pythonJobId,
             type: AnalysisType.Pdf);
 

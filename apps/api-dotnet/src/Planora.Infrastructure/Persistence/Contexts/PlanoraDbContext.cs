@@ -40,7 +40,6 @@ public class PlanoraDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
     public DbSet<SoilResult> SoilResults { get; set; }
     public DbSet<RiskResult> RiskResults { get; set; }
     public DbSet<BoreholeResult> BoreholeResults { get; set; }
-    public DbSet<BearingResult> BearingResults { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
