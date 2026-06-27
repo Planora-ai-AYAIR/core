@@ -72,10 +72,10 @@ public sealed class ProcessAggregatedAnalysisJob(
                 analysisJob.Options?.IncludeRisk ?? false,
                 analysisJob.Options?.IncludeBorehole ?? false));
 
-        AiAnalysisJobResponse response;
+        string pythonJobId;
         try
         {
-            response = await aiAnalysis.SubmitAnalysisJobAsync(request, CancellationToken.None);
+            pythonJobId = await aiAnalysis.SubmitAnalysisJobAsync(request, CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -85,7 +85,7 @@ public sealed class ProcessAggregatedAnalysisJob(
             throw;
         }
 
-        var setJobIdResult = analysisJob.SetPythonJobId(response.Data.JobId);
+        var setJobIdResult = analysisJob.SetPythonJobId(pythonJobId);
         if (setJobIdResult.IsError)
         {
             logger.LogError(
@@ -107,7 +107,7 @@ public sealed class ProcessAggregatedAnalysisJob(
 
         logger.LogInformation(
             "Aggregated analysis job accepted by AI service for ParcelId {ParcelId}, PythonJobId {PythonJobId}",
-            parcelId, response.Data.JobId);
+            parcelId, pythonJobId);
 
         return Result.Success;
     }

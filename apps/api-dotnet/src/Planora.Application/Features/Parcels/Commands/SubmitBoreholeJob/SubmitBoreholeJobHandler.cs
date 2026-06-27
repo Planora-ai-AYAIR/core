@@ -1,11 +1,11 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Planora.Application.Common.Dtos;
 using Planora.Application.Common.Helpers;
 using Planora.Application.Features.Parcels.Dtos.SubmitBoreholeJob;
 using Planora.Application.Interfaces.Jobs;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
+using Planora.Domain.AnalysisJob;
 using Planora.Domain.Enums;
 using Planora.Domain.Parcels;
 using Planora.Domain.Shared.Results;
@@ -14,6 +14,7 @@ namespace Planora.Application.Features.Parcels.Commands.SubmitBoreholeJob;
 
 public sealed class SubmitBoreholeJobHandler(
     IParcelRepository parcelRepository,
+    IAnalysisJobRepository analysisJobRepository,
     IHybridCacheService cacheService,
     IProcessBoreholeJob processBoreholeJob,
     ILogger<SubmitBoreholeJobHandler> logger)
@@ -24,21 +25,24 @@ public sealed class SubmitBoreholeJobHandler(
         logger.LogInformation("Submitting borehole job for ParcelId {ParcelId}", request.ParcelId);
 
         var parcel = await parcelRepository.GetByIdAsync(request.ParcelId, ct);
-
         if (parcel is null)
-        {
             return ParcelErrors.NotFound;
-        }
 
-        var processBoreholeRequest = new ProccessBoreholeJobAiRequest(
-            ParcelId: parcel.Id,
-            BoundaryGeoJson: parcel.Boundary.ToGeoJson(),
-            AreaHectares: parcel.AreaHectares,
-            CentroidLatitude: parcel.Centroid.Y,
-            CentroidLongitude: parcel.Centroid.X
-        );
+        if (await analysisJobRepository.HasActiveJobAsync(request.ParcelId, ct))
+            return AnalysisJobErrors.AlreadyRunning;
 
-        var jobId = processBoreholeJob.Enqueue(processBoreholeRequest);
+        var createResult = AnalysisJob.Create(
+            id: Guid.NewGuid(),
+            parcelId: parcel.Id,
+            pythonJobId: $"pending-borehole-{Guid.NewGuid():N}",
+            type: AnalysisType.Borehole);
+
+        if (createResult.IsError)
+            return createResult.Errors;
+
+        await analysisJobRepository.AddAsync(createResult.Value, ct);
+
+        var hangfireJobId = processBoreholeJob.Enqueue(parcel.Id, createResult.Value.Id);
 
         await cacheService.SetAsync(
             $"parcel-status:{parcel.Id}",
@@ -48,6 +52,10 @@ public sealed class SubmitBoreholeJobHandler(
         parcel.MarkAsProcessing();
         await parcelRepository.UpdateAsync(parcel, ct);
 
-        return new SubmitBoreholeJobResponse(jobId, parcel.Id, ParcelStatus.Queued.ToString(), DateTime.UtcNow);
+        return new SubmitBoreholeJobResponse(
+            hangfireJobId,
+            parcel.Id,
+            ParcelStatus.Queued.ToString(),
+            DateTime.UtcNow);
     }
 }

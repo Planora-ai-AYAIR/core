@@ -1,9 +1,6 @@
-using Planora.Application.Common.Dtos;
+namespace Planora.Application.Interfaces.Jobs;
 
-namespace Planora.Application.Interfaces.Jobs
+public interface IProcessSoilJob
 {
-    public interface IProcessSoilJob
-    {
-        string Enqueue(ProccessSoilJobAiRequest request);
-    }
+    string Enqueue(Guid parcelId, Guid analysisJobId);
 }

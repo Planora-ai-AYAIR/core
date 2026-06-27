@@ -190,6 +190,7 @@ public static class DependencyInjection
         services.AddScoped<ISoilResultRepository, SoilResultRepository>();
         services.AddScoped<IRiskResultRepository, RiskResultRepository>();
         services.AddScoped<IBoreholeResultRepository, BoreholeResultRepository>();
+        services.AddScoped<IBearingResultRepository, BearingResultRepository>();
         services.AddScoped<IAnalysisResultQuery, AnalysisResultQuery>();
 
 
@@ -198,6 +199,7 @@ public static class DependencyInjection
         services.AddScoped<IProcessSoilJob, ProcessSoilJob>();
         services.AddScoped<IProcessRiskJob, ProcessRiskJob>();
         services.AddScoped<IProcessBoreholeJob, ProcessBoreholeJob>();
+        services.AddScoped<IProcessBearingJob, ProcessBearingJob>();
         services.AddScoped<IProcessPdfJob, ProcessPdfJob>();
         services.AddScoped<IGeneratePdfJob, GeneratePdfJob>();
 

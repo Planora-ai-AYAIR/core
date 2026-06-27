@@ -10,21 +10,21 @@ using Planora.Domain.Shared.Results;
 
 namespace Planora.Infrastructure.BackgroundJobs;
 
-public sealed class ProcessBoreholeJob(
+public sealed class ProcessBearingJob(
     IBackgroundJobClient backgroundJobClient,
-    ILogger<ProcessBoreholeJob> logger,
+    ILogger<ProcessBearingJob> logger,
     IAiAnalysisService aiAnalysis,
     IAnalysisJobRepository analysisJobRepository,
     IParcelRepository parcelRepository)
-    : IProcessBoreholeJob
+    : IProcessBearingJob
 {
     public string Enqueue(Guid parcelId, Guid analysisJobId)
     {
-        var jobId = backgroundJobClient.Enqueue<ProcessBoreholeJob>(
+        var jobId = backgroundJobClient.Enqueue<ProcessBearingJob>(
             x => x.Execute(parcelId, analysisJobId));
 
         logger.LogInformation(
-            "Borehole job enqueued for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}, HangfireJobId {HangfireJobId}",
+            "Bearing job enqueued for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}, HangfireJobId {HangfireJobId}",
             parcelId, analysisJobId, jobId);
 
         return jobId;
@@ -33,13 +33,13 @@ public sealed class ProcessBoreholeJob(
     public async Task<Result<Success>> Execute(Guid parcelId, Guid analysisJobId)
     {
         logger.LogInformation(
-            "Borehole job started for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}",
+            "Bearing job started for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}",
             parcelId, analysisJobId);
 
         var parcel = await parcelRepository.GetByIdAsync(parcelId, CancellationToken.None);
         if (parcel is null)
         {
-            logger.LogError("Parcel {ParcelId} not found for borehole job", parcelId);
+            logger.LogError("Parcel {ParcelId} not found for bearing job", parcelId);
             return AnalysisJobErrors.NotFound;
         }
 
@@ -50,7 +50,7 @@ public sealed class ProcessBoreholeJob(
             return AnalysisJobErrors.NotFound;
         }
 
-        var request = new ProccessBoreholeJobAiRequest(
+        var request = new ProccessBearingJobAiRequest(
             JobId: analysisJob.Id.ToString(),
             ParcelId: parcel.Id.ToString(),
             GeoJson: parcel.Boundary.ToAiGeoJsonPolygon(),
@@ -59,12 +59,12 @@ public sealed class ProcessBoreholeJob(
         string pythonJobId;
         try
         {
-            pythonJobId = await aiAnalysis.ProccessBoreholeAsync(request, CancellationToken.None);
+            pythonJobId = await aiAnalysis.ProccessBearingAsync(request, CancellationToken.None);
         }
         catch (Exception ex)
         {
             logger.LogError(ex,
-                "Borehole job failed while calling AI service for ParcelId {ParcelId}",
+                "Bearing job failed while calling AI service for ParcelId {ParcelId}",
                 parcelId);
             throw;
         }
@@ -90,7 +90,7 @@ public sealed class ProcessBoreholeJob(
         await analysisJobRepository.SaveChangesAsync(CancellationToken.None);
 
         logger.LogInformation(
-            "Borehole job accepted by AI for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}, PythonJobId {PythonJobId}",
+            "Bearing job accepted by AI for ParcelId {ParcelId}, AnalysisJobId {AnalysisJobId}, PythonJobId {PythonJobId}",
             parcelId, analysisJobId, pythonJobId);
 
         return Result.Success;
