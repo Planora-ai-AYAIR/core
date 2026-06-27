@@ -9,6 +9,7 @@ interface AnalysisJobsSummaryResponse {
 interface AnalysisJobSummaryItem {
   id: string;
   name: string;
+  parcelId: string;
   status: string;
   modules: string[];
   date: string;

@@ -7,12 +7,12 @@
           Geotechnical Site Intelligence Report
         </p>
         <h1 class="font-display text-xl md:text-3xl font-bold mt-1">
-          Talaat Moustafa Group - Industrial Sector B
+          {{ parcelName() }}
         </h1>
         <p class="text-planora-desert-300 text-xs sm:text-sm mt-2 flex flex-wrap gap-x-2 gap-y-1">
-          <span>Project ID: PRJ-7702</span>
+          <span>Project ID: {{ parcelId }}</span>
           <span>|</span>
-          <span>Coordinates: 30.633°N, 31.942°E</span>
+          <span>Coordinates: {{ parcelCoordinates() }}</span>
           <span>|</span>
           <span>Date: {{ today | date: 'longDate' }}</span>
         </p>
@@ -60,7 +60,7 @@
       [class.hidden]="!isActiveModuleCompleted()"
     >
       <app-map
-        [center]="[31.942, 30.633]"
+        [center]="mapCenter()"
         [zoom]="17"
         [pitch]="0"
         [showSatelliteToggle]="!!true"

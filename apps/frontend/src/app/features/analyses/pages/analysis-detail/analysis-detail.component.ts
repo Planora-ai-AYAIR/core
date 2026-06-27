@@ -1,6 +1,6 @@
 import { Component, signal, inject, computed, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MapComponent } from '../../../../shared/components/map/map.component';
 import { MapLayerService } from '../../services/map-layer.service';
@@ -18,6 +18,7 @@ import { ModuleStatus } from '../../interfaces/module-status';
 import { BearingMapInitialiser } from '../../services/map-initialiser/bearing-map-initialiser.service';
 import { BearingTabComponent } from '../../components/analysis-detail/bearing-tab/bearing-tab.component';
 import { RiskTabComponent } from '../../components/analysis-detail/risk/risk-tab/risk-tab.component';
+import { ParcelFacadeService } from '../../../parcels/services/parcel-facade.service';
 import maplibregl from 'maplibre-gl';
 
 @Component({
@@ -41,17 +42,26 @@ import maplibregl from 'maplibre-gl';
 export class AnalysisDetailComponent implements OnInit, OnDestroy {
   private _layerService = inject(MapLayerService);
   private _analysisFacade = inject(AnalysisDetailFacadeService);
+  private _parcelFacade = inject(ParcelFacadeService);
+  private route = inject(ActivatedRoute);
+
   private _topographyInit = inject(TopographyMapInitialiser);
   private _soilInit = inject(SoilMapInitialiser);
   private _riskInit = inject(RiskMapInitialiser);
   private _boreholeInit = inject(BoreholeMapInitialiser);
   private _bearingInit = inject(BearingMapInitialiser);
+  private router = inject(Router);
 
   map = signal<maplibregl.Map | undefined>(undefined);
   activeModule = signal('topography');
 
-  private route = inject(ActivatedRoute);
-  private parcelId!: string;
+  parcelName = signal('');
+  parcelCoordinates = signal('');
+  mapCenter = signal<[number, number]>([31.942, 30.633]);
+
+  parcelId!: string;
+
+  private parcelBoundary: [number, number][] | null = null;
 
   readonly today = new Date();
   modules = [
@@ -131,14 +141,69 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.parcelId = this.route.snapshot.paramMap.get('parcelId')!;
-    if (this.parcelId) {
+    const analysisId = this.route.snapshot.paramMap.get('analysisId');
+    const parcelId = this.route.snapshot.paramMap.get('parcelId'); // from path
+
+    if (parcelId) {
+      this.parcelId = parcelId;
+
+      // Start analysis real‑time
       this._analysisFacade.startRealtimeProgress(this.parcelId);
+
+      // Load parcel metadata
+      this._parcelFacade.getParcelById(this.parcelId).subscribe((parcel) => {
+        if (parcel) {
+          this.parcelName.set(parcel.name);
+          this.parcelCoordinates.set(
+            `${parcel.centroidLatitude.toFixed(3)}°N, ${parcel.centroidLongitude.toFixed(3)}°E`,
+          );
+          this.mapCenter.set([parcel.centroidLongitude, parcel.centroidLatitude]);
+          this._addParcelBoundary(parcel.boundaryCoordinates);
+        }
+      });
+    } else {
+      console.warn('No parcelId in URL - redirecting to list');
+      this.router.navigate(['/app/analyses']);
     }
   }
 
   ngOnDestroy(): void {
     this._analysisFacade.stopRealtimeProgress();
+  }
+
+  private _addParcelBoundary(coords: { longitude: number; latitude: number }[]) {
+    this.parcelBoundary = coords.map((p) => [p.longitude, p.latitude] as [number, number]);
+    // If map already exists, draw now
+    if (this.map()) {
+      this._drawBoundary();
+    }
+  }
+
+  private _drawBoundary() {
+    const map = this.map()!;
+    if (!this.parcelBoundary) return;
+    if (map.getSource('parcel-outline')) {
+      (map.getSource('parcel-outline') as any).setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: this.parcelBoundary },
+      });
+    } else {
+      map.addSource('parcel-outline', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates: this.parcelBoundary },
+        },
+      });
+      map.addLayer({
+        id: 'parcel-outline-layer',
+        type: 'line',
+        source: 'parcel-outline',
+        paint: { 'line-color': '#B86E3D', 'line-width': 2, 'line-dasharray': [4, 2] },
+      });
+    }
   }
 
   activeModuleIndex() {
@@ -158,32 +223,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
   }
 
   onMapReady(map: maplibregl.Map) {
-    const coords: [number, number][] = [
-      [31.941933631896973, 30.633079403593342],
-      [31.942059695720673, 30.633150948509027],
-      [31.942183077335358, 30.632954776839696],
-      [31.942048966884613, 30.63287861596676],
-      [31.941933631896973, 30.633079403593342],
-    ];
-
     const init = () => {
-      if (!map.getSource('parcel-outline')) {
-        map.addSource('parcel-outline', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'LineString', coordinates: coords },
-          },
-        });
-        map.addLayer({
-          id: 'parcel-outline-layer',
-          type: 'line',
-          source: 'parcel-outline',
-          paint: { 'line-color': '#B86E3D', 'line-width': 2, 'line-dasharray': [4, 2] },
-        });
-      }
-
       // The layer metadata is registered immediately; actual data layers will be added by the effects above.
       const allLayers: MapLayerItem[] = [
         // topography
@@ -302,6 +342,9 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       this._layerService.init(map);
       this._layerService.refreshVisibility();
       this.map.set(map);
+      if (this.parcelBoundary) {
+        this._drawBoundary();
+      }
     };
 
     map.loaded() ? init() : map.once('load', init);

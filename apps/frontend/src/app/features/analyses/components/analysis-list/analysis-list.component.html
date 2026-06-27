@@ -151,13 +151,13 @@
         <div
           class="col-span-1 md:col-span-1 flex items-center justify-end gap-3 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-planora-desert-100 md:border-t-0"
         >
-          <a
-            [routerLink]="['/app/analyses', analysis.id]"
+          <button
+            (click)="viewAnalysis(analysis)"
             class="w-8 h-8 rounded-lg bg-planora-limestone hover:bg-planora-clay-500 hover:text-white text-planora-basalt-600 text-xs font-bold flex items-center justify-center transition-all shadow-sm"
             title="View Details"
           >
             <i class="pi pi-arrow-right"></i>
-          </a>
+          </button>
           <button
             (click)="$event.stopPropagation()"
             class="w-8 h-8 rounded-lg border border-transparent hover:border-red-200 hover:bg-red-50/50 text-planora-basalt-400 hover:text-red-600 text-xs flex items-center justify-center transition-all"

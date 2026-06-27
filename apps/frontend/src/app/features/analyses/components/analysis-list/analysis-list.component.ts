@@ -1,6 +1,6 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StatCardComponent } from '../../../../shared/components/stat-card/stat-card.component';
 import { AnalysisListFacadeService } from '../../services/analysis-dashboard/analysis-list-facade.service.service';
@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class AnalysisListComponent {
   private readonly analysisDashboard = inject(AnalysisListFacadeService);
   private readonly destroyRef = inject(DestroyRef);
+  private router = inject(Router);
 
   analyses = signal<AnalysisJobSummaryItem[]>([]);
   searchTerm = signal('');
@@ -80,5 +81,9 @@ export class AnalysisListComponent {
       default:
         return 'bg-planora-desert-100 text-planora-basalt-700';
     }
+  }
+
+  viewAnalysis(analysis: AnalysisJobSummaryItem): void {
+    this.router.navigate(['/app/analyses', analysis.id, analysis.parcelId]);
   }
 }

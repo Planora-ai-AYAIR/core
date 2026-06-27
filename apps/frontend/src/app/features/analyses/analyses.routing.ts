@@ -13,7 +13,7 @@ export const ANALYSIS_ROUTES: Routes = [
     title: 'New Analysis',
   },
   {
-    path: ':id',
+    path: ':analysisId/:parcelId',
     loadComponent: () =>
       import('./pages/analysis-detail/analysis-detail.component').then(
         (m) => m.AnalysisDetailComponent,
