@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Prevent Git Bash (MinGW) on Windows from converting /aws/... to a local C:/ file path
+export MSYS_NO_PATHCONV=1
+
 EXPORT_DIR="planora-logs-export"
 mkdir -p "$EXPORT_DIR"
 
