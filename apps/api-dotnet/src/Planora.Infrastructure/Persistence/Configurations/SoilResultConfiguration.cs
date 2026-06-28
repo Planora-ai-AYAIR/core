@@ -41,13 +41,6 @@ public sealed class SoilResultConfiguration : IEntityTypeConfiguration<SoilResul
 
         builder.Property(s => s.WaterTableDepthMeters);
 
-        builder.Property(s => s.BearingCapacityEstimate)
-               .IsRequired();
-
-        builder.Property(s => s.BearingCapacityCategory)
-               .IsRequired()
-               .HasMaxLength(20);
-
         builder.Property(s => s.CompositionUnit)
                .HasMaxLength(10);
 
@@ -83,29 +76,6 @@ public sealed class SoilResultConfiguration : IEntityTypeConfiguration<SoilResul
         builder.Property(s => s.NdviMean);
         builder.Property(s => s.BsiMean);
         builder.Property(s => s.NdmiMean);
-
-        builder.Property(s => s.BearingConfidence);
-        builder.Property(s => s.BearingRange)
-               .HasMaxLength(50);
-        builder.Property(s => s.BearingTrafficLight)
-               .HasMaxLength(20);
-        builder.Property(s => s.RecommendedFoundation)
-               .HasMaxLength(500);
-        builder.Property(s => s.MaxFloorsWithoutDeepFoundation);
-        builder.Property(s => s.FloorCountCategory)
-               .HasMaxLength(50);
-        builder.Property(s => s.BearingMinKpa);
-        builder.Property(s => s.BearingMaxKpa);
-        builder.Property(s => s.FeatureImportanceJson)
-               .HasColumnType("jsonb");
-        builder.Property(s => s.SoilFactorsJson)
-               .HasColumnType("jsonb");
-        builder.Property(s => s.BearingModelName)
-               .HasMaxLength(100);
-        builder.Property(s => s.BearingFramework)
-               .HasMaxLength(50);
-        builder.Property(s => s.BearingTrainingR2);
-        builder.Property(s => s.BearingShapEnabled);
 
         builder.Property(s => s.CreatedAt)
                .IsRequired();

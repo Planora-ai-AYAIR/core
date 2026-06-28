@@ -63,6 +63,7 @@ public sealed class TopographyResult : AuditableEntity
         string? crs = null,
         int? processingTimeSeconds = null)
     {
+        Id = Guid.NewGuid();
         AnalysisJobId = analysisJobId;
         ElevationMin = elevationMin;
         ElevationMax = elevationMax;

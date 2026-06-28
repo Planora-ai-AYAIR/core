@@ -39,6 +39,7 @@ public sealed class BoreholeResult : AuditableEntity
         double savingsPercentage,
         string? currency = "EGP")
     {
+        Id = Guid.NewGuid();
         AnalysisJobId = analysisJobId;
         MinimumRequired = minimumRequired;
         OptimalCount = optimalCount;

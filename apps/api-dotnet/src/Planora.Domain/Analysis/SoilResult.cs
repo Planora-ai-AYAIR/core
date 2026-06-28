@@ -21,6 +21,7 @@ public sealed class SoilResult : AuditableEntity
     public double BulkDensity { get; private set; }
     public string? BulkDensityUnit { get; private set; }
     public double OrganicCarbon { get; private set; }
+    public string? OrganicCarbonUnit { get; private set; }
     public double Ph { get; private set; }
     public double? Cec { get; private set; }
     public double? WaterTableDepthMeters { get; private set; }
@@ -41,62 +42,6 @@ public sealed class SoilResult : AuditableEntity
     public double? BsiMean { get; private set; }
     public double? NdmiMean { get; private set; }
 
-
-    // Bearing module (derived by Python alongside soil classification). [Not Listed in Soil Brackets in API Contract]
-    public double BearingCapacityEstimate { get; private set; }
-    public string BearingCapacityCategory { get; private set; } = string.Empty;
-    public string? OrganicCarbonUnit { get; private set; }
-    public double? BearingConfidence { get; private set; }
-    public string? BearingRange { get; private set; }
-    public string? BearingTrafficLight { get; private set; }
-    public string? RecommendedFoundation { get; private set; }
-    public int? MaxFloorsWithoutDeepFoundation { get; private set; }
-    public string? FloorCountCategory { get; private set; }
-    public double? BearingMinKpa { get; private set; }
-    public double? BearingMaxKpa { get; private set; }
-    public string? FeatureImportanceJson { get; private set; }
-    public string? SoilFactorsJson { get; private set; }
-    public string? BearingModelName { get; private set; }
-    public string? BearingFramework { get; private set; }
-    public double? BearingTrainingR2 { get; private set; }
-    public bool? BearingShapEnabled { get; private set; }
-
-    public void SetBearingResult(
-        double bearingCapacityEstimate,
-        string bearingCapacityCategory,
-        double? bearingConfidence = null,
-        string? bearingRange = null,
-        string? bearingTrafficLight = null,
-        string? recommendedFoundation = null,
-        int? maxFloorsWithoutDeepFoundation = null,
-        string? floorCountCategory = null,
-        double? bearingMinKpa = null,
-        double? bearingMaxKpa = null,
-        string? featureImportanceJson = null,
-        string? soilFactorsJson = null,
-        string? bearingModelName = null,
-        string? bearingFramework = null,
-        double? bearingTrainingR2 = null,
-        bool? bearingShapEnabled = null)
-    {
-        BearingCapacityEstimate = bearingCapacityEstimate;
-        BearingCapacityCategory = bearingCapacityCategory;
-        BearingConfidence = bearingConfidence;
-        BearingRange = bearingRange;
-        BearingTrafficLight = bearingTrafficLight;
-        RecommendedFoundation = recommendedFoundation;
-        MaxFloorsWithoutDeepFoundation = maxFloorsWithoutDeepFoundation;
-        FloorCountCategory = floorCountCategory;
-        BearingMinKpa = bearingMinKpa;
-        BearingMaxKpa = bearingMaxKpa;
-        FeatureImportanceJson = featureImportanceJson;
-        SoilFactorsJson = soilFactorsJson;
-        BearingModelName = bearingModelName;
-        BearingFramework = bearingFramework;
-        BearingTrainingR2 = bearingTrainingR2;
-        BearingShapEnabled = bearingShapEnabled;
-    }
-
     private SoilResult() { }
 
     public SoilResult(
@@ -107,8 +52,6 @@ public sealed class SoilResult : AuditableEntity
         double bulkDensity,
         double organicCarbon,
         double ph,
-        double bearingCapacityEstimate,
-        string bearingCapacityCategory,
         string? compositionUnit = null,
         string? bulkDensityUnit = null,
         string? organicCarbonUnit = null,
@@ -124,22 +67,9 @@ public sealed class SoilResult : AuditableEntity
         string? dataSourcesJson = null,
         double? ndviMean = null,
         double? bsiMean = null,
-        double? ndmiMean = null,
-        double? bearingConfidence = null,
-        string? bearingRange = null,
-        string? bearingTrafficLight = null,
-        string? recommendedFoundation = null,
-        int? maxFloorsWithoutDeepFoundation = null,
-        string? floorCountCategory = null,
-        double? bearingMinKpa = null,
-        double? bearingMaxKpa = null,
-        string? featureImportanceJson = null,
-        string? soilFactorsJson = null,
-        string? bearingModelName = null,
-        string? bearingFramework = null,
-        double? bearingTrainingR2 = null,
-        bool? bearingShapEnabled = null)
+        double? ndmiMean = null)
     {
+        Id = Guid.NewGuid();
         AnalysisJobId = analysisJobId;
         SandPercent = sandPercent;
         SiltPercent = siltPercent;
@@ -149,8 +79,6 @@ public sealed class SoilResult : AuditableEntity
         Ph = ph;
         Cec = cec;
         WaterTableDepthMeters = waterTableDepthMeters;
-        BearingCapacityEstimate = bearingCapacityEstimate;
-        BearingCapacityCategory = bearingCapacityCategory;
         CompositionUnit = compositionUnit;
         BulkDensityUnit = bulkDensityUnit;
         OrganicCarbonUnit = organicCarbonUnit;
@@ -165,19 +93,5 @@ public sealed class SoilResult : AuditableEntity
         NdviMean = ndviMean;
         BsiMean = bsiMean;
         NdmiMean = ndmiMean;
-        BearingConfidence = bearingConfidence;
-        BearingRange = bearingRange;
-        BearingTrafficLight = bearingTrafficLight;
-        RecommendedFoundation = recommendedFoundation;
-        MaxFloorsWithoutDeepFoundation = maxFloorsWithoutDeepFoundation;
-        FloorCountCategory = floorCountCategory;
-        BearingMinKpa = bearingMinKpa;
-        BearingMaxKpa = bearingMaxKpa;
-        FeatureImportanceJson = featureImportanceJson;
-        SoilFactorsJson = soilFactorsJson;
-        BearingModelName = bearingModelName;
-        BearingFramework = bearingFramework;
-        BearingTrainingR2 = bearingTrainingR2;
-        BearingShapEnabled = bearingShapEnabled;
     }
 }

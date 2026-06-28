@@ -37,6 +37,10 @@ public sealed class AnalysisResultQuery(PlanoraDbContext context) : IAnalysisRes
             .AsNoTracking()
             .FirstOrDefaultAsync(b => b.AnalysisJobId == job.Id, ct);
 
+        var bearing = await context.Set<BearingResult>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.AnalysisJobId == job.Id, ct);
+
         return new AggregatedAnalysisData
         {
             AnalysisJobId = job.Id,
@@ -65,13 +69,16 @@ public sealed class AnalysisResultQuery(PlanoraDbContext context) : IAnalysisRes
                 BulkDensity = soil.BulkDensity,
                 OrganicCarbon = soil.OrganicCarbon,
                 Ph = soil.Ph,
-                BearingCapacityEstimate = soil.BearingCapacityEstimate,
-                BearingCapacityCategory = soil.BearingCapacityCategory,
                 PrimaryType = soil.PrimaryType,
                 UsdaClass = soil.UsdaClass,
                 AiConfidence = soil.AiConfidence,
                 MultiDepthProfileJson = soil.MultiDepthProfileJson,
                 HeatmapTileUrl = soil.HeatmapTileUrl
+            },
+            Bearing = bearing == null ? null : new PdfBearingData
+            {
+                BearingCapacityKpa = bearing.BearingCapacityKpa,
+                Classification = bearing.Classification
             },
             Risk = risk == null ? null : new PdfRiskData
             {

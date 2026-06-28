@@ -34,7 +34,9 @@ public sealed class GetBoreholeResultsQueryHandler(
         logger.LogInformation("Fetching borehole results for ParcelId: {ParcelId}", request.ParcelId);
 
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
-        var boreholeJob = jobs.FirstOrDefault(j => j.Type == AnalysisType.Borehole && j.Status == AnalysisJobStatus.Completed);
+        var boreholeJob = jobs.FirstOrDefault(j =>
+            (j.Type == AnalysisType.Borehole || j.Type == AnalysisType.Aggregated)
+            && j.Status == AnalysisJobStatus.Completed);
 
         if (boreholeJob is null)
         {
