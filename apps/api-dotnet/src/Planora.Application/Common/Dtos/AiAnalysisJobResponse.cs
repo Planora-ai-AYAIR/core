@@ -8,6 +8,9 @@ public sealed record AiAnalysisJobResponse(
     [property: JsonPropertyName("data")] AiAnalysisJobData Data);
 
 public sealed record AiAnalysisJobData(
-    [property: JsonPropertyName("jobId")] string JobId,
+    [property: JsonPropertyName("pythonJobId")] string JobId,
+    [property: JsonPropertyName("backendJobId")] string BackendJobId,
+    [property: JsonPropertyName("parcelId")] string ParcelId,
     [property: JsonPropertyName("status")] string Status,
-    [property: JsonPropertyName("submittedAtUtc")] DateTime SubmittedAtUtc);
+    [property: JsonPropertyName("acceptedAt")] DateTime AcceptedAt,
+    [property: JsonPropertyName("estimatedDuration")] string EstimatedDuration);

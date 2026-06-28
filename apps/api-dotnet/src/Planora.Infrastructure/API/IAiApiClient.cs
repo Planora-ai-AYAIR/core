@@ -20,6 +20,6 @@ public interface IAiApiClient
     [Post("/reports/jobs")]
     Task<string> ProccessPdfAsync([Body] ProccessPdfJobAiRequest request, CancellationToken ct);
 
-    [Post("/api/v1/analysis/jobs")]
+    [Post("/analysis/jobs")]
     Task<AiAnalysisJobResponse> SubmitAnalysisJobAsync([Body] SubmitAiAnalysisJobRequest request, CancellationToken ct);
 }

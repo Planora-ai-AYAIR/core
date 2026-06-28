@@ -60,6 +60,7 @@ public sealed class RiskResult : AuditableEntity
         string? riskHeatmapTileUrl = null,
         string? mitigationSuggestionsJson = null)
     {
+        Id = Guid.NewGuid();
         AnalysisJobId = analysisJobId;
         FloodRiskScore = floodRiskScore;
         SeismicRiskScore = seismicRiskScore;

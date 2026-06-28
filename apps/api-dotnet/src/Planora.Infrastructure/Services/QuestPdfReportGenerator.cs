@@ -72,7 +72,7 @@ public sealed class QuestPdfReportGenerator : IPdfGeneratorService
                     if (data.Analysis.Soil is not null)
                     {
                         column.Item().PageBreak();
-                        column.Item().Element(c => ComposeSoil(c, data.Analysis.Soil));
+                        column.Item().Element(c => ComposeSoil(c, data.Analysis.Soil, data.Analysis.Bearing));
                     }
 
                     if (data.Analysis.Risk is not null && data.IncludeRiskMatrix)
@@ -333,7 +333,7 @@ public sealed class QuestPdfReportGenerator : IPdfGeneratorService
     // ===================================================================
     // SOIL
     // ===================================================================
-    private void ComposeSoil(IContainer container, PdfSoilData soil)
+    private void ComposeSoil(IContainer container, PdfSoilData soil, PdfBearingData? bearing)
     {
         container.Column(col =>
         {
@@ -394,8 +394,11 @@ public sealed class QuestPdfReportGenerator : IPdfGeneratorService
                 LabelCell(table.Cell(), "pH Level");
                 BodyCell(table.Cell(), $"{soil.Ph:F1}");
 
-                LabelCell(table.Cell(), "Bearing Capacity");
-                BodyCell(table.Cell(), $"{soil.BearingCapacityEstimate:F0} kPa ({soil.BearingCapacityCategory})");
+                if (bearing is not null)
+                {
+                    LabelCell(table.Cell(), "Bearing Capacity");
+                    BodyCell(table.Cell(), $"{bearing.BearingCapacityKpa:F0} kPa ({bearing.Classification})");
+                }
             });
 
             // NOTE: raw JSON fields (e.g. MultiDepthProfileJson) are intentionally

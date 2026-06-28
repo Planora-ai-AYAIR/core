@@ -49,18 +49,7 @@ public sealed class SoilCompletedHandler(
             ? JsonSerializer.Serialize(request.Payload.DataSources)
             : null;
 
-        var bearing = request.Payload.Bearing;
         var spectralIndices = request.Payload.SpectralIndices;
-
-        var featureImportanceJson = bearing?.FeatureImportance is not null
-            ? JsonSerializer.Serialize(bearing.FeatureImportance)
-            : null;
-
-        var soilFactorsJson = bearing?.SoilFactors is not null
-            ? JsonSerializer.Serialize(bearing.SoilFactors)
-            : null;
-
-        var modelMetadata = bearing?.ModelMetadata;
 
         var soilResult = new SoilResult(
             analysisJob.Id,
@@ -70,8 +59,6 @@ public sealed class SoilCompletedHandler(
             request.Payload.BulkDensity,
             request.Payload.OrganicCarbon,
             request.Payload.Ph,
-            request.Payload.BearingCapacityEstimate,
-            request.Payload.BearingCapacityCategory,
             request.Payload.CompositionUnit,
             request.Payload.BulkDensityUnit,
             request.Payload.OrganicCarbonUnit,
@@ -87,21 +74,7 @@ public sealed class SoilCompletedHandler(
             dataSourcesJson: dataSourcesJson,
             ndviMean: spectralIndices?.NdviMean,
             bsiMean: spectralIndices?.BsiMean,
-            ndmiMean: spectralIndices?.NdmiMean,
-            bearingConfidence: bearing?.Confidence,
-            bearingRange: bearing?.Range,
-            bearingTrafficLight: bearing?.TrafficLight,
-            recommendedFoundation: bearing?.RecommendedFoundation,
-            maxFloorsWithoutDeepFoundation: bearing?.MaxFloorsWithoutDeepFoundation,
-            floorCountCategory: bearing?.FloorCountCategory,
-            bearingMinKpa: bearing?.UncertaintyRange?.MinimumKpa,
-            bearingMaxKpa: bearing?.UncertaintyRange?.MaximumKpa,
-            featureImportanceJson: featureImportanceJson,
-            soilFactorsJson: soilFactorsJson,
-            bearingModelName: modelMetadata?.ModelName,
-            bearingFramework: modelMetadata?.Framework,
-            bearingTrainingR2: modelMetadata?.TrainingR2,
-            bearingShapEnabled: modelMetadata?.ShapEnabled);
+            ndmiMean: spectralIndices?.NdmiMean);
 
         await soilResultRepository.AddAsync(soilResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);

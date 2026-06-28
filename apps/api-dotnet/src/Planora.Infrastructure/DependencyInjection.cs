@@ -190,6 +190,7 @@ public static class DependencyInjection
         services.AddScoped<ISoilResultRepository, SoilResultRepository>();
         services.AddScoped<IRiskResultRepository, RiskResultRepository>();
         services.AddScoped<IBoreholeResultRepository, BoreholeResultRepository>();
+        services.AddScoped<IBearingResultRepository, BearingResultRepository>();
         services.AddScoped<IAnalysisResultQuery, AnalysisResultQuery>();
 
 

@@ -34,7 +34,9 @@ public sealed class GetRiskResultsQueryHandler(
         logger.LogInformation("Fetching risk results for ParcelId: {ParcelId}", request.ParcelId);
 
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
-        var riskJob = jobs.FirstOrDefault(j => j.Type == AnalysisType.Risk && j.Status == AnalysisJobStatus.Completed);
+        var riskJob = jobs.FirstOrDefault(j =>
+            (j.Type == AnalysisType.Risk || j.Type == AnalysisType.Aggregated)
+            && j.Status == AnalysisJobStatus.Completed);
 
         if (riskJob is null)
         {
