@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
+import asyncio
+from app.services.webhook_service import send_analysis_webhook
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
@@ -240,15 +242,42 @@ def _run_pipeline(python_job_id: str, request: AnalysisJobRequest) -> None:
         logger.info("Job completed — pythonJobId=%s duration=%.1fs",
                     python_job_id, (completed - started).total_seconds())
 
+        _fire_webhook(
+                python_job_id,
+                {
+                    "pythonJobId":  python_job_id,
+                    "backendJobId": request.job_id,
+                    "parcelId":     request.parcel_id,
+                    "status":       JobStatus.COMPLETED.value,
+                    "startedAt":    started.isoformat().replace("+00:00", "Z"),
+                    "completedAt":  completed.isoformat().replace("+00:00", "Z"),
+                    "result":       result.model_dump(by_alias=True, mode="json"),
+                },
+                "analysis.completed",
+            )
+
     except Exception as exc:
-        logger.error("Job FAILED — %s\n%s", python_job_id, traceback.format_exc())
-        error_code, description = _classify_error(exc)
-        _update_job(
-            python_job_id,
-            status=JobStatus.FAILED,
-            completedAt=datetime.now(timezone.utc),
-            errors=[ErrorDetail(code=error_code, description=description)],
-        )
+            logger.error("Job FAILED — %s\n%s", python_job_id, traceback.format_exc())
+            error_code, description = _classify_error(exc)
+            _update_job(
+                python_job_id,
+                status=JobStatus.FAILED,
+                completedAt=datetime.now(timezone.utc),
+                errors=[ErrorDetail(code=error_code, description=description)],
+            )
+
+            _fire_webhook(
+                python_job_id,
+                {
+                    "pythonJobId":  python_job_id,
+                    "backendJobId": request.job_id,
+                    "parcelId":     request.parcel_id,
+                    "status":       JobStatus.FAILED.value,
+                    "reason":       description,
+                    "errorCode":    error_code,
+                },
+                "analysis.failed",
+            )
 
 
 def _set_stage(job_id: str, stage_idx: int) -> None:
@@ -836,6 +865,22 @@ def _build_borehole_geojson(points: list[dict]) -> dict:
         for p in points
     ]}
 
+# ═══════════════════════════════════════════════════════════════════════════
+# PIPELINE
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _fire_webhook(python_job_id: str, data: dict, event_type: str) -> None:
+    """Deliver a completion/failure webhook from the synchronous pipeline task.
+
+    ``_run_pipeline`` runs in FastAPI's threadpool (no event loop), while
+    ``send_analysis_webhook`` is async — so we drive it with ``asyncio.run``.
+    Delivery errors are already swallowed inside the webhook service; this guard
+    only protects against the (unlikely) event-loop setup failing.
+    """
+    try:
+        asyncio.run(send_analysis_webhook(python_job_id, data, event_type))
+    except Exception:
+        logger.error("Webhook dispatch failed — pythonJobId=%s\n%s", python_job_id, traceback.format_exc())
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HELPERS
