@@ -4,14 +4,21 @@ import { environment } from '../../../environments/environment';
 import { NotificationDto } from '../interfaces/notification/notification-dto';
 import { AuthService } from './auth.service';
 import * as signalR from '@microsoft/signalr';
+import { AnalysisResultEnvelope } from '../../features/analyses/interfaces/analysis/analysis-result-envelope';
 
 @Injectable({ providedIn: 'root' })
 export class SignalRService implements OnDestroy {
   private auth = inject(AuthService);
   private hubConnection?: signalR.HubConnection;
   private notificationSubject = new Subject<NotificationDto>();
+  private analysisResultSubject = new Subject<AnalysisResultEnvelope>();
+  private reportGeneratedSubject = new Subject<any>();
+  private reportFailedSubject = new Subject<any>();
 
   notification$ = this.notificationSubject.asObservable();
+  analysisResult$ = this.analysisResultSubject.asObservable();
+  reportGenerated$ = this.reportGeneratedSubject.asObservable();
+  reportFailed$ = this.reportFailedSubject.asObservable();
 
   startConnection(): void {
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -25,6 +32,18 @@ export class SignalRService implements OnDestroy {
       this.notificationSubject.next(notification);
     });
 
+    this.hubConnection.on('AnalysisResultReceived', (envelope: AnalysisResultEnvelope) => {
+      this.analysisResultSubject.next(envelope);
+    });
+
+    this.hubConnection.on('ReportGenerated', (event: any) => {
+      this.reportGeneratedSubject.next(event);
+    });
+
+    this.hubConnection.on('ReportFailed', (event: any) => {
+      this.reportFailedSubject.next(event);
+    });
+
     this.hubConnection.start().catch((err) => console.error('SignalR error:', err));
   }
 
@@ -35,6 +54,10 @@ export class SignalRService implements OnDestroy {
   subscribeToParcel(parcelId: string): void {
     this.hubConnection?.invoke('SubscribeToParcel', parcelId).catch((err) => console.error(err));
   }
+
+  stopConnection(): void {
+  this.hubConnection?.stop();
+}
 
   ngOnDestroy(): void {
     this.hubConnection?.stop();

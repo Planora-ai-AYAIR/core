@@ -1,38 +1,583 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { BoreholeData } from '../interfaces/borehole-data';
 import { RiskData } from '../interfaces/risk-data';
 import { SoilData } from '../interfaces/soil-data';
 import { TopographyData } from '../interfaces/topography-data';
-import {
-  MOCK_TOPOGRAPHY_DATA,
-  MOCK_SOIL_DATA,
-  MOCK_RISK_DATA,
-  MOCK_BOREHOLE_DATA,
-  MOCK_BEARING_DATA,
-} from '../analysis-mock-data';
 import { BearingData } from '../interfaces/bearing-data';
+import { ModuleStatus } from '../interfaces/module-status';
+import { NotificationDto } from '../../../core/interfaces/notification/notification-dto';
+import { ParcelAnalysisStatusResponse } from '../interfaces/analysis/parcel-analysis-status-response';
+import { SignalRService } from '../../../core/services/signalr.service';
+import { AnalysisResultEnvelope } from '../interfaces/analysis/analysis-result-envelope';
+import { ParcelAnalysisFullResponse } from '../interfaces/analysis/analysis-full-response';
+import { AnalysisApiService } from './analysis-api.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AnalysisDetailFacadeService {
+  // ── Module result signals ──
   readonly topographyData = signal<TopographyData | null>(null);
   readonly soilData = signal<SoilData | null>(null);
   readonly bearingData = signal<BearingData | null>(null);
   readonly riskData = signal<RiskData | null>(null);
   readonly boreholeData = signal<BoreholeData | null>(null);
 
+  // ── Progress signal ──
+  readonly moduleProgress = signal<
+    Record<string, { status: ModuleStatus; estimatedSeconds: number }>
+  >({
+    topography: { status: 'Processing', estimatedSeconds: 0 },
+    soil: { status: 'Processing', estimatedSeconds: 0 },
+    bearing: { status: 'Processing', estimatedSeconds: 0 },
+    risk: { status: 'Processing', estimatedSeconds: 0 },
+    borehole: { status: 'Processing', estimatedSeconds: 0 },
+  });
+
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
-  loadAllData() {
+  private signalR = inject(SignalRService);
+  private api = inject(AnalysisApiService);
+  private notificationSub?: Subscription;
+  private analysisResultSub?: Subscription;
+
+  /** Start real‑time progress tracking for the given parcel. */
+  async startRealtimeProgress(parcelId: string) {
     this.loading.set(true);
-    // Simulate API call - replace with HTTP later
-    this.topographyData.set(MOCK_TOPOGRAPHY_DATA);
-    this.soilData.set(MOCK_SOIL_DATA);
-    this.bearingData.set(MOCK_BEARING_DATA);
-    this.riskData.set(MOCK_RISK_DATA);
-    this.boreholeData.set(MOCK_BOREHOLE_DATA);
-    this.loading.set(false);
+
+    // Ensure SignalR connection is started (if not already)
+    try {
+      this.signalR.startConnection(); // fire and forget; start() handles its own promise
+    } catch (_) {
+      this.error.set('Unable to establish real‑time connection');
+      this.loading.set(false);
+      return;
+    }
+
+    // 1. Try to get already-completed analysis via REST
+    this.api.getFullAnalysis(parcelId).subscribe({
+      next: (data) => {
+        this.populateFromFullResponse(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        if (err.status === 409) {
+          // Not completed yet – subscribe to SignalR for real-time updates
+          this.subscribeToSignalR(parcelId);
+          // Also fetch current module status to show progress
+          this.api
+            .getParcelAnalysisStatus(parcelId)
+            .subscribe((s) => this.updateProgressFromStatus(s));
+        } else {
+          this.error.set('Failed to load analysis');
+        }
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private subscribeToSignalR(parcelId: string) {
+    this.signalR.subscribeToParcel(parcelId);
+    this.analysisResultSub = this.signalR.analysisResult$.subscribe((envelope) =>
+      this.handleAnalysisResult(envelope, parcelId),
+    );
+  }
+
+  private populateFromFullResponse(data: ParcelAnalysisFullResponse) {
+    const result = data.result;
+    if (result?.topography) {
+      this.topographyData.set(this.mapTopographyFromFull(result.topography));
+    }
+    if (result?.soil) {
+      this.soilData.set(this.mapSoilFromFull(result.soil));
+      if (result.bearing) {
+        this.bearingData.set(this.mapBearingFromFull(result.bearing));
+      }
+    }
+    if (result?.risk) {
+      this.riskData.set(this.mapRiskFromFull(result.risk));
+    }
+    if (result?.borehole) {
+      this.boreholeData.set(this.mapBoreholeFromFull(result.borehole));
+    }
+
+    // Mark all returned modules as completed
+    this.moduleProgress.update((prev) => ({
+      ...prev,
+      ...(result.topography
+        ? { ['topography']: { status: 'Completed' as ModuleStatus, estimatedSeconds: 0 } }
+        : {}),
+      ...(result.soil ? { ['soil']: { status: 'Completed', estimatedSeconds: 0 } } : {}),
+      ...(result.bearing ? { ['bearing']: { status: 'Completed', estimatedSeconds: 0 } } : {}),
+      ...(result.risk ? { ['risk']: { status: 'Completed', estimatedSeconds: 0 } } : {}),
+      ...(result.borehole ? { ['borehole']: { status: 'Completed', estimatedSeconds: 0 } } : {}),
+    }));
+  }
+
+  stopRealtimeProgress(): void {
+    this.notificationSub?.unsubscribe();
+    this.analysisResultSub?.unsubscribe();
+  }
+
+  // ── SignalR event handler (per‑module & aggregated) ────────────────
+  private handleAnalysisResult(envelope: AnalysisResultEnvelope, parcelId: string): void {
+    if (envelope.ParcelId !== parcelId) return;
+
+    const eventType = envelope.EventType;
+    const payload = envelope.Result;
+    if (!payload) return;
+
+    // Per‑module events
+    if (eventType === 'TopographyCompleted' || eventType === 'AnalysisCompleted') {
+      const topo = eventType === 'AnalysisCompleted' ? payload.topography : payload;
+      if (topo) {
+        this.topographyData.set(this.mapTopographyFromSignalR(topo));
+        this.moduleProgress.update((prev) => ({
+          ...prev,
+          ['topography']: { status: 'Completed', estimatedSeconds: 0 },
+        }));
+      }
+    }
+
+    if (eventType === 'SoilCompleted' || eventType === 'AnalysisCompleted') {
+      const soil = eventType === 'AnalysisCompleted' ? payload.soil : payload;
+      if (soil) {
+        this.soilData.set(this.mapSoilFromSignalR(soil));
+        if (soil.bearingCapacityEstimate || soil.bearing) {
+          this.bearingData.set(this.mapBearingFromSignalR(soil));
+        }
+        this.moduleProgress.update((prev) => ({
+          ...prev,
+          ['soil']: { status: 'Completed', estimatedSeconds: 0 },
+          ['bearing']:
+            soil.bearingCapacityEstimate || soil.bearing
+              ? { status: 'Completed', estimatedSeconds: 0 }
+              : prev['bearing'],
+        }));
+      }
+    }
+
+    if (eventType === 'RiskCompleted' || eventType === 'AnalysisCompleted') {
+      const risk = eventType === 'AnalysisCompleted' ? payload.risk : payload;
+      if (risk) {
+        this.riskData.set(this.mapRiskFromSignalR(risk));
+        this.moduleProgress.update((prev) => ({
+          ...prev,
+          ['risk']: { status: 'Completed', estimatedSeconds: 0 },
+        }));
+      }
+    }
+
+    if (eventType === 'BoreholeCompleted' || eventType === 'AnalysisCompleted') {
+      const bore = eventType === 'AnalysisCompleted' ? payload.borehole : payload;
+      if (bore) {
+        this.boreholeData.set(this.mapBoreholeFromSignalR(bore));
+        this.moduleProgress.update((prev) => ({
+          ...prev,
+          ['borehole']: { status: 'Completed', estimatedSeconds: 0 },
+        }));
+      }
+    }
+  }
+
+  // ── Notification handler ───────────────────────────────────────────
+  private handleNotification(notification: NotificationDto, parcelId: string): void {
+    const moduleType = this.extractModuleType(notification);
+    if (!moduleType) return;
+
+    const newStatus: ModuleStatus =
+      notification.type === 'ModuleCompleted'
+        ? 'Completed'
+        : notification.type === 'ModuleFailed'
+          ? 'Failed'
+          : 'Processing';
+
+    this.moduleProgress.update((prev) => ({
+      ...prev,
+      [moduleType.toLowerCase()]: { status: newStatus, estimatedSeconds: 0 },
+    }));
+  }
+
+  private updateProgressFromStatus(status: ParcelAnalysisStatusResponse): void {
+    const progress: Record<string, { status: ModuleStatus; estimatedSeconds: number }> = {};
+    status.modules.forEach((m) => {
+      const mappedStatus: ModuleStatus =
+        m.status === 'Completed' ? 'Completed' : m.status === 'Failed' ? 'Failed' : 'Processing';
+      progress[m.type.toLowerCase()] = { status: mappedStatus, estimatedSeconds: 0 };
+    });
+    this.moduleProgress.set(progress);
+  }
+
+  private extractModuleType(notification: NotificationDto): string | null {
+    if (notification.data) {
+      try {
+        const data = JSON.parse(notification.data);
+        return data.moduleType || null;
+      } catch {}
+    }
+    const match = notification.title.match(/^(\w+)\s/);
+    return match ? match[1] : null;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Mappers: Raw SignalR payload → frontend models
+  // (Field names match the Python webhook output you confirmed)
+  // ═══════════════════════════════════════════════════════════════════
+
+  private mapTopographyFromSignalR(payload: any): TopographyData {
+    const slopeDist = payload.slopeDistribution || [];
+    return {
+      minElevation: payload.elevationMin ?? 0,
+      maxElevation: payload.elevationMax ?? 0,
+      meanElevation: payload.elevationMean ?? 0,
+      cutFill: payload.netVolume ?? 0,
+      slopeDistribution: slopeDist.map((s: any) => ({
+        name: s.range || s.category,
+        value: s.percentage,
+      })),
+      pondingZones: [],
+      engineeringFlags: [],
+      elevationGrid: [],
+      contourLines: [],
+      slopePolygons: [],
+      pondingPolygons: [],
+    };
+  }
+
+  private mapSoilFromSignalR(payload: any): SoilData {
+    const depthProfiles = payload.depthProfiles || [];
+    return {
+      bulkDensity: payload.bulkDensity ?? 0,
+      organicCarbon: payload.organicCarbon ?? 0,
+      pH: payload.ph ?? 0,
+      classification: payload.primaryType ?? '',
+      confidence: payload.aiConfidence ?? 0,
+      composition: [
+        { type: 'Clay', percent: payload.clayPercent ?? 0, color: '#C0392B' },
+        { type: 'Silt', percent: payload.siltPercent ?? 0, color: '#A0522D' },
+        { type: 'Sand', percent: payload.sandPercent ?? 0, color: '#F4D03F' },
+      ],
+      soilCompositionGeoJSON: null,
+      depthProfiles: depthProfiles.map((p: any) => ({
+        depthRange: p.depth,
+        sandPercent: p.sand,
+        siltPercent: 100 - p.sand - p.clay,
+        clayPercent: p.clay,
+        classification: p.type,
+        color: this.soilColor(p.type),
+      })),
+      heatmapUrls: {},
+      heatmapLegend: [
+        { color: '#F4D03F', label: 'Sand' },
+        { color: '#A0522D', label: 'Silt' },
+        { color: '#C0392B', label: 'Clay' },
+      ],
+    };
+  }
+
+  private mapBearingFromSignalR(payload: any): BearingData {
+    const bearing = payload.bearing || {};
+    return {
+      bearingCapacity: payload.bearingCapacityEstimate ?? 0,
+      uncertaintyRangeKpa: {
+        min: bearing.uncertaintyRange?.minimumKpa ?? 0,
+        max: bearing.uncertaintyRange?.maximumKpa ?? 0,
+      },
+      capacityClass: (payload.bearingCapacityCategory as any) ?? 'Medium',
+      isUnreliableEstimate: false,
+      floorCountCategory: bearing.floorCountCategory ?? '1-2 floors',
+      maxFloorsWithoutDeepFoundation: bearing.maxFloorsWithoutDeepFoundation ?? 0,
+      foundationType: bearing.recommendedFoundation ?? 'Shallow',
+      factors: {
+        clayPercent: {
+          value: payload.clayPercent,
+          unit: '%',
+          safeThreshold: 50,
+          source: 'Soil module',
+          tooltip: '',
+        },
+        sandPercent: {
+          value: payload.sandPercent,
+          unit: '%',
+          safeThreshold: 60,
+          source: 'Soil module',
+          tooltip: '',
+        },
+        moistureIndex: {
+          value: 0.32,
+          unit: '',
+          safeThreshold: 0.4,
+          source: 'Sentinel-2 NDMI',
+          tooltip: '',
+        },
+        waterTableDepth: {
+          value: payload.waterTableDepthMeters ?? 0,
+          unit: 'm',
+          safeThreshold: 5,
+          source: 'SoilGrids',
+          tooltip: '',
+        },
+        terrainSlope: {
+          value: 0,
+          unit: '%',
+          safeThreshold: 5,
+          source: 'Topography module',
+          tooltip: '',
+        },
+      },
+      buildingLoadReferences: [],
+      bearingPoints: [],
+      waterTableLines: [],
+    };
+  }
+
+  private mapRiskFromSignalR(payload: any): RiskData {
+    const sub = (item: any, icon: string, color: string) => ({
+      score: item?.score ?? 0,
+      level: item?.level ?? '',
+      icon,
+      color,
+      factors: (item?.factors || []).map((f: string) => ({ label: '', detail: f })),
+      mitigation: item?.level === 'High' ? 'See recommendations' : '',
+    });
+
+    return {
+      overallRiskScore: payload.overallRiskScore ?? 0,
+      overallRiskLevel: payload.overallRiskLevel ?? '',
+      benchmarkComparison: 'Lower than 65% of sites in Nile Delta region',
+      floodRisk: sub(payload.flood, 'pi pi-cloud-download', '#3B82F6'),
+      seismicRisk: sub(payload.seismic, 'pi pi-compass', '#F59E0B'),
+      expansiveSoilRisk: sub(payload.expansiveSoil, 'pi pi-arrows-v', '#A0522D'),
+      liquefactionRisk: sub(payload.liquefaction, 'pi pi-exclamation-triangle', '#8B5CF6'),
+      mitigations: [],
+      floodFeatures: [],
+      seismicZonesGeoJSON: null,
+      expansiveSoilZonesGeoJSON: null,
+      liquefactionZonesGeoJSON: null,
+    };
+  }
+
+  private mapBoreholeFromSignalR(payload: any): BoreholeData {
+    return {
+      minRequired: payload.minimumRequired ?? 0,
+      recommended: payload.optimalCount ?? 0,
+      coveragePercent: payload.coveragePercentage ?? 0,
+      gridSize: payload.gridSize ?? '',
+      strategy: payload.placementStrategy ?? '',
+      placementPoints: (payload.placementPoints || []).map((p: any) => ({
+        id: p.id,
+        lng: p.longitude,
+        lat: p.latitude,
+        priority: p.priority as any,
+        reason: p.reason ?? '',
+        estimatedDepth: p.estimatedDepth ?? 0,
+      })),
+      costAnalysis: {
+        traditionalCount: payload.traditionalBoreholeCount ?? 0,
+        traditionalCost: payload.traditionalEstimatedCost ?? 0,
+        optimizedCount: payload.optimizedBoreholeCount ?? 0,
+        optimizedCost: payload.optimizedEstimatedCost ?? 0,
+        savingsAmount: payload.savingsAmount ?? 0,
+        savingsPercent: payload.savingsPercentage ?? 0,
+        ratePerMeter: 700,
+      },
+      parameters: {
+        maxSpacing: 30,
+        minBoreholes: payload.minimumRequired ?? 0,
+        targetDepth: payload.placementPoints?.[0]?.estimatedDepth ?? 20,
+        unit: 'm',
+      },
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Mappers: Full REST response → frontend models
+  // (Used when loading an already‑completed analysis)
+  // ═══════════════════════════════════════════════════════════════════
+
+  private mapTopographyFromFull(dto: any): TopographyData {
+    const elevation = dto?.elevation ?? {};
+    const slope = dto?.slopeDistribution ?? [];
+    const cutFill = dto?.cutFillAnalysis ?? {};
+    return {
+      minElevation: elevation.minimumMeters ?? 0,
+      maxElevation: elevation.maximumMeters ?? 0,
+      meanElevation: elevation.averageMeters ?? 0,
+      cutFill: cutFill.netVolumeM3 ?? 0,
+      slopeDistribution: slope.map((s: any) => ({
+        name: s.range,
+        value: s.percentage,
+      })),
+      pondingZones: [],
+      engineeringFlags: [],
+      elevationGrid: [],
+      contourLines: [],
+      slopePolygons: [],
+      pondingPolygons: [],
+    };
+  }
+
+  private mapSoilFromFull(dto: any): SoilData {
+    const classification = dto?.classification ?? {};
+    const surface = dto?.surfaceComposition ?? {};
+    const properties = dto?.properties ?? {};
+    const depthLayers = dto?.depthLayers ?? [];
+    return {
+      bulkDensity: properties.bulkDensity ?? 0,
+      organicCarbon: properties.organicCarbonPercentage ?? 0,
+      pH: properties.ph ?? 0,
+      classification: classification.primaryType ?? '',
+      confidence: classification.aiConfidence ?? 0,
+      composition: [
+        { type: 'Clay', percent: surface.clayPercentage ?? 0, color: '#C0392B' },
+        { type: 'Silt', percent: surface.siltPercentage ?? 0, color: '#A0522D' },
+        { type: 'Sand', percent: surface.sandPercentage ?? 0, color: '#F4D03F' },
+      ],
+      soilCompositionGeoJSON: null,
+      depthProfiles: depthLayers.map((l: any) => ({
+        depthRange: l.depth,
+        sandPercent: l.sand,
+        siltPercent: l.silt,
+        clayPercent: l.clay,
+        classification: l.soilType,
+        color: this.soilColor(l.soilType),
+      })),
+      heatmapUrls: {},
+      heatmapLegend: [
+        { color: '#F4D03F', label: 'Sand' },
+        { color: '#A0522D', label: 'Silt' },
+        { color: '#C0392B', label: 'Clay' },
+      ],
+    };
+  }
+
+  private mapBearingFromFull(dto: any): BearingData {
+    return {
+      bearingCapacity: dto?.bearingCapacityKpa ?? 0,
+      uncertaintyRangeKpa: {
+        min: dto?.uncertaintyRange?.minimumKpa ?? 0,
+        max: dto?.uncertaintyRange?.maximumKpa ?? 0,
+      },
+      capacityClass: (dto?.classification as any) ?? 'Medium',
+      isUnreliableEstimate: false,
+      floorCountCategory: dto?.floorCountCategory ?? '1-2 floors',
+      maxFloorsWithoutDeepFoundation: dto?.maxFloorsWithoutDeepFoundation ?? 0,
+      foundationType: dto?.recommendedFoundation ?? 'Shallow',
+      factors: {
+        clayPercent: {
+          value: dto?.soilFactors?.clayContent ?? 0,
+          unit: '%',
+          safeThreshold: 50,
+          source: 'Soil module',
+          tooltip: '',
+        },
+        sandPercent: {
+          value: dto?.soilFactors?.sandContent ?? 0,
+          unit: '%',
+          safeThreshold: 60,
+          source: 'Soil module',
+          tooltip: '',
+        },
+        moistureIndex: {
+          value: dto?.soilFactors?.moistureIndex ?? 0,
+          unit: '',
+          safeThreshold: 0.4,
+          source: 'Sentinel-2 NDMI',
+          tooltip: '',
+        },
+        waterTableDepth: {
+          value: dto?.soilFactors?.depthToWaterTableMeters ?? 0,
+          unit: 'm',
+          safeThreshold: 5,
+          source: 'SoilGrids',
+          tooltip: '',
+        },
+        terrainSlope: {
+          value: dto?.soilFactors?.terrainSlopePercent ?? 0,
+          unit: '%',
+          safeThreshold: 5,
+          source: 'Topography module',
+          tooltip: '',
+        },
+      },
+      buildingLoadReferences: [],
+      bearingPoints: [],
+      waterTableLines: [],
+    };
+  }
+
+  private mapRiskFromFull(dto: any): RiskData {
+    const sub = (item: any, icon: string, color: string) => ({
+      score: item?.score ?? 0,
+      level: item?.level ?? '',
+      icon,
+      color,
+      factors: (item?.factors || []).map((f: string) => ({ label: '', detail: f })),
+      mitigation: item?.level === 'High' ? 'See recommendations' : '',
+    });
+
+    return {
+      overallRiskScore: dto?.overallScore ?? 0,
+      overallRiskLevel: dto?.overallRiskLevel ?? '',
+      benchmarkComparison: 'Lower than 65% of sites in Nile Delta region',
+      floodRisk: sub(dto?.riskBreakdown?.flood, 'pi pi-cloud-download', '#3B82F6'),
+      seismicRisk: sub(dto?.riskBreakdown?.seismic, 'pi pi-compass', '#F59E0B'),
+      expansiveSoilRisk: sub(dto?.riskBreakdown?.expansiveSoil, 'pi pi-arrows-v', '#A0522D'),
+      liquefactionRisk: sub(
+        dto?.riskBreakdown?.liquefaction,
+        'pi pi-exclamation-triangle',
+        '#8B5CF6',
+      ),
+      mitigations: [],
+      floodFeatures: [],
+      seismicZonesGeoJSON: null,
+      expansiveSoilZonesGeoJSON: null,
+      liquefactionZonesGeoJSON: null,
+    };
+  }
+
+  private mapBoreholeFromFull(dto: any): BoreholeData {
+    const rec = dto?.recommendation ?? {};
+    const cost = dto?.costAnalysis ?? {};
+    return {
+      minRequired: rec.minimumRequired ?? 0,
+      recommended: rec.optimalCount ?? 0,
+      coveragePercent: rec.coveragePercentage ?? 0,
+      gridSize: rec.gridSize ?? '',
+      strategy: rec.strategy ?? '',
+      placementPoints: (dto?.placementPoints || []).map((p: any) => ({
+        id: p.id,
+        lng: p.longitude,
+        lat: p.latitude,
+        priority: p.priority as any,
+        reason: p.reason ?? '',
+        estimatedDepth: p.estimatedDepthMeters ?? 0,
+      })),
+      costAnalysis: {
+        traditionalCount: cost.traditionalApproach?.boreholes ?? 0,
+        traditionalCost: cost.traditionalApproach?.estimatedCost ?? 0,
+        optimizedCount: cost.optimizedApproach?.boreholes ?? 0,
+        optimizedCost: cost.optimizedApproach?.estimatedCost ?? 0,
+        savingsAmount: cost.savings?.amount ?? 0,
+        savingsPercent: cost.savings?.percentage ?? 0,
+        ratePerMeter: 700,
+      },
+      parameters: {
+        maxSpacing: 30,
+        minBoreholes: rec.minimumRequired ?? 0,
+        targetDepth: dto?.placementPoints?.[0]?.estimatedDepthMeters ?? 20,
+        unit: 'm',
+      },
+    };
+  }
+
+  private soilColor(type: string): string {
+    const colors: Record<string, string> = {
+      'sandy loam': '#F4D03F',
+      'sandy clay loam': '#D9A23A',
+      'clay loam': '#BD7434',
+      clay: '#C0392B',
+    };
+    return colors[type.toLowerCase()] ?? '#ccc';
   }
 }

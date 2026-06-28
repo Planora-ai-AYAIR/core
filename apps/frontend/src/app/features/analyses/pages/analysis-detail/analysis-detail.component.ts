@@ -1,6 +1,6 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MapComponent } from '../../../../shared/components/map/map.component';
 import { MapLayerService } from '../../services/map-layer.service';
@@ -18,7 +18,10 @@ import { ModuleStatus } from '../../interfaces/module-status';
 import { BearingMapInitialiser } from '../../services/map-initialiser/bearing-map-initialiser.service';
 import { BearingTabComponent } from '../../components/analysis-detail/bearing-tab/bearing-tab.component';
 import { RiskTabComponent } from '../../components/analysis-detail/risk/risk-tab/risk-tab.component';
+import { ParcelFacadeService } from '../../../parcels/services/parcel-facade.service';
 import maplibregl from 'maplibre-gl';
+import { ReportFacadeService } from '../../services/report/report-facade.service';
+import { SignalRService } from '../../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-analysis-detail',
@@ -38,17 +41,31 @@ import maplibregl from 'maplibre-gl';
   templateUrl: './analysis-detail.component.html',
   styleUrls: ['./analysis-detail.component.css'],
 })
-export class AnalysisDetailComponent {
+export class AnalysisDetailComponent implements OnInit, OnDestroy {
   private _layerService = inject(MapLayerService);
   private _analysisFacade = inject(AnalysisDetailFacadeService);
+  private _parcelFacade = inject(ParcelFacadeService);
+  reportFacade = inject(ReportFacadeService);
+  private signalR = inject(SignalRService);
+  private route = inject(ActivatedRoute);
+
   private _topographyInit = inject(TopographyMapInitialiser);
   private _soilInit = inject(SoilMapInitialiser);
   private _riskInit = inject(RiskMapInitialiser);
   private _boreholeInit = inject(BoreholeMapInitialiser);
   private _bearingInit = inject(BearingMapInitialiser);
+  private router = inject(Router);
 
   map = signal<maplibregl.Map | undefined>(undefined);
   activeModule = signal('topography');
+
+  parcelName = signal('');
+  parcelCoordinates = signal('');
+  mapCenter = signal<[number, number]>([31.942, 30.633]);
+
+  parcelId!: string;
+
+  private parcelBoundary: [number, number][] | null = null;
 
   readonly today = new Date();
   modules = [
@@ -58,6 +75,157 @@ export class AnalysisDetailComponent {
     { id: 'risk', label: 'Construction Risk', status: 'ready' },
     { id: 'borehole', label: 'Drilling Plan', status: 'ready' },
   ];
+
+  // ── Progress from facade ──
+  moduleProgress = this._analysisFacade.moduleProgress;
+
+  // ── Derived status (for dot colors) ──
+  moduleStatus = computed(() => {
+    const progress = this.moduleProgress();
+    return {
+      topography: progress['topography']?.status ?? 'pending',
+      soil: progress['soil']?.status ?? 'pending',
+      bearing: progress['bearing']?.status ?? 'pending',
+      risk: progress['risk']?.status ?? 'pending',
+      borehole: progress['borehole']?.status ?? 'pending',
+    } as Record<string, string>;
+  });
+
+  isActiveModuleCompleted = computed(
+    () => this.moduleProgress()[this.activeModule()]?.status === 'Completed',
+  );
+
+  allModulesCompleted = computed(() => {
+    const progress = this.moduleProgress();
+    return Object.values(progress).every((m) => m.status === 'Completed');
+  });
+
+  constructor() {
+    // ── Reactive layer adding ──
+    // When data arrives for a completed module, add its map layers immediately.
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.topographyData();
+      const progress = this.moduleProgress()['topography']?.status;
+      if (map && data && progress === 'Completed') {
+        this._topographyInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.soilData();
+      const progress = this.moduleProgress()['soil']?.status;
+      if (map && data && progress === 'Completed') {
+        this._soilInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.bearingData();
+      const progress = this.moduleProgress()['bearing']?.status;
+      if (map && data && progress === 'Completed') {
+        this._bearingInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.riskData();
+      const progress = this.moduleProgress()['risk']?.status;
+      if (map && data && progress === 'Completed') {
+        this._riskInit.addLayers(map, data);
+      }
+    });
+
+    effect(() => {
+      const map = this.map();
+      const data = this._analysisFacade.boreholeData();
+      const progress = this.moduleProgress()['borehole']?.status;
+      if (map && data && progress === 'Completed') {
+        this._boreholeInit.addLayers(map, data);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    const analysisId = this.route.snapshot.paramMap.get('analysisId');
+    const parcelId = this.route.snapshot.paramMap.get('parcelId'); // from path
+
+    if (parcelId) {
+      this.parcelId = parcelId;
+
+      // Start analysis real‑time
+      this._analysisFacade.startRealtimeProgress(this.parcelId);
+
+      // Load parcel metadata
+      this._parcelFacade.getParcelById(this.parcelId).subscribe((parcel) => {
+        if (parcel) {
+          this.parcelName.set(parcel.name);
+          this.parcelCoordinates.set(
+            `${parcel.centroidLatitude.toFixed(3)}°N, ${parcel.centroidLongitude.toFixed(3)}°E`,
+          );
+          this.mapCenter.set([parcel.centroidLongitude, parcel.centroidLatitude]);
+          this._addParcelBoundary(parcel.boundaryCoordinates);
+        }
+      });
+
+      this.signalR.reportGenerated$.subscribe((event: any) => {
+        if (event.ParcelId === this.parcelId) {
+          this.reportFacade.onReportGenerated(this.parcelId, event.ReportJobId);
+        }
+      });
+
+      this.signalR.reportFailed$.subscribe((event: any) => {
+        if (event.ParcelId === this.parcelId) {
+          this.reportFacade.onReportFailed(event.Message);
+        }
+      });
+    } else {
+      console.warn('No parcelId in URL - redirecting to list');
+      this.router.navigate(['/app/analyses']);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this._analysisFacade.stopRealtimeProgress();
+  }
+
+  private _addParcelBoundary(coords: { longitude: number; latitude: number }[]) {
+    this.parcelBoundary = coords.map((p) => [p.longitude, p.latitude] as [number, number]);
+    // If map already exists, draw now
+    if (this.map()) {
+      this._drawBoundary();
+    }
+  }
+
+  private _drawBoundary() {
+    const map = this.map()!;
+    if (!this.parcelBoundary) return;
+    if (map.getSource('parcel-outline')) {
+      (map.getSource('parcel-outline') as any).setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: this.parcelBoundary },
+      });
+    } else {
+      map.addSource('parcel-outline', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates: this.parcelBoundary },
+        },
+      });
+      map.addLayer({
+        id: 'parcel-outline-layer',
+        type: 'line',
+        source: 'parcel-outline',
+        paint: { 'line-color': '#B86E3D', 'line-width': 2, 'line-dasharray': [4, 2] },
+      });
+    }
+  }
 
   activeModuleIndex() {
     return this.modules.findIndex((m) => m.id === this.activeModule());
@@ -76,53 +244,8 @@ export class AnalysisDetailComponent {
   }
 
   onMapReady(map: maplibregl.Map) {
-    const coords: [number, number][] = [
-      [31.941933631896973, 30.633079403593342],
-      [31.942059695720673, 30.633150948509027],
-      [31.942183077335358, 30.632954776839696],
-      [31.942048966884613, 30.63287861596676],
-      [31.941933631896973, 30.633079403593342],
-    ];
-
     const init = () => {
-      if (!map.getSource('parcel-outline')) {
-        map.addSource('parcel-outline', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'LineString', coordinates: coords },
-          },
-        });
-        map.addLayer({
-          id: 'parcel-outline-layer',
-          type: 'line',
-          source: 'parcel-outline',
-          paint: { 'line-color': '#B86E3D', 'line-width': 2, 'line-dasharray': [4, 2] },
-        });
-      }
-
-      this._analysisFacade.loadAllData();
-
-      const topoData = this._analysisFacade.topographyData();
-      const soilData = this._analysisFacade.soilData();
-      const bearingData = this._analysisFacade.bearingData();
-      const riskData = this._analysisFacade.riskData();
-      const boreholeData = this._analysisFacade.boreholeData();
-
-      const progress = this.moduleProgress();
-
-      if (progress['topography']?.status === 'Completed' && topoData)
-        this._topographyInit.addLayers(map, topoData);
-      if (progress['soil']?.status === 'Completed' && soilData)
-        this._soilInit.addLayers(map, soilData);
-      if (progress['bearing']?.status === 'Completed' && bearingData)
-        this._bearingInit.addLayers(map, bearingData);
-      if (progress['risk']?.status === 'Completed' && riskData)
-        this._riskInit.addLayers(map, riskData);
-      if (progress['borehole']?.status === 'Completed' && boreholeData)
-        this._boreholeInit.addLayers(map, boreholeData);
-
+      // The layer metadata is registered immediately; actual data layers will be added by the effects above.
       const allLayers: MapLayerItem[] = [
         // topography
         {
@@ -171,23 +294,9 @@ export class AnalysisDetailComponent {
           group: 'soil',
           setOpacity: (m, o) => m.setPaintProperty('soil-composition', 'fill-opacity', o),
         },
-        {
-          id: 'soil-heatmap',
-          label: 'Soil Heatmap',
-          visible: true,
-          opacity: 0.7,
-          group: 'soil',
-        },
-        ...Object.keys(soilData?.heatmapUrls ?? {}).map((depth) => ({
-          id: `soil-heatmap-${depth}`,
-          label: `Soil Heatmap (${depth})`,
-          visible: false,
-          opacity: 0.7,
-          group: 'soil',
-          hidden: true,
-          setOpacity: (m: maplibregl.Map, o: number) =>
-            m.setPaintProperty(`soil-heatmap-${depth}`, 'raster-opacity', o),
-        })),
+        // soil heatmap layers will be added later once soilData is available
+        // they are already registered dynamically (the keys generation depends on data)
+        // For now we just register the static ones; the dynamic ones can be registered later if needed.
         // bearing
         {
           id: 'bearing-points',
@@ -254,6 +363,9 @@ export class AnalysisDetailComponent {
       this._layerService.init(map);
       this._layerService.refreshVisibility();
       this.map.set(map);
+      if (this.parcelBoundary) {
+        this._drawBoundary();
+      }
     };
 
     map.loaded() ? init() : map.once('load', init);
@@ -264,35 +376,24 @@ export class AnalysisDetailComponent {
     this._layerService.setActiveGroup(id);
   }
 
-  moduleProgress = signal<Record<string, { status: ModuleStatus; estimatedSeconds: number }>>({
-    topography: { status: 'Completed', estimatedSeconds: 0 },
-    soil: { status: 'Completed', estimatedSeconds: 0 },
-    bearing: { status: 'Completed', estimatedSeconds: 0 },
-    risk: { status: 'Completed', estimatedSeconds: 0 },
-    borehole: { status: 'Completed', estimatedSeconds: 0 },
-  });
-
-  // Make the computed return a Record that accepts any string key
-  moduleStatus = computed(() => {
-    const progress = this.moduleProgress();
-    return {
-      topography: progress['topography']?.status ?? 'pending',
-      soil: progress['soil']?.status ?? 'pending',
-      bearing: progress['bearing']?.status ?? 'pending',
-      risk: progress['risk']?.status ?? 'pending',
-      borehole: progress['borehole']?.status ?? 'pending',
-    } as Record<string, string>; // allow indexing with any string
-  });
-
-  // cancelModule also uses the type
   cancelModule(moduleId: string) {
-    this.moduleProgress.update((prev) => ({
+    this._analysisFacade.moduleProgress.update((prev) => ({
       ...prev,
       [moduleId]: { ...prev[moduleId], status: 'Failed' as ModuleStatus },
     }));
   }
 
-  isActiveModuleCompleted = computed(
-    () => this.moduleProgress()[this.activeModule()]?.status === 'Completed',
-  );
+  onGenerateReport() {
+    const options = {
+      language: 'en',
+      companyName: 'Talaat Moustafa Group',
+      projectName: 'New Alamein Phase 3',
+      includeMaps: true,
+      includeTables: true,
+      includeRiskMatrix: true,
+      includeBoreholePlan: true,
+      disclaimerLevel: 'full',
+    };
+    this.reportFacade.generateReport(this.parcelId, options);
+  }
 }

@@ -7,12 +7,12 @@
           Geotechnical Site Intelligence Report
         </p>
         <h1 class="font-display text-xl md:text-3xl font-bold mt-1">
-          Talaat Moustafa Group - Industrial Sector B
+          {{ parcelName() }}
         </h1>
         <p class="text-planora-desert-300 text-xs sm:text-sm mt-2 flex flex-wrap gap-x-2 gap-y-1">
-          <span>Project ID: PRJ-7702</span>
+          <span>Project ID: {{ parcelId }}</span>
           <span>|</span>
-          <span>Coordinates: 30.633°N, 31.942°E</span>
+          <span>Coordinates: {{ parcelCoordinates() }}</span>
           <span>|</span>
           <span>Date: {{ today | date: 'longDate' }}</span>
         </p>
@@ -24,6 +24,49 @@
       </div>
     </div>
   </header>
+
+  <!-- Report Banner (only when analysis is fully completed) -->
+  @if (allModulesCompleted()) {
+    <div
+      class="bg-white border-b border-planora-desert-200 px-6 py-3 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <i class="pi pi-file-pdf text-planora-clay-500 text-xl"></i>
+        <div>
+          <p class="text-sm font-semibold text-planora-basalt-800">Site Intelligence Report</p>
+          @if (reportFacade.reportStatus() === 'ready') {
+            <p class="text-xs text-green-600 font-mono">Ready for download</p>
+          } @else if (reportFacade.reportStatus() === 'generating') {
+            <p class="text-xs text-amber-600">Generating PDF…</p>
+          } @else if (reportFacade.reportStatus() === 'failed') {
+            <p class="text-xs text-red-600">{{ reportFacade.reportError() }}</p>
+          } @else {
+            <p class="text-xs text-planora-basalt-400">Generate a professional PDF report</p>
+          }
+        </div>
+      </div>
+      <div>
+        @if (reportFacade.reportStatus() === 'ready' && reportFacade.reportDownloadUrl()) {
+          <a
+            [href]="reportFacade.reportDownloadUrl()"
+            target="_blank"
+            class="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-colors"
+          >
+            <i class="pi pi-download mr-1"></i> Download
+          </a>
+        } @else if (
+          reportFacade.reportStatus() === 'idle' || reportFacade.reportStatus() === 'failed'
+        ) {
+          <button
+            (click)="onGenerateReport()"
+            class="px-4 py-2 bg-planora-clay-500 text-white text-sm font-bold rounded-xl hover:bg-planora-clay-600 transition-colors"
+          >
+            <i class="pi pi-cog mr-1"></i> Generate Report
+          </button>
+        }
+      </div>
+    </div>
+  }
 
   <!-- Section navigation (tabs) - styled like chapter tabs -->
   <nav
@@ -60,7 +103,7 @@
       [class.hidden]="!isActiveModuleCompleted()"
     >
       <app-map
-        [center]="[31.942, 30.633]"
+        [center]="mapCenter()"
         [zoom]="17"
         [pitch]="0"
         [showSatelliteToggle]="!!true"

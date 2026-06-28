@@ -30,3 +30,10 @@ apps/api-dotnet/src/CLAUDE.md
 apps/api-dotnet/src/Planora.Api/appsettings.Development.Local.json
 apps/api-dotnet/src/Planora.Api/appsettings.Production.json
 apps/api-dotnet/src/Planora.Api/web.config
+/apps/api-dotnet/src/RULES.md
+/apps/api-dotnet/.claude
+
+# Log Exports
+planora-logs-export/
+planora-logs-archive.zip
+planora-logs-archive.tar.gz

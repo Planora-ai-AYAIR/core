@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Planora.Application.Common.Helpers;
 using Planora.Application.Features.Analysis.Dtos;
+using Planora.Application.Features.Parcels.Dtos.Webhook;
 using Planora.Application.Interfaces.Repositories;
 using Planora.Application.Interfaces.Services;
 using Planora.Domain.Analysis;
@@ -106,9 +107,9 @@ public sealed class SoilCompletedHandler(
         await analysisJobRepository.SaveChangesAsync(ct);
 
         await cacheService.RemoveByTagAsync($"parcel:{analysisJob.ParcelId}", ct);
-
-        await AnalysisNotificationHelper.PublishCompletionNotificationAsync(
-            analysisJob, parcelRepository, notificationRepository, notificationPublisher, ct);
+        
+        await AnalysisNotificationHelper.PublishAnalysisResultAsync(
+            analysisJob, AiWebhookEventTypes.SoilCompleted, request.Payload, notificationPublisher, ct);
 
         logger.LogInformation("Successfully processed soil completed webhook for AnalysisJob {AnalysisJobId}, PythonJobId: {PythonJobId}", analysisJob.Id, request.PythonJobId);
 

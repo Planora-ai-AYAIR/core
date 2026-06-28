@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Planora.Application.Features.Analysis.Commands.AnalysisCompleted;
 using Planora.Application.Features.Analysis.Commands.AnalysisFailed;
 using Planora.Application.Features.Analysis.Commands.BoreholeCompleted;
+using Planora.Application.Features.Analysis.Commands.BearingCompleted;
 using Planora.Application.Features.Analysis.Commands.PdfCompleted;
 using Planora.Application.Features.Analysis.Commands.RiskCompleted;
 using Planora.Application.Features.Analysis.Commands.SoilCompleted;
@@ -79,6 +80,14 @@ public sealed class AiWebhookController(ISender mediator) : BaseApiController
                 {
                     PythonJobId = envelope.JobId,
                     Payload = envelope.Data.Deserialize<PdfResultPayload>(JsonOptions)!
+                },
+                ct),
+
+            AiWebhookEventTypes.BearingCompleted => await mediator.Send(
+                new BearingCompletedCommand
+                {
+                    PythonJobId = envelope.JobId,
+                    Payload = envelope.Data.Deserialize<BearingResultPayload>(JsonOptions)!
                 },
                 ct),
 

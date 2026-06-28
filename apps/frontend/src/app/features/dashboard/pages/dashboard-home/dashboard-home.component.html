@@ -1,195 +1,196 @@
-<div class="space-y-5 mx-auto p-6 sm:p-8">
-  <div class="grid grid-cols-12 gap-6">
-    <div
-      class="col-span-12 xl:col-span-8 bento-tile p-8 relative overflow-hidden bg-planora-basalt-900 text-white"
-    >
-      <div class="topo-lines-overlay"></div>
-      <div class="relative z-10 flex flex-col md:flex-row justify-between h-full gap-8">
-        <div class="space-y-6">
-          <div class="flex items-center gap-3">
-            <span
-              class="px-3 py-1 bg-planora-clay-500 text-[10px] font-black uppercase tracking-widest rounded"
-              >Active Survey</span
-            >
-            <span class="text-xs text-planora-desert-300">{{ activeParcel.coordinates }}</span>
-          </div>
-          <h1 class="text-4xl font-display font-bold leading-tight">
-            {{ activeParcel.name }}<br />
-            <span class="text-planora-desert-400 text-2xl font-normal"
-              >Site Intelligence Pipeline</span
-            >
-          </h1>
-          <div class="flex gap-4">
-            <button
-              (click)="newParcel()"
-              class="px-6 py-3 bg-white text-planora-basalt-900 rounded-xl font-bold text-sm hover:bg-planora-gold-400 transition-colors"
-            >
-              <i class="pi pi-plus-circle mr-2"></i>New Parcel
-            </button>
-            <button
-              class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl font-bold text-sm backdrop-blur hover:bg-white/20 transition-all"
-            >
-              <i class="pi pi-map mr-2"></i>Expand Map
-            </button>
-          </div>
-        </div>
+<header class="bg-planora-basalt-900 text-white px-6 sm:px-8 py-6 relative overflow-hidden">
+  <!-- Animated topographic lines overlay -->
+  <div class="topo-lines-overlay"></div>
 
-        <div class="flex flex-col justify-center border-l border-white/10 pl-8 gap-4">
-          <p class="text-[10px] font-bold text-planora-desert-500 uppercase tracking-tighter">
-            Current Status
-          </p>
-          <div class="text-3xl font-mono font-bold text-planora-gold-400">STAGE 3/6</div>
-          <p class="text-xs text-planora-desert-300">
-            Estimating Bearing Capacity (kPa) <br />
-            via AI Regressor...
-          </p>
-        </div>
+  <!-- Content (above the overlay) -->
+  <div class="relative z-10 max-w-7xl mx-auto">
+    <p class="text-planora-gold-400 text-xs font-bold uppercase tracking-widest">Planora AI</p>
+    <h1 class="text-2xl sm:text-3xl font-display font-bold mt-1">
+      Geotechnical Intelligence Dashboard
+    </h1>
+    <p class="text-planora-desert-300 text-xs sm:text-sm mt-2 max-w-xl">
+      Comprehensive overview of your registered parcels, analysis pipelines, and site intelligence
+      metrics.
+    </p>
+  </div>
+</header>
+
+<div class="space-y-5 mx-auto p-6 sm:p-8">
+  <!-- Loading / Error states -->
+  @if (loading()) {
+    <div class="flex items-center justify-center h-64">
+      <div class="flex flex-col items-center gap-3">
+        <i class="pi pi-spin pi-spinner text-3xl text-planora-clay-500"></i>
+        <p class="text-sm text-planora-basalt-500">Loading dashboard…</p>
       </div>
     </div>
+  } @else if (error()) {
+    <div class="flex items-center justify-center h-64">
+      <div class="flex flex-col items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-3xl text-planora-risk"></i>
+        <p class="text-sm text-planora-risk">{{ error() }}</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-display font-bold text-planora-basalt-900 tracking-tight">
+          {{ parcels().length ? 'Site Intelligence Overview' : 'Welcome to Planora AI' }}
+        </h1>
+        <p class="text-sm text-planora-basalt-400 mt-1">
+          {{
+            parcels().length
+              ? 'Global view of your parcels and analyses.'
+              : 'Register your first parcel to get started.'
+          }}
+        </p>
+      </div>
+      <button
+        (click)="newParcel()"
+        class="px-5 py-3 bg-planora-clay-500 text-white text-sm font-bold rounded-xl shadow-md shadow-planora-clay-500/10 hover:bg-planora-clay-600 hover:shadow-lg transition-all flex items-center gap-2"
+      >
+        <i class="pi pi-plus text-xs"></i> New Parcel
+      </button>
+    </div>
 
-    <div class="col-span-12 xl:col-span-4 grid grid-cols-1 gap-4">
-      @for (m of metrics; track m.label) {
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (m of metrics(); track m.label) {
         <div
-          class="bento-tile bg-white border border-planora-desert-200 p-6 flex items-center gap-5 hover:border-planora-clay-500 group transition-all cursor-pointer"
+          class="bento-tile bg-white border border-planora-desert-200 p-5 flex items-center gap-4"
         >
           <div
-            class="w-12 h-12 rounded-2xl bg-planora-limestone flex items-center justify-center text-planora-clay-600 transition-transform group-hover:scale-110"
+            class="w-10 h-10 rounded-xl bg-planora-limestone flex items-center justify-center text-planora-clay-600"
           >
-            <i [class]="'pi ' + m.icon + ' text-xl'"></i>
+            <i [class]="'pi ' + m.icon + ' text-lg'"></i>
           </div>
           <div>
-            <p class="text-xs font-bold text-planora-basalt-400 uppercase tracking-widest mb-1">
+            <p class="text-xs font-bold text-planora-basalt-400 uppercase tracking-widest">
               {{ m.label }}
             </p>
-            <div class="flex items-baseline gap-2">
-              <span class="text-2xl font-bold text-planora-basalt-900">{{ m.value }}</span>
-              @if (m.trend) {
-                <span class="text-[10px] font-bold text-green-600">{{ m.trend }}</span>
-              }
-            </div>
+            <p class="text-xl font-bold text-planora-basalt-900">{{ m.value }}</p>
           </div>
         </div>
       }
     </div>
-  </div>
 
-  <div class="space-y-4">
-    <h2 class="text-xs font-black text-planora-basalt-400 uppercase tracking-[0.2em] px-2">
-      Geotechnical Analysis Core
-    </h2>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      @for (mod of modules; track mod.id) {
-        <div
-          class="bento-tile bg-white border border-planora-desert-200 p-5 group hover:shadow-xl transition-all cursor-pointer relative overflow-hidden"
-          [class.opacity-50]="mod.status === 'Pending'"
+    <!-- Recent Parcels -->
+    <div class="bento-tile bg-white border border-planora-desert-200 overflow-hidden">
+      <div class="p-5 border-b border-planora-desert-100 flex justify-between items-center">
+        <h3 class="font-bold text-planora-basalt-900">Recent Parcels</h3>
+        <button
+          (click)="viewAllParcels()"
+          class="text-xs font-bold text-planora-clay-600 hover:underline"
         >
-          <div
-            class="absolute bottom-0 left-0 h-1 bg-planora-clay-500 transition-all duration-1000"
-            [style.width]="
-              mod.status === 'Completed' ? '100%' : mod.status === 'Processing' ? '45%' : '0%'
-            "
-          ></div>
-
-          <div class="flex flex-col h-full justify-between gap-4">
-            <i
-              [class]="
-                'pi ' +
-                mod.icon +
-                ' text-2xl ' +
-                (mod.status === 'Pending' ? 'text-planora-basalt-300' : 'text-planora-clay-600')
-              "
-            ></i>
-            <div>
-              <p class="text-sm font-bold text-planora-basalt-800 leading-tight">{{ mod.name }}</p>
-              <p
-                class="text-[10px] font-bold mt-1 uppercase"
-                [class.text-green-600]="mod.status === 'Completed'"
-                [class.text-planora-gold-600]="mod.status === 'Processing'"
-                [class.text-planora-basalt-400]="mod.status === 'Pending'"
-              >
-                {{ mod.status }}
-              </p>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  </div>
-
-  <div class="grid grid-cols-12 gap-6">
-    <div
-      class="col-span-12 lg:col-span-7 bento-tile bg-white border border-planora-desert-200 overflow-hidden"
-    >
-      <div class="p-6 border-b border-planora-desert-100 flex justify-between items-center">
-        <h3 class="font-bold text-planora-basalt-900">Recent Site Intelligence Reports</h3>
-        <button class="text-xs font-bold text-planora-clay-600">View History</button>
+          View All
+        </button>
       </div>
-      <div class="p-0">
+      <div class="overflow-x-auto">
         <table class="w-full text-left">
           <thead
             class="bg-planora-limestone/50 text-[10px] uppercase font-bold text-planora-basalt-400"
           >
             <tr>
-              <th class="px-6 py-3">Site Location</th>
-              <th class="px-6 py-3">Risk Level</th>
-              <th class="px-6 py-3">Savings</th>
+              <th class="px-6 py-3">Name</th>
+              <th class="px-6 py-3">Area</th>
+              <th class="px-6 py-3">Status</th>
               <th class="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-planora-desert-100">
-            <tr class="hover:bg-planora-limestone transition-colors cursor-pointer group">
-              <td class="px-6 py-4 font-bold text-sm text-planora-basalt-800">
-                Alexandria North Port
-              </td>
-              <td class="px-6 py-4">
-                <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold"
-                  >HIGH (82)</span
-                >
-              </td>
-              <td class="px-6 py-4 text-sm font-mono font-bold text-planora-silt-700">
-                EGP 120,400
-              </td>
-              <td class="px-6 py-4">
-                <i
-                  class="pi pi-download text-planora-basalt-400 group-hover:text-planora-clay-600"
-                ></i>
-              </td>
-            </tr>
+            @for (parcel of recentParcels(); track parcel.id) {
+              <tr
+                class="hover:bg-planora-limestone transition-colors cursor-pointer"
+                (click)="viewParcel(parcel)"
+              >
+                <td class="px-6 py-4 font-bold text-sm text-planora-basalt-800">
+                  {{ parcel.name }}
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  {{ (parcel.areaHectares * 10000).toLocaleString() }} m²
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                    [ngClass]="getStatusClass(parcel.status)"
+                  >
+                    {{ parcel.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-planora-basalt-400">
+                  <i class="pi pi-arrow-right"></i>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-planora-basalt-400 text-sm">
+                  No parcels registered yet.
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
     </div>
 
-    <div
-      class="col-span-12 lg:col-span-5 bento-tile bg-planora-gold-50 p-8 border border-planora-gold-200 flex flex-col justify-between"
-    >
-      <div class="space-y-4">
-        <div class="flex items-center gap-3">
-          <div
-            class="w-8 h-8 rounded bg-planora-gold-500 flex items-center justify-center text-white"
-          >
-            <i class="pi pi-bolt text-xs"></i>
-          </div>
-          <h3 class="font-bold text-planora-gold-900">AI Borehole Optimization</h3>
-        </div>
-        <p class="text-sm text-planora-gold-800 leading-relaxed">
-          Planora AI analyzed soil variability in Sector B and reduced mandatory drilling points
-          from <strong>32</strong> to <strong>14</strong>.
-        </p>
+    <!-- Recent Analyses -->
+    <div class="bento-tile bg-white border border-planora-desert-200 overflow-hidden">
+      <div class="p-5 border-b border-planora-desert-100 flex justify-between items-center">
+        <h3 class="font-bold text-planora-basalt-900">Recent Analyses</h3>
+        <button
+          (click)="viewAllAnalyses()"
+          class="text-xs font-bold text-planora-clay-600 hover:underline"
+        >
+          View All
+        </button>
       </div>
-      <div
-        class="mt-6 p-4 bg-white/60 rounded-xl border border-planora-gold-300 flex justify-around items-center"
-      >
-        <div class="text-center">
-          <p class="text-[10px] uppercase font-bold text-planora-gold-600">Efficiency</p>
-          <p class="text-xl font-black text-planora-gold-900">+56%</p>
-        </div>
-        <div class="h-8 w-px bg-planora-gold-300"></div>
-        <div class="text-center">
-          <p class="text-[10px] uppercase font-bold text-planora-gold-600">Coverage</p>
-          <p class="text-xl font-black text-planora-gold-900">92%</p>
-        </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead
+            class="bg-planora-limestone/50 text-[10px] uppercase font-bold text-planora-basalt-400"
+          >
+            <tr>
+              <th class="px-6 py-3">Parcel</th>
+              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3">Date</th>
+              <th class="px-6 py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-planora-desert-100">
+            @for (analysis of recentAnalyses(); track analysis.id) {
+              <tr
+                class="hover:bg-planora-limestone transition-colors cursor-pointer"
+                (click)="viewAnalysis(analysis)"
+              >
+                <td class="px-6 py-4 font-bold text-sm text-planora-basalt-800">
+                  {{ analysis.name }}
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                    [ngClass]="getStatusClass(analysis.status)"
+                  >
+                    {{ analysis.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-planora-basalt-600 font-mono">
+                  {{ analysis.date | date: 'mediumDate' }}
+                </td>
+                <td class="px-6 py-4 text-planora-basalt-400">
+                  <i class="pi pi-arrow-right"></i>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-planora-basalt-400 text-sm">
+                  No analyses yet.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
+  }
 </div>

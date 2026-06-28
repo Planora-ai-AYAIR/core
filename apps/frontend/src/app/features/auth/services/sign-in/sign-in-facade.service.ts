@@ -7,6 +7,7 @@ import { LoginRequest } from '../../interfaces/sign-in/login-request';
 import { ROUTES } from '../../../../shared/config/constants';
 import { catchError, finalize, EMPTY, of, switchMap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { SignalRService } from '../../../../core/services/signalr.service';
 
 @Injectable({ providedIn: 'root' })
 export class SignInFacadeService {
@@ -14,6 +15,7 @@ export class SignInFacadeService {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toaster = inject(ToastService);
+  private signalRService = inject(SignalRService);
 
   private isLoading = signal(false);
   readonly loading = this.isLoading.asReadonly();
@@ -67,11 +69,13 @@ export class SignInFacadeService {
       this.api.logout(token).subscribe({
         next: () => {
           this.authService.clearTokens();
+          this.signalRService.stopConnection();
           this.toaster.success('Logged out successfully.');
           this.router.navigate([ROUTES.signIn]);
         },
         error: () => {
           this.authService.clearTokens();
+          this.signalRService.stopConnection();
           this.router.navigate([ROUTES.signIn]);
         },
       });

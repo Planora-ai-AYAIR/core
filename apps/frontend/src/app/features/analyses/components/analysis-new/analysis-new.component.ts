@@ -8,6 +8,7 @@ import { ParcelListResponse } from '../../../parcels/interfaces/parcel-list/parc
 import { ParcelApiService } from '../../../parcels/services/parcel-api.service';
 import { ROUTES } from '../../../../shared/config/constants';
 import { AnalysisOptionsDto } from '../../interfaces/start-analysis/analysis-options-dto';
+import { ToastService } from '../../../../shared/services/toaster.service';
 
 @Component({
   selector: 'app-analysis-new',
@@ -20,6 +21,7 @@ export class AnalysisNewComponent implements OnInit {
   private parcelApi = inject(ParcelApiService);
   private analysisApi = inject(AnalysisApiService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   parcels = signal<ParcelListResponse[]>([]);
   selectedParcelId = signal('');
@@ -74,10 +76,21 @@ export class AnalysisNewComponent implements OnInit {
     this.analysisApi.startAnalysis(this.selectedParcelId(), options).subscribe({
       next: (response) => {
         this.launching.set(false);
+        this.toast.success('Analysis launched successfully');
         this.router.navigate([ROUTES.analysis]);
       },
-      error: () => {
+      error: (err) => {
         this.launching.set(false);
+        // Extract the API error envelope
+        const envelope = err?.error;
+        const errors: any[] = envelope?.errors ?? [];
+        const message = envelope?.message ?? 'Failed to start analysis';
+
+        if (errors.length > 0) {
+          errors.forEach((e) => this.toast.error(e.message));
+        } else {
+          this.toast.error(message);
+        }
       },
     });
   }

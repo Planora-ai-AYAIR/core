@@ -28,7 +28,7 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
-        services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+        services.AddScoped<INotificationPublisher, Planora.Api.Services.SignalRNotificationPublisher>();
         services.AddScoped<IReportNotifier, ReportNotifier>();
 
 
