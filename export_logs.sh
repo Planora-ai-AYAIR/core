@@ -50,17 +50,17 @@ done
 
 # 4. Zip the archive
 echo "Zipping the archive..."
-# Using zip (standard in most bash environments). If zip is unavailable, use tar -czf planora-logs-archive.tar.gz
-zip -r planora-logs-archive.zip "$EXPORT_DIR"
+# Using tar because 'zip' is often missing in Git Bash on Windows
+tar -czf planora-logs-archive.tar.gz "$EXPORT_DIR"
 
 # 5. Upload to S3
 echo "Uploading to S3..."
 BUCKET_NAME="planora-exported-logs-production-639182473909916708"
-aws s3 cp "planora-logs-archive.zip" "s3://$BUCKET_NAME/planora-logs-archive.zip"
+aws s3 cp "planora-logs-archive.tar.gz" "s3://$BUCKET_NAME/planora-logs-archive.tar.gz"
 
 # 6. Generate presigned URL
 echo "Generating Presigned URL..."
-URL=$(aws s3 presign "s3://$BUCKET_NAME/planora-logs-archive.zip" --expires-in 604800)
+URL=$(aws s3 presign "s3://$BUCKET_NAME/planora-logs-archive.tar.gz" --expires-in 604800)
 echo ""
 echo "========================================="
 echo "PRESIGNED_URL=$URL"
