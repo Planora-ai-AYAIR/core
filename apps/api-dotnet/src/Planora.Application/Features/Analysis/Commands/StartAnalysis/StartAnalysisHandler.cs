@@ -25,7 +25,7 @@ public sealed class StartAnalysisHandler(
 {
     public async Task<Result<StartAnalysisResponse>> Handle(StartAnalysisCommand request, CancellationToken ct)
     {
-        logger.LogInformation("Starting aggregated analysis for ParcelId {ParcelId}", request.ParcelId);
+        logger.LogInformation($"Starting aggregated analysis for ParcelId {request.ParcelId}", request.ParcelId);
 
         var parcel = await parcelRepository.GetByIdAsync(request.ParcelId, ct);
         if (parcel is null)

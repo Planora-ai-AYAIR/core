@@ -24,7 +24,7 @@ using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
 using Planora.Infrastructure.Services.Reporting;
-using Refit;
+//using Refit;
 
 namespace Planora.Infrastructure;
 
@@ -106,10 +106,14 @@ public static class DependencyInjection
         
         var aiOptions = configuration.GetSection(AiOptions.SectionName).Get<AiOptions>()
             ?? new AiOptions();
-            
+
         // services.AddTransient<AiApiKeyHandler>();
-        services.AddRefitClient<IAiApiClient>()
-        .ConfigureHttpClient((client) =>
+        //services.AddRefitClient<IAiApiClient>()
+        //.ConfigureHttpClient((client) =>
+        //{
+        //    client.BaseAddress = new Uri(aiOptions.BaseUrl);
+        //});
+        services.AddHttpClient<IAiApiClient, AiApiClient>(client =>
         {
             client.BaseAddress = new Uri(aiOptions.BaseUrl);
         });
