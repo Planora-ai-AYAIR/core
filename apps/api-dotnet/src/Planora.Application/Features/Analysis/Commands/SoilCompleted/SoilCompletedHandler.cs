@@ -41,36 +41,39 @@ public sealed class SoilCompletedHandler(
             return AnalysisJobErrors.FaildStatusUpdate;
         }
 
-        var multiDepthProfileJson = request.Payload.DepthProfiles is not null
-            ? JsonSerializer.Serialize(request.Payload.DepthProfiles)
-            : null;
+        var soil = request.Payload;
+        var classification = soil.Classification;
+        var composition = soil.SurfaceComposition;
+        var properties = soil.Properties;
+        var assets = soil.VisualizationAssets;
+        var spectralIndices = soil.SpectralIndices;
 
-        var dataSourcesJson = request.Payload.DataSources is not null
-            ? JsonSerializer.Serialize(request.Payload.DataSources)
-            : null;
+        var multiDepthProfileJson = SoilDepthLayerSerializer.Serialize(soil.DepthLayers);
 
-        var spectralIndices = request.Payload.SpectralIndices;
+        var dataSourcesJson = soil.DataSources is not null
+            ? JsonSerializer.Serialize(soil.DataSources)
+            : null;
 
         var soilResult = new SoilResult(
             analysisJob.Id,
-            request.Payload.SandPercent,
-            request.Payload.SiltPercent,
-            request.Payload.ClayPercent,
-            request.Payload.BulkDensity,
-            request.Payload.OrganicCarbon,
-            request.Payload.Ph,
-            request.Payload.CompositionUnit,
-            request.Payload.BulkDensityUnit,
-            request.Payload.OrganicCarbonUnit,
-            request.Payload.PrimaryType,
-            request.Payload.UsdaClass,
-            request.Payload.AiConfidence,
+            composition?.SandPercentage ?? 0,
+            composition?.SiltPercentage ?? 0,
+            composition?.ClayPercentage ?? 0,
+            properties?.BulkDensity ?? 0,
+            properties?.OrganicCarbonPercentage ?? 0,
+            properties?.Ph ?? 0,
+            composition?.Unit,
+            properties?.BulkDensityUnit,
+            organicCarbonUnit: null,
+            classification?.PrimaryType,
+            classification?.UsdaClass,
+            classification?.AiConfidence,
             multiDepthProfileJson,
-            request.Payload.HeatmapTileUrl,
-            cec: request.Payload.Cec,
-            waterTableDepthMeters: request.Payload.WaterTableDepthMeters,
-            soilTypeGeoJsonUrl: request.Payload.SoilTypeGeoJsonUrl,
-            depthProfileImageUrl: request.Payload.DepthProfileImageUrl,
+            assets?.SoilHeatmapTileUrl,
+            cec: properties?.Cec,
+            waterTableDepthMeters: properties?.WaterTableDepthMeters,
+            soilTypeGeoJsonUrl: assets?.SoilTypeGeoJsonUrl,
+            depthProfileImageUrl: assets?.DepthProfileImageUrl,
             dataSourcesJson: dataSourcesJson,
             ndviMean: spectralIndices?.NdviMean,
             bsiMean: spectralIndices?.BsiMean,

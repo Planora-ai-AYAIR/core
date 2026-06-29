@@ -4,23 +4,65 @@ namespace Planora.Application.Features.Analysis.Dtos;
 
 public sealed record SoilResultPayload
 {
-    [JsonPropertyName("pythonJobId")]
-    public string PythonJobId { get; init; } = string.Empty;
+    [JsonPropertyName("classification")]
+    public SoilClassificationPayload? Classification { get; init; }
 
-    [JsonPropertyName("sandPercent")]
-    public double SandPercent { get; init; }
+    [JsonPropertyName("surfaceComposition")]
+    public SoilSurfaceCompositionPayload? SurfaceComposition { get; init; }
 
-    [JsonPropertyName("siltPercent")]
-    public double SiltPercent { get; init; }
+    [JsonPropertyName("properties")]
+    public SoilPropertiesPayload? Properties { get; init; }
 
-    [JsonPropertyName("clayPercent")]
-    public double ClayPercent { get; init; }
+    [JsonPropertyName("depthLayers")]
+    public List<SoilDepthLayerPayload>? DepthLayers { get; init; }
 
+    [JsonPropertyName("visualizationAssets")]
+    public SoilAssetsPayload? VisualizationAssets { get; init; }
+
+    [JsonPropertyName("dataSources")]
+    public List<string>? DataSources { get; init; }
+
+    [JsonPropertyName("spectralIndices")]
+    public SoilSpectralIndicesPayload? SpectralIndices { get; init; }
+}
+
+public sealed record SoilClassificationPayload
+{
+    [JsonPropertyName("primaryType")]
+    public string? PrimaryType { get; init; }
+
+    [JsonPropertyName("usdaClass")]
+    public string? UsdaClass { get; init; }
+
+    [JsonPropertyName("aiConfidence")]
+    public double? AiConfidence { get; init; }
+}
+
+public sealed record SoilSurfaceCompositionPayload
+{
+    [JsonPropertyName("sandPercentage")]
+    public double SandPercentage { get; init; }
+
+    [JsonPropertyName("siltPercentage")]
+    public double SiltPercentage { get; init; }
+
+    [JsonPropertyName("clayPercentage")]
+    public double ClayPercentage { get; init; }
+
+    [JsonPropertyName("unit")]
+    public string? Unit { get; init; }
+}
+
+public sealed record SoilPropertiesPayload
+{
     [JsonPropertyName("bulkDensity")]
     public double BulkDensity { get; init; }
 
-    [JsonPropertyName("organicCarbon")]
-    public double OrganicCarbon { get; init; }
+    [JsonPropertyName("bulkDensityUnit")]
+    public string? BulkDensityUnit { get; init; }
+
+    [JsonPropertyName("organicCarbonPercentage")]
+    public double OrganicCarbonPercentage { get; init; }
 
     [JsonPropertyName("ph")]
     public double Ph { get; init; }
@@ -30,51 +72,39 @@ public sealed record SoilResultPayload
 
     [JsonPropertyName("waterTableDepthMeters")]
     public double? WaterTableDepthMeters { get; init; }
+}
 
-    [JsonPropertyName("bearingCapacityEstimate")]
-    public double BearingCapacityEstimate { get; init; }
+public sealed record SoilDepthLayerPayload
+{
+    [JsonPropertyName("depth")]
+    public string Depth { get; init; } = string.Empty;
 
-    [JsonPropertyName("bearingCapacityCategory")]
-    public string BearingCapacityCategory { get; init; } = string.Empty;
+    [JsonPropertyName("sand")]
+    public double Sand { get; init; }
 
-    [JsonPropertyName("compositionUnit")]
-    public string? CompositionUnit { get; init; }
+    [JsonPropertyName("silt")]
+    public double Silt { get; init; }
 
-    [JsonPropertyName("bulkDensityUnit")]
-    public string? BulkDensityUnit { get; init; }
+    [JsonPropertyName("clay")]
+    public double Clay { get; init; }
 
-    [JsonPropertyName("organicCarbonUnit")]
-    public string? OrganicCarbonUnit { get; init; }
+    [JsonPropertyName("soilType")]
+    public string? SoilType { get; init; }
 
-    [JsonPropertyName("primaryType")]
-    public string? PrimaryType { get; init; }
+    [JsonPropertyName("bulkDensity")]
+    public double? BulkDensity { get; init; }
+}
 
-    [JsonPropertyName("usdaClass")]
-    public string? UsdaClass { get; init; }
-
-    [JsonPropertyName("aiConfidence")]
-    public double? AiConfidence { get; init; }
-
-    [JsonPropertyName("depthProfiles")]
-    public List<DepthProfileEntry>? DepthProfiles { get; init; }
-
-    [JsonPropertyName("heatmapTileUrl")]
-    public string? HeatmapTileUrl { get; init; }
+public sealed record SoilAssetsPayload
+{
+    [JsonPropertyName("soilHeatmapTileUrl")]
+    public string? SoilHeatmapTileUrl { get; init; }
 
     [JsonPropertyName("soilTypeGeoJsonUrl")]
     public string? SoilTypeGeoJsonUrl { get; init; }
 
     [JsonPropertyName("depthProfileImageUrl")]
     public string? DepthProfileImageUrl { get; init; }
-
-    [JsonPropertyName("dataSources")]
-    public List<string>? DataSources { get; init; }
-
-    [JsonPropertyName("spectralIndices")]
-    public SoilSpectralIndicesPayload? SpectralIndices { get; init; }
-
-    [JsonPropertyName("bearing")]
-    public BearingPayload? Bearing { get; init; }
 }
 
 public sealed record SoilSpectralIndicesPayload
@@ -89,38 +119,7 @@ public sealed record SoilSpectralIndicesPayload
     public double NdmiMean { get; init; }
 }
 
-public sealed record BearingPayload
-{
-    [JsonPropertyName("confidence")]
-    public double? Confidence { get; init; }
-
-    [JsonPropertyName("range")]
-    public string? Range { get; init; }
-
-    [JsonPropertyName("trafficLight")]
-    public string? TrafficLight { get; init; }
-
-    [JsonPropertyName("recommendedFoundation")]
-    public string? RecommendedFoundation { get; init; }
-
-    [JsonPropertyName("maxFloorsWithoutDeepFoundation")]
-    public int? MaxFloorsWithoutDeepFoundation { get; init; }
-
-    [JsonPropertyName("floorCountCategory")]
-    public string? FloorCountCategory { get; init; }
-
-    [JsonPropertyName("uncertaintyRange")]
-    public BearingUncertaintyRangePayload? UncertaintyRange { get; init; }
-
-    [JsonPropertyName("featureImportance")]
-    public List<FeatureImportanceEntry>? FeatureImportance { get; init; }
-
-    [JsonPropertyName("soilFactors")]
-    public BearingSoilFactorsPayload? SoilFactors { get; init; }
-
-    [JsonPropertyName("modelMetadata")]
-    public BearingModelMetadataPayload? ModelMetadata { get; init; }
-}
+// ── Shared Bearing sub-records (also consumed by BearingResultPayload) ──────
 
 public sealed record BearingUncertaintyRangePayload
 {

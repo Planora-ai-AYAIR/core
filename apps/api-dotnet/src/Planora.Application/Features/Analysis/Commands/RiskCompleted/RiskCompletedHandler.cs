@@ -51,13 +51,14 @@ public sealed class RiskCompletedHandler(
             return AnalysisJobErrors.FaildStatusUpdate;
         }
 
-        // Use nested sub-results when present, otherwise fall back to flat scores with derived levels
-        var overallRiskLevel = request.Payload.OverallRiskLevel ?? DeriveRiskLevel(request.Payload.OverallRiskScore);
+        var overallRiskLevel = request.Payload.OverallRiskLevel ?? DeriveRiskLevel(request.Payload.OverallScore);
 
-        var flood = request.Payload.Flood;
-        var seismic = request.Payload.Seismic;
-        var expansiveSoil = request.Payload.ExpansiveSoil;
-        var liquefaction = request.Payload.Liquefaction;
+        var breakdown = request.Payload.RiskBreakdown;
+        var assets = request.Payload.VisualizationAssets;
+        var flood = breakdown?.Flood;
+        var seismic = breakdown?.Seismic;
+        var expansiveSoil = breakdown?.ExpansiveSoil;
+        var liquefaction = breakdown?.Liquefaction;
 
         var mitigationSuggestionsJson = request.Payload.MitigationSuggestions is not null
             ? JsonSerializer.Serialize(request.Payload.MitigationSuggestions)
@@ -65,27 +66,27 @@ public sealed class RiskCompletedHandler(
 
         var riskResult = new RiskResult(
             analysisJob.Id,
-            flood?.Score ?? request.Payload.FloodRiskScore,
-            seismic?.Score ?? request.Payload.SeismicRiskScore,
-            expansiveSoil?.Score ?? request.Payload.ExpansiveSoilRisk,
-            liquefaction?.Score ?? request.Payload.LiquefactionRisk,
-            request.Payload.OverallRiskScore,
+            flood?.Score ?? 0,
+            seismic?.Score ?? 0,
+            expansiveSoil?.Score ?? 0,
+            liquefaction?.Score ?? 0,
+            request.Payload.OverallScore,
             overallRiskLevel,
-            flood?.Level ?? DeriveRiskLevel(request.Payload.FloodRiskScore),
+            flood?.Level ?? DeriveRiskLevel(flood?.Score ?? 0),
             flood?.Factors is not null ? JsonSerializer.Serialize(flood.Factors) : null,
-            flood?.GeoJsonUrl,
-            seismic?.Level ?? DeriveRiskLevel(request.Payload.SeismicRiskScore),
+            flood?.ZonesGeoJsonUrl,
+            seismic?.Level ?? DeriveRiskLevel(seismic?.Score ?? 0),
             seismic?.Factors is not null ? JsonSerializer.Serialize(seismic.Factors) : null,
             seismic?.Source,
             seismicZone: seismic?.Zone,
-            expansiveSoil?.Level ?? DeriveRiskLevel(request.Payload.ExpansiveSoilRisk),
+            expansiveSoil?.Level ?? DeriveRiskLevel(expansiveSoil?.Score ?? 0),
             expansiveSoil?.Factors is not null ? JsonSerializer.Serialize(expansiveSoil.Factors) : null,
-            expansiveSoil?.ReplacementDepth,
-            liquefaction?.Level ?? DeriveRiskLevel(request.Payload.LiquefactionRisk),
+            expansiveSoil?.ReplacementDepthMeters,
+            liquefaction?.Level ?? DeriveRiskLevel(liquefaction?.Score ?? 0),
             liquefaction?.Factors is not null ? JsonSerializer.Serialize(liquefaction.Factors) : null,
             liquefaction?.Susceptibility,
             liquefactionMethodology: liquefaction?.Methodology,
-            riskHeatmapTileUrl: request.Payload.RiskHeatmapTileUrl,
+            riskHeatmapTileUrl: assets?.RiskHeatmapTileUrl,
             mitigationSuggestionsJson: mitigationSuggestionsJson);
 
         await riskResultRepository.AddAsync(riskResult, ct);

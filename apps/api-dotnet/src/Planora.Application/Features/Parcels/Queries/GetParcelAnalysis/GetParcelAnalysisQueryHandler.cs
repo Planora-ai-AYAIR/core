@@ -440,7 +440,7 @@ public sealed class GetParcelAnalysisQueryHandler(
         var placementPoints = DeserializeJson<List<BoreholePlacementPointEntry>>(r.PlacementPointsJson)
             ?.Select(p => new BoreholeAnalysisPlacementPointDto(
                 p.Id, p.Latitude, p.Longitude, p.Priority,
-                p.Reason, p.EstimatedDepth))
+                p.Reason, p.EstimatedDepthMeters))
             .ToList();
 
         return new BoreholeAnalysisDto(
@@ -506,5 +506,5 @@ public sealed class GetParcelAnalysisQueryHandler(
 
     private sealed record BoreholePlacementPointEntry(
         string Id, double Latitude, double Longitude, string Priority,
-        string? Reason, double? EstimatedDepth);
+        string? Reason, double? EstimatedDepthMeters);
 }
