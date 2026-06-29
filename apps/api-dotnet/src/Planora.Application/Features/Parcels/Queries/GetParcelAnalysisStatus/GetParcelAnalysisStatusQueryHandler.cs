@@ -27,7 +27,7 @@ public sealed class GetParcelAnalysisStatusQueryHandler(
         if (parcel is null || parcel.UserId != request.UserId)
         {
             logger.LogWarning(
-                "Analysis status requested for inaccessible parcel. ParcelId: {ParcelId}, UserId: {UserId}",
+                $"Analysis status requested for inaccessible parcel. ParcelId: {request.ParcelId}, UserId: {request.UserId}",
                 request.ParcelId, request.UserId);
             return ParcelErrors.NotFound;
         }
