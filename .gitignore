@@ -37,5 +37,3 @@ apps/api-dotnet/src/Planora.Api/web.config
 planora-logs-export/
 planora-logs-archive.zip
 planora-logs-archive.tar.gz
-apps/api-dotnet/AGENTS.md
-apps/api-dotnet/LEAN-CTX.md
