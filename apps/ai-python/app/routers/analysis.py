@@ -340,6 +340,13 @@ def _stage_soil(geo_json: dict) -> dict:
         }
 
 
+def _soil_num(soil: dict, key: str, default: float) -> float:
+    """soil.get(key, default), but also falls back when SoilGrids stored an
+    explicit None for this depth/property (dict.get only covers missing keys)."""
+    value = soil.get(key)
+    return value if value is not None else default
+
+
 def _stage_bearing(soil: dict, terrain: dict) -> dict | None:
     try:
         import joblib
@@ -347,13 +354,13 @@ def _stage_bearing(soil: dict, terrain: dict) -> dict | None:
         bundle         = joblib.load(MODEL_B_PATH)
         features_order = bundle["features"]
         feature_map = {
-            "clay_0_5":   soil.get("clay_0_5",   20.0),
-            "sand_0_5":   soil.get("sand_0_5",   50.0),
-            "silt_0_5":   soil.get("silt_0_5",   30.0),
-            "bdod_0_5":   soil.get("bdod_0_5",    1.4),
-            "clay_30_60": soil.get("clay_30_60",  22.0),
-            "sand_30_60": soil.get("sand_30_60",  48.0),
-            "bdod_30_60": soil.get("bdod_30_60",  1.45),
+            "clay_0_5":   _soil_num(soil, "clay_0_5",   20.0),
+            "sand_0_5":   _soil_num(soil, "sand_0_5",   50.0),
+            "silt_0_5":   _soil_num(soil, "silt_0_5",   30.0),
+            "bdod_0_5":   _soil_num(soil, "bdod_0_5",    1.4),
+            "clay_30_60": _soil_num(soil, "clay_30_60",  22.0),
+            "sand_30_60": _soil_num(soil, "sand_30_60",  48.0),
+            "bdod_30_60": _soil_num(soil, "bdod_30_60",  1.45),
             "slope":      terrain.get("slope_mean", 2.0),
             "TWI":        terrain.get("twi_mean",   6.0),
         }
@@ -396,8 +403,8 @@ def _stage_bearing(soil: dict, terrain: dict) -> dict | None:
 
 
 def _stage_risk(soil: dict, terrain: dict, bearing: dict | None, parcel_id: str) -> dict:
-    clay        = soil.get("clay_0_5",      20.0)
-    sand        = soil.get("sand_0_5",      50.0)
+    clay        = _soil_num(soil, "clay_0_5", 20.0)
+    sand        = _soil_num(soil, "sand_0_5", 50.0)
     twi_hi      = terrain.get("high_risk_pct", 10.0)
     slope       = terrain.get("slope_mean",     2.0)
     twi         = terrain.get("twi_mean",        5.0)
