@@ -321,23 +321,35 @@ def _stage_terrain(geo_json: dict, bbox: list, contour_interval: float) -> dict:
         }
 
 
+_DEFAULT_SOIL = {
+    "clay_0_5":   20.0, "sand_0_5":   55.0, "silt_0_5":   25.0, "bdod_0_5":   1.45,
+    "clay_5_15":  21.0, "sand_5_15":  54.0, "bdod_5_15":  1.46,
+    "clay_15_30": 22.0, "sand_15_30": 52.0, "bdod_15_30": 1.47,
+    "clay_30_60": 23.0, "sand_30_60": 50.0, "bdod_30_60": 1.48,
+    "clay_60_100":25.0, "sand_60_100":48.0, "bdod_60_100":1.50,
+    "clay_100_200":27.0,"sand_100_200":45.0,"bdod_100_200":1.52,
+    "phh2o_0_5": 7.8,  "ocd_0_5": 1.2, "cec_0_5": 14.0,
+}
+
+
 # FIX 1 — soil never crashes the job
 def _stage_soil(geo_json: dict) -> dict:
     try:
         from app.services.soilgrids_service import get_soil_composition
-        return get_soil_composition(geo_json)
+        soil = get_soil_composition(geo_json)
     except Exception as exc:
         logger.warning("SoilGrids failed (%s) — using default soil values", exc)
-        return {
-            "clay_0_5":   20.0, "sand_0_5":   55.0, "silt_0_5":   25.0, "bdod_0_5":   1.45,
-            "clay_5_15":  21.0, "sand_5_15":  54.0, "bdod_5_15":  1.46,
-            "clay_15_30": 22.0, "sand_15_30": 52.0, "bdod_15_30": 1.47,
-            "clay_30_60": 23.0, "sand_30_60": 50.0, "bdod_30_60": 1.48,
-            "clay_60_100":25.0, "sand_60_100":48.0, "bdod_60_100":1.50,
-            "clay_100_200":27.0,"sand_100_200":45.0,"bdod_100_200":1.52,
-            "phh2o_0_5": 7.8,  "ocd_0_5": 1.2, "cec_0_5": 14.0,
-            "_source": "default_fallback",
-        }
+        soil = {**_DEFAULT_SOIL, "_source": "default_fallback"}
+
+    # SoilGrids can return a successful response with individual depths/properties
+    # set to None (no data at that location) — fill just those gaps, keep the rest.
+    missing = [k for k in _DEFAULT_SOIL if soil.get(k) is None]
+    if missing:
+        logger.warning("SoilGrids returned null for %s — using defaults for those fields", missing)
+        for k in missing:
+            soil[k] = _DEFAULT_SOIL[k]
+
+    return soil
 
 
 def _stage_bearing(soil: dict, terrain: dict) -> dict | None:
