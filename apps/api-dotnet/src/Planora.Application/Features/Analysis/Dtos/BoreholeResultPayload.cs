@@ -4,9 +4,21 @@ namespace Planora.Application.Features.Analysis.Dtos;
 
 public sealed record BoreholeResultPayload
 {
-    [JsonPropertyName("pythonJobId")]
-    public string PythonJobId { get; init; } = string.Empty;
+    [JsonPropertyName("recommendation")]
+    public BoreholeRecommendationPayload? Recommendation { get; init; }
 
+    [JsonPropertyName("placementPoints")]
+    public List<BoreholePlacementPoint>? PlacementPoints { get; init; }
+
+    [JsonPropertyName("costAnalysis")]
+    public BoreholeCostAnalysisPayload? CostAnalysis { get; init; }
+
+    [JsonPropertyName("visualizationAssets")]
+    public BoreholeAssetsPayload? VisualizationAssets { get; init; }
+}
+
+public sealed record BoreholeRecommendationPayload
+{
     [JsonPropertyName("minimumRequired")]
     public int MinimumRequired { get; init; }
 
@@ -19,33 +31,51 @@ public sealed record BoreholeResultPayload
     [JsonPropertyName("gridSize")]
     public string? GridSize { get; init; }
 
-    [JsonPropertyName("placementStrategy")]
-    public string? PlacementStrategy { get; init; }
+    [JsonPropertyName("strategy")]
+    public string? Strategy { get; init; }
+}
 
-    [JsonPropertyName("placementPoints")]
-    public List<BoreholePlacementPoint>? PlacementPoints { get; init; }
+public sealed record BoreholeCostAnalysisPayload
+{
+    [JsonPropertyName("traditionalApproach")]
+    public BoreholeCostOptionPayload? TraditionalApproach { get; init; }
 
-    [JsonPropertyName("placementGeoJsonUrl")]
-    public string? PlacementGeoJsonUrl { get; init; }
+    [JsonPropertyName("optimizedApproach")]
+    public BoreholeCostOptionPayload? OptimizedApproach { get; init; }
 
-    [JsonPropertyName("traditionalBoreholeCount")]
-    public int TraditionalBoreholeCount { get; init; }
+    [JsonPropertyName("savings")]
+    public BoreholeSavingsPayload? Savings { get; init; }
+}
 
-    [JsonPropertyName("traditionalEstimatedCost")]
-    public decimal TraditionalEstimatedCost { get; init; }
+public sealed record BoreholeCostOptionPayload
+{
+    [JsonPropertyName("boreholes")]
+    public int Boreholes { get; init; }
 
-    [JsonPropertyName("optimizedBoreholeCount")]
-    public int OptimizedBoreholeCount { get; init; }
-
-    [JsonPropertyName("optimizedEstimatedCost")]
-    public decimal OptimizedEstimatedCost { get; init; }
-
-    [JsonPropertyName("savingsAmount")]
-    public decimal SavingsAmount { get; init; }
-
-    [JsonPropertyName("savingsPercentage")]
-    public double SavingsPercentage { get; init; }
+    [JsonPropertyName("estimatedCost")]
+    public decimal EstimatedCost { get; init; }
 
     [JsonPropertyName("currency")]
     public string? Currency { get; init; }
+
+    [JsonPropertyName("basis")]
+    public string? Basis { get; init; }
+}
+
+public sealed record BoreholeSavingsPayload
+{
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; init; }
+
+    [JsonPropertyName("currency")]
+    public string? Currency { get; init; }
+
+    [JsonPropertyName("percentage")]
+    public double Percentage { get; init; }
+}
+
+public sealed record BoreholeAssetsPayload
+{
+    [JsonPropertyName("boreholePointsGeoJsonUrl")]
+    public string? BoreholePointsGeoJsonUrl { get; init; }
 }

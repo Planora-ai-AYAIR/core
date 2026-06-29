@@ -16,8 +16,8 @@ public sealed record RiskSubResultPayload
     [JsonPropertyName("factors")]
     public List<string>? Factors { get; init; }
 
-    [JsonPropertyName("geoJsonUrl")]
-    public string? GeoJsonUrl { get; init; }
+    [JsonPropertyName("zonesGeoJsonUrl")]
+    public string? ZonesGeoJsonUrl { get; init; }
 
     [JsonPropertyName("source")]
     public string? Source { get; init; }
@@ -25,8 +25,8 @@ public sealed record RiskSubResultPayload
     [JsonPropertyName("zone")]
     public string? Zone { get; init; }
 
-    [JsonPropertyName("replacementDepth")]
-    public double? ReplacementDepth { get; init; }
+    [JsonPropertyName("replacementDepthMeters")]
+    public double? ReplacementDepthMeters { get; init; }
 
     [JsonPropertyName("susceptibility")]
     public string? Susceptibility { get; init; }

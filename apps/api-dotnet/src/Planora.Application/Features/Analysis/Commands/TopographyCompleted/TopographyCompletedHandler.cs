@@ -45,32 +45,39 @@ public sealed class TopographyCompletedHandler(
             return AnalysisJobErrors.FaildStatusUpdate;
         }
 
-        var slopeDistributionJson = request.Payload.SlopeDistribution is not null
-            ? JsonSerializer.Serialize(request.Payload.SlopeDistribution)
+        var topo = request.Payload;
+        var elevation = topo.Elevation;
+        var cutFill = topo.CutFillAnalysis;
+        var ponding = topo.PondingRisk;
+        var assets = topo.VisualizationAssets;
+        var metadata = topo.Metadata;
+
+        var slopeDistributionJson = topo.SlopeDistribution is not null
+            ? JsonSerializer.Serialize(topo.SlopeDistribution)
             : string.Empty;
 
         var topographyResult = new TopographyResult(
             analysisJob.Id,
-            request.Payload.ElevationMin,
-            request.Payload.ElevationMax,
-            request.Payload.ElevationMean,
+            elevation?.MinimumMeters ?? 0,
+            elevation?.MaximumMeters ?? 0,
+            elevation?.AverageMeters ?? 0,
             slopeDistributionJson,
-            request.Payload.CutVolume,
-            request.Payload.FillVolume,
-            request.Payload.NetVolume,
-            request.Payload.ContourInterval,
-            request.Payload.ContourGeoJsonUrl,
-            request.Payload.PondingGeoJsonUrl,
-            request.Payload.PondingZonesCount,
-            request.Payload.PondingTotalArea,
-            request.Payload.ElevationTileUrl,
-            request.Payload.SlopeTileUrl,
-            request.Payload.DemRasterUrl,
-            request.Payload.SlopeRasterUrl,
-            request.Payload.Metadata?.CopernicusDemVersion,
-            request.Payload.Metadata?.PixelResolutionMeters,
-            request.Payload.Metadata?.Crs,
-            request.Payload.Metadata?.ProcessingTimeSeconds);
+            cutFill?.CutVolumeM3 ?? 0,
+            cutFill?.FillVolumeM3 ?? 0,
+            cutFill?.NetVolumeM3 ?? 0,
+            contourInterval: 0,
+            assets?.ContourGeoJsonUrl,
+            assets?.PondingGeoJsonUrl,
+            ponding?.ZonesCount,
+            ponding?.AffectedAreaM2,
+            assets?.ElevationTileUrl,
+            assets?.SlopeTileUrl,
+            assets?.DemRasterUrl,
+            assets?.SlopeRasterUrl,
+            metadata?.CopernicusDemVersion,
+            metadata?.PixelResolutionMeters,
+            metadata?.Crs,
+            metadata?.ProcessingTimeSeconds);
 
         await topographyResultRepository.AddAsync(topographyResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);

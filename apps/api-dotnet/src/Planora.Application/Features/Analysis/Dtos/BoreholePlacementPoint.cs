@@ -19,6 +19,6 @@ public sealed record BoreholePlacementPoint
     [JsonPropertyName("reason")]
     public string? Reason { get; init; }
 
-    [JsonPropertyName("estimatedDepth")]
+    [JsonPropertyName("estimatedDepthMeters")]
     public double? EstimatedDepth { get; init; }
 }

@@ -45,26 +45,33 @@ public sealed class BoreholeCompletedHandler(
             return AnalysisJobErrors.FaildStatusUpdate;
         }
 
+        var recommendation = request.Payload.Recommendation;
+        var costAnalysis = request.Payload.CostAnalysis;
+        var traditional = costAnalysis?.TraditionalApproach;
+        var optimized = costAnalysis?.OptimizedApproach;
+        var savings = costAnalysis?.Savings;
+        var assets = request.Payload.VisualizationAssets;
+
         var placementPointsJson = request.Payload.PlacementPoints is not null
             ? JsonSerializer.Serialize(request.Payload.PlacementPoints)
             : null;
 
         var boreholeResult = new BoreholeResult(
             analysisJob.Id,
-            request.Payload.MinimumRequired,
-            request.Payload.OptimalCount,
-            request.Payload.CoveragePercentage,
-            request.Payload.GridSize,
-            request.Payload.PlacementStrategy,
+            recommendation?.MinimumRequired ?? 0,
+            recommendation?.OptimalCount ?? 0,
+            recommendation?.CoveragePercentage ?? 0,
+            recommendation?.GridSize,
+            recommendation?.Strategy,
             placementPointsJson,
-            request.Payload.PlacementGeoJsonUrl,
-            request.Payload.TraditionalBoreholeCount,
-            request.Payload.TraditionalEstimatedCost,
-            request.Payload.OptimizedBoreholeCount,
-            request.Payload.OptimizedEstimatedCost,
-            request.Payload.SavingsAmount,
-            request.Payload.SavingsPercentage,
-            request.Payload.Currency);
+            assets?.BoreholePointsGeoJsonUrl,
+            traditional?.Boreholes ?? 0,
+            traditional?.EstimatedCost ?? 0,
+            optimized?.Boreholes ?? 0,
+            optimized?.EstimatedCost ?? 0,
+            savings?.Amount ?? 0,
+            savings?.Percentage ?? 0,
+            savings?.Currency ?? traditional?.Currency ?? optimized?.Currency);
 
         await boreholeResultRepository.AddAsync(boreholeResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);
