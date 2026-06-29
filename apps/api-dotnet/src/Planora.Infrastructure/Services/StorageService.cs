@@ -74,10 +74,20 @@ public sealed class StorageService(
         {
             await s3Client.GetObjectMetadataAsync(_bucketName, s3Key, ct);
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        catch (AmazonS3Exception ex) when (
+            ex.StatusCode == HttpStatusCode.NotFound ||
+            ex.StatusCode == HttpStatusCode.Forbidden)
         {
+
             logger.LogWarning(
-                "S3 asset not found and will be returned as null. Bucket={Bucket}, Key={Key}",
+                "S3 asset unavailable (HTTP {Status}); returning null. Bucket={Bucket}, Key={Key}",
+                ex.StatusCode, _bucketName, s3Key);
+            return null;
+        }
+        catch (AmazonS3Exception ex)
+        {
+            logger.LogError(ex,
+                "Unexpected S3 error resolving asset; returning null. Bucket={Bucket}, Key={Key}",
                 _bucketName, s3Key);
             return null;
         }

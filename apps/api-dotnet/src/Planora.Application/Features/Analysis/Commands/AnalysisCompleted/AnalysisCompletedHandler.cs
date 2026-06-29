@@ -55,17 +55,27 @@ public sealed class AnalysisCompletedHandler(
         if (result?.Topography is not null)
         {
             var topo = result.Topography;
+            var elevation = topo.Elevation;
+            var cutFill = topo.CutFillAnalysis;
+            var ponding = topo.PondingRisk;
+            var assets = topo.VisualizationAssets;
+            var metadata = topo.Metadata;
+
             var slopeDistributionJson = topo.SlopeDistribution is not null
                 ? JsonSerializer.Serialize(topo.SlopeDistribution) : string.Empty;
 
             var topographyResult = new TopographyResult(
-                analysisJob.Id, topo.ElevationMin, topo.ElevationMax, topo.ElevationMean,
-                slopeDistributionJson, topo.CutVolume, topo.FillVolume, topo.NetVolume,
-                topo.ContourInterval, topo.ContourGeoJsonUrl, topo.PondingGeoJsonUrl,
-                topo.PondingZonesCount, topo.PondingTotalArea, topo.ElevationTileUrl,
-                topo.SlopeTileUrl, topo.DemRasterUrl, topo.SlopeRasterUrl,
-                topo.Metadata?.CopernicusDemVersion, topo.Metadata?.PixelResolutionMeters,
-                topo.Metadata?.Crs, topo.Metadata?.ProcessingTimeSeconds);
+                analysisJob.Id,
+                elevation?.MinimumMeters ?? 0, elevation?.MaximumMeters ?? 0, elevation?.AverageMeters ?? 0,
+                slopeDistributionJson,
+                cutFill?.CutVolumeM3 ?? 0, cutFill?.FillVolumeM3 ?? 0, cutFill?.NetVolumeM3 ?? 0,
+                contourInterval: 0,
+                assets?.ContourGeoJsonUrl, assets?.PondingGeoJsonUrl,
+                ponding?.ZonesCount, ponding?.AffectedAreaM2,
+                assets?.ElevationTileUrl, assets?.SlopeTileUrl,
+                assets?.DemRasterUrl, assets?.SlopeRasterUrl,
+                metadata?.CopernicusDemVersion, metadata?.PixelResolutionMeters,
+                metadata?.Crs, metadata?.ProcessingTimeSeconds);
 
             await topographyResultRepository.AddAsync(topographyResult, ct);
         }
@@ -73,21 +83,25 @@ public sealed class AnalysisCompletedHandler(
         if (result?.Soil is not null)
         {
             var soil = result.Soil;
+            var classification = soil.Classification;
+            var composition = soil.SurfaceComposition;
+            var properties = soil.Properties;
+            var assets = soil.VisualizationAssets;
             var spectralIndices = soil.SpectralIndices;
 
-            var multiDepthProfileJson = soil.DepthProfiles is not null
-                ? JsonSerializer.Serialize(soil.DepthProfiles) : null;
+            var multiDepthProfileJson = SoilDepthLayerSerializer.Serialize(soil.DepthLayers);
             var dataSourcesJson = soil.DataSources is not null
                 ? JsonSerializer.Serialize(soil.DataSources) : null;
 
             var soilResult = new SoilResult(
-                analysisJob.Id, soil.SandPercent, soil.SiltPercent, soil.ClayPercent,
-                soil.BulkDensity, soil.OrganicCarbon, soil.Ph,
-                soil.CompositionUnit, soil.BulkDensityUnit, soil.OrganicCarbonUnit,
-                soil.PrimaryType, soil.UsdaClass, soil.AiConfidence,
-                multiDepthProfileJson, soil.HeatmapTileUrl, soil.Cec,
-                soil.WaterTableDepthMeters, soil.SoilTypeGeoJsonUrl,
-                soil.DepthProfileImageUrl, dataSourcesJson,
+                analysisJob.Id,
+                composition?.SandPercentage ?? 0, composition?.SiltPercentage ?? 0, composition?.ClayPercentage ?? 0,
+                properties?.BulkDensity ?? 0, properties?.OrganicCarbonPercentage ?? 0, properties?.Ph ?? 0,
+                composition?.Unit, properties?.BulkDensityUnit, organicCarbonUnit: null,
+                classification?.PrimaryType, classification?.UsdaClass, classification?.AiConfidence,
+                multiDepthProfileJson, assets?.SoilHeatmapTileUrl, properties?.Cec,
+                properties?.WaterTableDepthMeters, assets?.SoilTypeGeoJsonUrl,
+                assets?.DepthProfileImageUrl, dataSourcesJson,
                 spectralIndices?.NdviMean, spectralIndices?.BsiMean, spectralIndices?.NdmiMean);
 
             await soilResultRepository.AddAsync(soilResult, ct);
@@ -118,34 +132,36 @@ public sealed class AnalysisCompletedHandler(
         if (result?.Risk is not null)
         {
             var risk = result.Risk;
-            var overallRiskLevel = risk.OverallRiskLevel ?? DeriveRiskLevel(risk.OverallRiskScore);
-            var flood = risk.Flood;
-            var seismic = risk.Seismic;
-            var expansiveSoil = risk.ExpansiveSoil;
-            var liquefaction = risk.Liquefaction;
+            var breakdown = risk.RiskBreakdown;
+            var assets = risk.VisualizationAssets;
+            var overallRiskLevel = risk.OverallRiskLevel ?? DeriveRiskLevel(risk.OverallScore);
+            var flood = breakdown?.Flood;
+            var seismic = breakdown?.Seismic;
+            var expansiveSoil = breakdown?.ExpansiveSoil;
+            var liquefaction = breakdown?.Liquefaction;
             var mitigationSuggestionsJson = risk.MitigationSuggestions is not null
                 ? JsonSerializer.Serialize(risk.MitigationSuggestions) : null;
 
             var riskResult = new RiskResult(
                 analysisJob.Id,
-                flood?.Score ?? risk.FloodRiskScore,
-                seismic?.Score ?? risk.SeismicRiskScore,
-                expansiveSoil?.Score ?? risk.ExpansiveSoilRisk,
-                liquefaction?.Score ?? risk.LiquefactionRisk,
-                risk.OverallRiskScore, overallRiskLevel,
-                flood?.Level ?? DeriveRiskLevel(risk.FloodRiskScore),
+                flood?.Score ?? 0,
+                seismic?.Score ?? 0,
+                expansiveSoil?.Score ?? 0,
+                liquefaction?.Score ?? 0,
+                risk.OverallScore, overallRiskLevel,
+                flood?.Level ?? DeriveRiskLevel(flood?.Score ?? 0),
                 flood?.Factors is not null ? JsonSerializer.Serialize(flood.Factors) : null,
-                flood?.GeoJsonUrl,
-                seismic?.Level ?? DeriveRiskLevel(risk.SeismicRiskScore),
+                flood?.ZonesGeoJsonUrl,
+                seismic?.Level ?? DeriveRiskLevel(seismic?.Score ?? 0),
                 seismic?.Factors is not null ? JsonSerializer.Serialize(seismic.Factors) : null,
                 seismic?.Source, seismicZone: seismic?.Zone,
-                expansiveSoil?.Level ?? DeriveRiskLevel(risk.ExpansiveSoilRisk),
+                expansiveSoil?.Level ?? DeriveRiskLevel(expansiveSoil?.Score ?? 0),
                 expansiveSoil?.Factors is not null ? JsonSerializer.Serialize(expansiveSoil.Factors) : null,
-                expansiveSoil?.ReplacementDepth,
-                liquefaction?.Level ?? DeriveRiskLevel(risk.LiquefactionRisk),
+                expansiveSoil?.ReplacementDepthMeters,
+                liquefaction?.Level ?? DeriveRiskLevel(liquefaction?.Score ?? 0),
                 liquefaction?.Factors is not null ? JsonSerializer.Serialize(liquefaction.Factors) : null,
                 liquefaction?.Susceptibility, liquefactionMethodology: liquefaction?.Methodology,
-                riskHeatmapTileUrl: risk.RiskHeatmapTileUrl,
+                riskHeatmapTileUrl: assets?.RiskHeatmapTileUrl,
                 mitigationSuggestionsJson: mitigationSuggestionsJson);
 
             await riskResultRepository.AddAsync(riskResult, ct);
@@ -154,16 +170,24 @@ public sealed class AnalysisCompletedHandler(
         if (result?.Borehole is not null)
         {
             var borehole = result.Borehole;
+            var recommendation = borehole.Recommendation;
+            var costAnalysis = borehole.CostAnalysis;
+            var traditional = costAnalysis?.TraditionalApproach;
+            var optimized = costAnalysis?.OptimizedApproach;
+            var savings = costAnalysis?.Savings;
+            var assets = borehole.VisualizationAssets;
             var placementPointsJson = borehole.PlacementPoints is not null
                 ? JsonSerializer.Serialize(borehole.PlacementPoints) : null;
 
             var boreholeResult = new BoreholeResult(
-                analysisJob.Id, borehole.MinimumRequired, borehole.OptimalCount,
-                borehole.CoveragePercentage, borehole.GridSize, borehole.PlacementStrategy,
-                placementPointsJson, borehole.PlacementGeoJsonUrl,
-                borehole.TraditionalBoreholeCount, borehole.TraditionalEstimatedCost,
-                borehole.OptimizedBoreholeCount, borehole.OptimizedEstimatedCost,
-                borehole.SavingsAmount, borehole.SavingsPercentage, borehole.Currency);
+                analysisJob.Id,
+                recommendation?.MinimumRequired ?? 0, recommendation?.OptimalCount ?? 0,
+                recommendation?.CoveragePercentage ?? 0, recommendation?.GridSize, recommendation?.Strategy,
+                placementPointsJson, assets?.BoreholePointsGeoJsonUrl,
+                traditional?.Boreholes ?? 0, traditional?.EstimatedCost ?? 0,
+                optimized?.Boreholes ?? 0, optimized?.EstimatedCost ?? 0,
+                savings?.Amount ?? 0, savings?.Percentage ?? 0,
+                savings?.Currency ?? traditional?.Currency ?? optimized?.Currency);
 
             await boreholeResultRepository.AddAsync(boreholeResult, ct);
         }
