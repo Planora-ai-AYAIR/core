@@ -105,7 +105,8 @@ variable "aws_region" {
 resource "aws_secretsmanager_secret" "db" {
   name                    = "planora/${var.environment}/database"
   description             = "PlanoraDb and PlanoraHangfire PostgreSQL connection strings"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
@@ -127,7 +128,8 @@ resource "aws_secretsmanager_secret_version" "db" {
 resource "aws_secretsmanager_secret" "redis" {
   name                    = "planora/${var.environment}/redis"
   description             = "Redis connection string for HybridCache"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
@@ -147,7 +149,8 @@ resource "aws_secretsmanager_secret_version" "redis" {
 resource "aws_secretsmanager_secret" "jwt" {
   name                    = "planora/${var.environment}/jwt"
   description             = "JWT signing key for ASP.NET Identity + JWT auth"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
@@ -167,7 +170,8 @@ resource "aws_secretsmanager_secret_version" "jwt" {
 resource "aws_secretsmanager_secret" "smtp" {
   name                    = "planora/${var.environment}/smtp"
   description             = "SMTP credentials for OTP and notification emails"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
@@ -193,7 +197,8 @@ resource "aws_secretsmanager_secret_version" "smtp" {
 resource "aws_secretsmanager_secret" "hangfire" {
   name                    = "planora/${var.environment}/hangfire"
   description             = "Hangfire dashboard credentials"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
@@ -214,7 +219,8 @@ resource "aws_secretsmanager_secret_version" "hangfire" {
 resource "aws_secretsmanager_secret" "ai_service" {
   name                    = "planora/${var.environment}/ai-service"
   description             = "Python AI service endpoint and API key"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
@@ -235,7 +241,8 @@ resource "aws_secretsmanager_secret_version" "ai_service" {
 resource "aws_secretsmanager_secret" "s3_config" {
   name                    = "planora/${var.environment}/s3"
   description             = "AWS S3 bucket config for the .NET backend"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
+  force_overwrite_replica_secret = true
 
   tags = {
     Project     = "Planora-AI"
