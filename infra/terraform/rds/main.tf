@@ -167,7 +167,7 @@ resource "aws_db_instance" "planora" {
   performance_insights_enabled = true
 
   # Prevent accidental deletion in production
-  deletion_protection = true
+  deletion_protection = false
   skip_final_snapshot = false
   final_snapshot_identifier = "planora-final-${var.environment}"
 
