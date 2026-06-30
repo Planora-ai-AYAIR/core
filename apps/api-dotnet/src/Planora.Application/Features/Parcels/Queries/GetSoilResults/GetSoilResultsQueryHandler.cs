@@ -33,9 +33,12 @@ public sealed class GetSoilResultsQueryHandler(
 
         logger.LogInformation("Fetching soil results for ParcelId: {ParcelId}", request.ParcelId);
 
-        // Find the completed soil analysis job for this parcel
+        // Find the completed soil job, or the Aggregated job (which owns soil results
+        // in the unified analysis flow).
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
-        var soilJob = jobs.FirstOrDefault(j => j.Type == AnalysisType.Soil && j.Status == AnalysisJobStatus.Completed);
+        var soilJob = jobs.FirstOrDefault(j =>
+            (j.Type == AnalysisType.Soil || j.Type == AnalysisType.Aggregated)
+            && j.Status == AnalysisJobStatus.Completed);
 
         if (soilJob is null)
         {
@@ -66,7 +69,7 @@ public sealed class GetSoilResultsQueryHandler(
             soilResult.OrganicCarbon,
             soilResult.OrganicCarbonUnit ?? "%",
             soilResult.Ph,
-            soilResult.PrimaryType ?? soilResult.BearingCapacityCategory,
+            soilResult.PrimaryType ?? "",
             soilResult.UsdaClass ?? "",
             soilResult.AiConfidence,
             multiDepthProfile,

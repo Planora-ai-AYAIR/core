@@ -41,67 +41,43 @@ public sealed class SoilCompletedHandler(
             return AnalysisJobErrors.FaildStatusUpdate;
         }
 
-        var multiDepthProfileJson = request.Payload.DepthProfiles is not null
-            ? JsonSerializer.Serialize(request.Payload.DepthProfiles)
+        var soil = request.Payload;
+        var classification = soil.Classification;
+        var composition = soil.SurfaceComposition;
+        var properties = soil.Properties;
+        var assets = soil.VisualizationAssets;
+        var spectralIndices = soil.SpectralIndices;
+
+        var multiDepthProfileJson = SoilDepthLayerSerializer.Serialize(soil.DepthLayers);
+
+        var dataSourcesJson = soil.DataSources is not null
+            ? JsonSerializer.Serialize(soil.DataSources)
             : null;
-
-        var dataSourcesJson = request.Payload.DataSources is not null
-            ? JsonSerializer.Serialize(request.Payload.DataSources)
-            : null;
-
-        var bearing = request.Payload.Bearing;
-        var spectralIndices = request.Payload.SpectralIndices;
-
-        var featureImportanceJson = bearing?.FeatureImportance is not null
-            ? JsonSerializer.Serialize(bearing.FeatureImportance)
-            : null;
-
-        var soilFactorsJson = bearing?.SoilFactors is not null
-            ? JsonSerializer.Serialize(bearing.SoilFactors)
-            : null;
-
-        var modelMetadata = bearing?.ModelMetadata;
 
         var soilResult = new SoilResult(
             analysisJob.Id,
-            request.Payload.SandPercent,
-            request.Payload.SiltPercent,
-            request.Payload.ClayPercent,
-            request.Payload.BulkDensity,
-            request.Payload.OrganicCarbon,
-            request.Payload.Ph,
-            request.Payload.BearingCapacityEstimate,
-            request.Payload.BearingCapacityCategory,
-            request.Payload.CompositionUnit,
-            request.Payload.BulkDensityUnit,
-            request.Payload.OrganicCarbonUnit,
-            request.Payload.PrimaryType,
-            request.Payload.UsdaClass,
-            request.Payload.AiConfidence,
+            composition?.SandPercentage ?? 0,
+            composition?.SiltPercentage ?? 0,
+            composition?.ClayPercentage ?? 0,
+            properties?.BulkDensity ?? 0,
+            properties?.OrganicCarbonPercentage ?? 0,
+            properties?.Ph ?? 0,
+            composition?.Unit,
+            properties?.BulkDensityUnit,
+            organicCarbonUnit: null,
+            classification?.PrimaryType,
+            classification?.UsdaClass,
+            classification?.AiConfidence,
             multiDepthProfileJson,
-            request.Payload.HeatmapTileUrl,
-            cec: request.Payload.Cec,
-            waterTableDepthMeters: request.Payload.WaterTableDepthMeters,
-            soilTypeGeoJsonUrl: request.Payload.SoilTypeGeoJsonUrl,
-            depthProfileImageUrl: request.Payload.DepthProfileImageUrl,
+            assets?.SoilHeatmapTileUrl,
+            cec: properties?.Cec,
+            waterTableDepthMeters: properties?.WaterTableDepthMeters,
+            soilTypeGeoJsonUrl: assets?.SoilTypeGeoJsonUrl,
+            depthProfileImageUrl: assets?.DepthProfileImageUrl,
             dataSourcesJson: dataSourcesJson,
             ndviMean: spectralIndices?.NdviMean,
             bsiMean: spectralIndices?.BsiMean,
-            ndmiMean: spectralIndices?.NdmiMean,
-            bearingConfidence: bearing?.Confidence,
-            bearingRange: bearing?.Range,
-            bearingTrafficLight: bearing?.TrafficLight,
-            recommendedFoundation: bearing?.RecommendedFoundation,
-            maxFloorsWithoutDeepFoundation: bearing?.MaxFloorsWithoutDeepFoundation,
-            floorCountCategory: bearing?.FloorCountCategory,
-            bearingMinKpa: bearing?.UncertaintyRange?.MinimumKpa,
-            bearingMaxKpa: bearing?.UncertaintyRange?.MaximumKpa,
-            featureImportanceJson: featureImportanceJson,
-            soilFactorsJson: soilFactorsJson,
-            bearingModelName: modelMetadata?.ModelName,
-            bearingFramework: modelMetadata?.Framework,
-            bearingTrainingR2: modelMetadata?.TrainingR2,
-            bearingShapEnabled: modelMetadata?.ShapEnabled);
+            ndmiMean: spectralIndices?.NdmiMean);
 
         await soilResultRepository.AddAsync(soilResult, ct);
         await analysisJobRepository.SaveChangesAsync(ct);

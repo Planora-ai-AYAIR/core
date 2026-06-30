@@ -38,7 +38,7 @@
     </div>
   }
 
-  <div class="flex flex-col sm:flex-row gap-4">
+  <div class="flex flex-col gap-4">
     @if (classificationData(); as cls) {
       <app-soil-classification-badge
         [classification]="cls.classification"
@@ -52,6 +52,38 @@
           [organicCarbon]="props.organicCarbon"
           [pH]="props.pH"
         />
+      </div>
+    }
+    @if (spectralIndices(); as si) {
+      <div class="overflow-hidden rounded-lg border border-planora-desert-200 bg-white shadow-sm">
+        <div class="border-b border-planora-desert-100 bg-planora-desert-50 px-4 py-2.5">
+          <h3 class="text-[10px] font-bold uppercase tracking-wider text-planora-basalt-600">
+            Spectral Indices (Satellite)
+          </h3>
+        </div>
+        <div class="grid grid-cols-3 divide-x divide-planora-desert-100">
+          <div class="p-3 text-center">
+            <div class="text-[10px] text-planora-basalt-400 uppercase mb-1">NDVI</div>
+            <div class="font-mono text-lg font-bold text-green-700">
+              {{ si.ndviMean | number: '1.2-2' }}
+            </div>
+            <div class="text-[9px] text-planora-basalt-400 mt-0.5">Vegetation</div>
+          </div>
+          <div class="p-3 text-center">
+            <div class="text-[10px] text-planora-basalt-400 uppercase mb-1">BSI</div>
+            <div class="font-mono text-lg font-bold text-amber-700">
+              {{ si.bsiMean | number: '1.2-2' }}
+            </div>
+            <div class="text-[9px] text-planora-basalt-400 mt-0.5">Bare Soil</div>
+          </div>
+          <div class="p-3 text-center">
+            <div class="text-[10px] text-planora-basalt-400 uppercase mb-1">NDMI</div>
+            <div class="font-mono text-lg font-bold text-blue-700">
+              {{ si.ndmiMean | number: '1.2-2' }}
+            </div>
+            <div class="text-[9px] text-planora-basalt-400 mt-0.5">Moisture</div>
+          </div>
+        </div>
       </div>
     }
   </div>

@@ -11,6 +11,9 @@ export class BearingMapInitialiser implements MapInitialiser<BearingData> {
   }
 
   private addBearingPoints(map: maplibregl.Map, points: BearingData['bearingPoints']) {
+    if (map.getSource('bearing-src') || map.getLayer('bearing-points')) {
+      return;
+    }
     map.addSource('bearing-src', {
       type: 'geojson',
       data: {
@@ -37,6 +40,9 @@ export class BearingMapInitialiser implements MapInitialiser<BearingData> {
   }
 
   private addWaterTable(map: maplibregl.Map, lines: any[]) {
+    if (map.getSource('water-src') || map.getLayer('water-table')) {
+      return;
+    }
     map.addSource('water-src', {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: lines },

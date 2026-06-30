@@ -31,5 +31,7 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD curl -fsS http://localhost:8000/api/v1/health || exit 1
 
-# Run the FastAPI app (app.main:app) with uvicorn.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# If GEE_SERVICE_ACCOUNT_KEY_JSON is set (e.g. injected as a platform secret),
+# materialize it to the path GEE_SERVICE_ACCOUNT_KEY points at before starting —
+# lets deployments without a mountable secrets file pass the key as one env var.
+CMD ["/bin/sh", "-c", "if [ -n \"$GEE_SERVICE_ACCOUNT_KEY_JSON\" ]; then key_path=${GEE_SERVICE_ACCOUNT_KEY:-./secrets/gee_key.json}; mkdir -p \"$(dirname \"$key_path\")\"; printf '%s' \"$GEE_SERVICE_ACCOUNT_KEY_JSON\" > \"$key_path\"; fi; exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

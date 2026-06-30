@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Planora.Domain.AnalysisJob;
 using Planora.Domain.Parcels;
@@ -59,7 +59,6 @@ public sealed class AnalysisJobConfiguration : IEntityTypeConfiguration<Analysis
 
         builder.OwnsOne(j => j.Options, optionsBuilder =>
         {
-            optionsBuilder.ToTable("AnalysisJobs");
             optionsBuilder.Property(o => o.IncludeTopography)
                           .HasColumnName("options_include_topography")
                           .HasDefaultValue(false);

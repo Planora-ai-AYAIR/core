@@ -151,23 +151,21 @@ export class ParcelCreateComponent {
   saveParcel(): void {
     if (!this.parcelName() || this.polygonPoints().length < 3 || this.saving()) return;
 
-    const geoJson = JSON.parse(this.drawnGeoJSON()); // already a Polygon object
-    const area = parseFloat(this.parcelStats().sqMeters.replace(/,/g, ''));
-
-    this.saving.set(true);
-
     const areaM2 = parseFloat(this.parcelStats().sqMeters.replace(/,/g, ''));
-
     if (areaM2 < 50_000) {
       this.toast.error('Parcel area must be at least 5 hectares (50,000 m²).');
-      return;
+      return; // saving was never set to true, so no need to reset
     }
+
+    const geoJson = JSON.parse(this.drawnGeoJSON());
+
+    this.saving.set(true); // only now start the loading state
 
     this.parcelFacade
       .createParcel({
         name: this.parcelName(),
-        geoJson, // ← this is { type: 'Polygon', coordinates: [...] }
-        area,
+        geoJson,
+        area: areaM2,
         areaUnit: 'm2',
       })
       .subscribe({
@@ -178,7 +176,7 @@ export class ParcelCreateComponent {
           }
         },
         error: () => {
-          this.saving.set(false);
+          this.saving.set(false); // already handled by facade toast, but we must stop spinner
         },
       });
   }

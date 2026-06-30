@@ -20,6 +20,7 @@ public sealed class GetParcelAnalysisQueryHandler(
     ISoilResultRepository soilResultRepository,
     IRiskResultRepository riskResultRepository,
     IBoreholeResultRepository boreholeResultRepository,
+    IBearingResultRepository bearingResultRepository,
     IStorageService storageService,
     IHybridCacheService cacheService,
     ILogger<GetParcelAnalysisQueryHandler> logger)
@@ -74,17 +75,23 @@ public sealed class GetParcelAnalysisQueryHandler(
             return AnalysisJobErrors.AnalysisNotCompletedWithProgress(aggregateStatus, progress);
         }
 
-        // 4. Find completed job IDs per module
-        var topoJob  = FindCompletedJob(jobs, AnalysisType.Topography);
-        var soilJob  = FindCompletedJob(jobs, AnalysisType.Soil);
-        var riskJob  = FindCompletedJob(jobs, AnalysisType.Risk);
-        var boreJob  = FindCompletedJob(jobs, AnalysisType.Borehole);
+        // 4. Find the job that owns the module result rows.
+        //    Aggregated flow: AnalysisCompletedHandler saves ALL module results
+        //    keyed to the single Aggregated job's Id. Per-module flow falls back
+        //    to the type-specific jobs.
+        var aggregatedJob = FindCompletedJob(jobs, AnalysisType.Aggregated);
+        var topoJob  = aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Topography);
+        var soilJob  = aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Soil);
+        var riskJob  = aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Risk);
+        var boreJob  = aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Borehole);
+        var bearingJob = aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Soil);
 
         // 5. Load module results sequentially (DbContext is not thread-safe).
         var topographyResult = await LoadResultAsync(topoJob, topographyResultRepository.GetByAnalysisJobIdAsync, ct);
         var soilResult       = await LoadResultAsync(soilJob, soilResultRepository.GetByAnalysisJobIdAsync, ct);
         var riskResult       = await LoadResultAsync(riskJob, riskResultRepository.GetByAnalysisJobIdAsync, ct);
         var boreholeResult   = await LoadResultAsync(boreJob, boreholeResultRepository.GetByAnalysisJobIdAsync, ct);
+        var bearingResult    = await LoadResultAsync(bearingJob, bearingResultRepository.GetByAnalysisJobIdAsync, ct);
 
         // 6. Generate presigned URLs concurrently for each module
         var topoAssetsTask  = PresignTopographyAssetsAsync(topographyResult, ct);
@@ -122,8 +129,8 @@ public sealed class GetParcelAnalysisQueryHandler(
             ? BuildSoilDto(soilResult, soilAssets)
             : null;
 
-        var bearingDto = soilResult is not null
-            ? BuildBearingDto(soilResult)
+        var bearingDto = bearingResult is not null
+            ? BuildBearingDto(bearingResult)
             : null;
 
         var riskDto = riskResult is not null
@@ -307,7 +314,7 @@ public sealed class GetParcelAnalysisQueryHandler(
 
         return new SoilAnalysisDto(
             Classification: new SoilClassificationDto(
-                r.PrimaryType ?? r.BearingCapacityCategory,
+                r.PrimaryType ?? "",
                 r.UsdaClass ?? "",
                 r.AiConfidence),
             SurfaceComposition: new SoilSurfaceCompositionDto(
@@ -323,13 +330,13 @@ public sealed class GetParcelAnalysisQueryHandler(
             SpectralIndices: spectralIndices);
     }
 
-    private static BearingAnalysisDto? BuildBearingDto(SoilResult r)
+    private static BearingAnalysisDto? BuildBearingDto(BearingResult r)
     {
-        if (r.BearingCapacityEstimate <= 0 && string.IsNullOrEmpty(r.BearingCapacityCategory))
+        if (r.BearingCapacityKpa <= 0 && string.IsNullOrEmpty(r.Classification))
             return null;
 
-        var uncertaintyRange = (r.BearingMinKpa.HasValue && r.BearingMaxKpa.HasValue)
-            ? new BearingUncertaintyRangeDto(r.BearingMinKpa.Value, r.BearingMaxKpa.Value)
+        var uncertaintyRange = (r.MinKpa.HasValue && r.MaxKpa.HasValue)
+            ? new BearingUncertaintyRangeDto(r.MinKpa.Value, r.MaxKpa.Value)
             : null;
 
         var featureImportance = DeserializeJson<List<FeatureImportanceEntry>>(r.FeatureImportanceJson)
@@ -342,20 +349,20 @@ public sealed class GetParcelAnalysisQueryHandler(
                 sf.DepthToWaterTableMeters, sf.TerrainSlopePercent)
             : null;
 
-        var modelMetadata = r.BearingModelName is not null
+        var modelMetadata = r.ModelName is not null
             ? new BearingModelMetadataDto(
-                ModelName: r.BearingModelName,
-                Framework: r.BearingFramework ?? "",
-                TrainingR2: r.BearingTrainingR2 ?? 0,
-                ShapEnabled: r.BearingShapEnabled ?? false)
+                ModelName: r.ModelName,
+                Framework: r.Framework ?? "",
+                TrainingR2: r.TrainingR2 ?? 0,
+                ShapEnabled: r.ShapEnabled ?? false)
             : null;
 
         return new BearingAnalysisDto(
-            BearingCapacityKpa: r.BearingCapacityEstimate,
-            Confidence: r.BearingConfidence ?? 0,
-            Classification: r.BearingCapacityCategory,
-            Range: r.BearingRange ?? "",
-            TrafficLight: r.BearingTrafficLight ?? "",
+            BearingCapacityKpa: r.BearingCapacityKpa,
+            Confidence: r.Confidence ?? 0,
+            Classification: r.Classification ?? "",
+            Range: r.Range ?? "",
+            TrafficLight: r.TrafficLight ?? "",
             RecommendedFoundation: r.RecommendedFoundation ?? "",
             MaxFloorsWithoutDeepFoundation: r.MaxFloorsWithoutDeepFoundation,
             FloorCountCategory: r.FloorCountCategory,
@@ -433,7 +440,7 @@ public sealed class GetParcelAnalysisQueryHandler(
         var placementPoints = DeserializeJson<List<BoreholePlacementPointEntry>>(r.PlacementPointsJson)
             ?.Select(p => new BoreholeAnalysisPlacementPointDto(
                 p.Id, p.Latitude, p.Longitude, p.Priority,
-                p.Reason, p.EstimatedDepth))
+                p.Reason, p.EstimatedDepthMeters))
             .ToList();
 
         return new BoreholeAnalysisDto(
@@ -499,5 +506,5 @@ public sealed class GetParcelAnalysisQueryHandler(
 
     private sealed record BoreholePlacementPointEntry(
         string Id, double Latitude, double Longitude, string Priority,
-        string? Reason, double? EstimatedDepth);
+        string? Reason, double? EstimatedDepthMeters);
 }

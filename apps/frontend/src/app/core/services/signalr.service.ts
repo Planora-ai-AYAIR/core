@@ -12,17 +12,51 @@ export class SignalRService implements OnDestroy {
   private hubConnection?: signalR.HubConnection;
   private notificationSubject = new Subject<NotificationDto>();
   private analysisResultSubject = new Subject<AnalysisResultEnvelope>();
+  private reportGeneratedSubject = new Subject<any>();
+  private reportFailedSubject = new Subject<any>();
 
   notification$ = this.notificationSubject.asObservable();
   analysisResult$ = this.analysisResultSubject.asObservable();
+  reportGenerated$ = this.reportGeneratedSubject.asObservable();
+  reportFailed$ = this.reportFailedSubject.asObservable();
 
-  startConnection(): void {
+  async startConnection(): Promise<void> {
+    if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    // 1. Wait for a valid token (refreshes if necessary)
+    const token = await this.auth.getValidAccessToken();
+    if (!token) {
+      console.warn('SignalR: No valid token available, skipping connection');
+      return;
+    }
+
+    // 2. Build connection with an async accessTokenFactory that always fetches fresh token
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.getBaseUrl()}/hubs/notifications`, {
-        accessTokenFactory: () => this.auth.accessToken ?? '',
+        accessTokenFactory: async () => {
+          // This runs BEFORE every connection or reconnection attempt
+          const freshToken = await this.auth.getValidAccessToken();
+          return freshToken ?? '';
+        },
       })
       .withAutomaticReconnect()
       .build();
+
+    // 3. Register event handlers
+    this.registerEvents();
+
+    // 4. Start
+    try {
+      await this.hubConnection.start();
+    } catch (err) {
+      console.error('SignalR error:', err);
+    }
+  }
+
+  private registerEvents(): void {
+    if (!this.hubConnection) return;
 
     this.hubConnection.on('NotificationReceived', (notification: NotificationDto) => {
       this.notificationSubject.next(notification);
@@ -32,7 +66,13 @@ export class SignalRService implements OnDestroy {
       this.analysisResultSubject.next(envelope);
     });
 
-    this.hubConnection.start().catch((err) => console.error('SignalR error:', err));
+    this.hubConnection.on('ReportGenerated', (event: any) => {
+      this.reportGeneratedSubject.next(event);
+    });
+
+    this.hubConnection.on('ReportFailed', (event: any) => {
+      this.reportFailedSubject.next(event);
+    });
   }
 
   private getBaseUrl(): string {
@@ -41,6 +81,10 @@ export class SignalRService implements OnDestroy {
 
   subscribeToParcel(parcelId: string): void {
     this.hubConnection?.invoke('SubscribeToParcel', parcelId).catch((err) => console.error(err));
+  }
+
+  stopConnection(): void {
+    this.hubConnection?.stop();
   }
 
   ngOnDestroy(): void {

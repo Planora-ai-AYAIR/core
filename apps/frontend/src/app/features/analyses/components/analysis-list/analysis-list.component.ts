@@ -21,6 +21,7 @@ export class AnalysisListComponent {
   analyses = signal<AnalysisJobSummaryItem[]>([]);
   searchTerm = signal('');
   isLoading = signal(true);
+  error = signal<string | null>(null);
 
   readonly allModules = ['topography', 'soil', 'risk', 'bearing', 'boreholes', 'report'];
 
@@ -58,6 +59,7 @@ export class AnalysisListComponent {
         },
         error: () => {
           this.isLoading.set(false);
+          this.error.set('Failed to load analyses. Please try again.'); // <-- set error
         },
       });
   }

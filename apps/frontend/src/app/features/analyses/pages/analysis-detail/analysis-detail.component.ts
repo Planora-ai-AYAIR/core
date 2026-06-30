@@ -20,6 +20,8 @@ import { BearingTabComponent } from '../../components/analysis-detail/bearing-ta
 import { RiskTabComponent } from '../../components/analysis-detail/risk/risk-tab/risk-tab.component';
 import { ParcelFacadeService } from '../../../parcels/services/parcel-facade.service';
 import maplibregl from 'maplibre-gl';
+import { ReportFacadeService } from '../../services/report/report-facade.service';
+import { SignalRService } from '../../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-analysis-detail',
@@ -41,8 +43,10 @@ import maplibregl from 'maplibre-gl';
 })
 export class AnalysisDetailComponent implements OnInit, OnDestroy {
   private _layerService = inject(MapLayerService);
-  private _analysisFacade = inject(AnalysisDetailFacadeService);
+  _analysisFacade = inject(AnalysisDetailFacadeService);
   private _parcelFacade = inject(ParcelFacadeService);
+  reportFacade = inject(ReportFacadeService);
+  private signalR = inject(SignalRService);
   private route = inject(ActivatedRoute);
 
   private _topographyInit = inject(TopographyMapInitialiser);
@@ -58,6 +62,8 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
   parcelName = signal('');
   parcelCoordinates = signal('');
   mapCenter = signal<[number, number]>([31.942, 30.633]);
+
+  private pendingFlyTo: { center: [number, number]; zoom: number } | null = null;
 
   parcelId!: string;
 
@@ -91,6 +97,11 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
     () => this.moduleProgress()[this.activeModule()]?.status === 'Completed',
   );
 
+  allModulesCompleted = computed(() => {
+    const progress = this.moduleProgress();
+    return Object.values(progress).every((m) => m.status === 'Completed');
+  });
+
   constructor() {
     // ── Reactive layer adding ──
     // When data arrives for a completed module, add its map layers immediately.
@@ -100,6 +111,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['topography']?.status;
       if (map && data && progress === 'Completed') {
         this._topographyInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -109,6 +121,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['soil']?.status;
       if (map && data && progress === 'Completed') {
         this._soilInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -118,6 +131,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['bearing']?.status;
       if (map && data && progress === 'Completed') {
         this._bearingInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -127,6 +141,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['risk']?.status;
       if (map && data && progress === 'Completed') {
         this._riskInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -136,6 +151,13 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['borehole']?.status;
       if (map && data && progress === 'Completed') {
         this._boreholeInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
+      }
+    });
+
+    effect(() => {
+      if (this.allModulesCompleted()) {
+        this.reportFacade.checkExistingReport(this.parcelId);
       }
     });
   }
@@ -159,6 +181,26 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
           );
           this.mapCenter.set([parcel.centroidLongitude, parcel.centroidLatitude]);
           this._addParcelBoundary(parcel.boundaryCoordinates);
+
+          // Fly the map to the parcel’s centroid if map is ready, otherwise defer
+          const target: [number, number] = [parcel.centroidLongitude, parcel.centroidLatitude];
+          if (this.map()) {
+            this.map()!.flyTo({ center: target, zoom: 17, essential: true });
+          } else {
+            this.pendingFlyTo = { center: target, zoom: 17 };
+          }
+        }
+      });
+
+      this.signalR.reportGenerated$.subscribe((event: any) => {
+        if (event.ParcelId === this.parcelId) {
+          this.reportFacade.onReportGenerated(this.parcelId, event.ReportJobId);
+        }
+      });
+
+      this.signalR.reportFailed$.subscribe((event: any) => {
+        if (event.ParcelId === this.parcelId) {
+          this.reportFacade.onReportFailed(event.Message);
         }
       });
     } else {
@@ -345,6 +387,15 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       if (this.parcelBoundary) {
         this._drawBoundary();
       }
+
+      if (this.pendingFlyTo) {
+        map.flyTo({
+          center: this.pendingFlyTo.center,
+          zoom: this.pendingFlyTo.zoom,
+          essential: true,
+        });
+        this.pendingFlyTo = null;
+      }
     };
 
     map.loaded() ? init() : map.once('load', init);
@@ -360,5 +411,19 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       ...prev,
       [moduleId]: { ...prev[moduleId], status: 'Failed' as ModuleStatus },
     }));
+  }
+
+  onGenerateReport() {
+    const options = {
+      language: 'en',
+      companyName: 'Talaat Moustafa Group',
+      projectName: 'New Alamein Phase 3',
+      includeMaps: true,
+      includeTables: true,
+      includeRiskMatrix: true,
+      includeBoreholePlan: true,
+      disclaimerLevel: 'full',
+    };
+    this.reportFacade.generateReport(this.parcelId, options);
   }
 }

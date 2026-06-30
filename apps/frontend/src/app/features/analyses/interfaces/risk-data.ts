@@ -13,7 +13,7 @@ export interface RiskBreakdown {
 }
 
 export interface MitigationItem {
-  risk: string;
+  riskType: string;
   suggestion: string;
   costImpact: string;
   feasibility: string;

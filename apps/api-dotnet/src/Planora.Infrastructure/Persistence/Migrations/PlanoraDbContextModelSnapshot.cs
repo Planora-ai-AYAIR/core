@@ -186,6 +186,112 @@ namespace Planora.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Planora.Domain.Analysis.BearingResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AnalysisJobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("analysis_job_id");
+
+                    b.Property<double>("BearingCapacityKpa")
+                        .HasColumnType("double precision")
+                        .HasColumnName("bearing_capacity_kpa");
+
+                    b.Property<string>("Classification")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("classification");
+
+                    b.Property<double?>("Confidence")
+                        .HasColumnType("double precision")
+                        .HasColumnName("confidence");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("FeatureImportanceJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("feature_importance_json");
+
+                    b.Property<string>("FloorCountCategory")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("floor_count_category");
+
+                    b.Property<string>("Framework")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("framework");
+
+                    b.Property<int?>("MaxFloorsWithoutDeepFoundation")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_floors_without_deep_foundation");
+
+                    b.Property<double?>("MaxKpa")
+                        .HasColumnType("double precision")
+                        .HasColumnName("max_kpa");
+
+                    b.Property<double?>("MinKpa")
+                        .HasColumnType("double precision")
+                        .HasColumnName("min_kpa");
+
+                    b.Property<string>("ModelName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("model_name");
+
+                    b.Property<string>("Range")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("range");
+
+                    b.Property<string>("RecommendedFoundation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("recommended_foundation");
+
+                    b.Property<bool?>("ShapEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shap_enabled");
+
+                    b.Property<string>("SoilFactorsJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("soil_factors_json");
+
+                    b.Property<string>("TrafficLight")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("traffic_light");
+
+                    b.Property<double?>("TrainingR2")
+                        .HasColumnType("double precision")
+                        .HasColumnName("training_r2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_bearing_results");
+
+                    b.HasIndex("AnalysisJobId")
+                        .HasDatabaseName("ix_bearing_results_analysis_job_id");
+
+                    b.ToTable("BearingResults", (string)null);
+                });
+
             modelBuilder.Entity("Planora.Domain.Analysis.BoreholeResult", b =>
                 {
                     b.Property<Guid>("Id")
@@ -429,56 +535,6 @@ namespace Planora.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("analysis_job_id");
 
-                    b.Property<string>("BearingCapacityCategory")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("bearing_capacity_category");
-
-                    b.Property<double>("BearingCapacityEstimate")
-                        .HasColumnType("double precision")
-                        .HasColumnName("bearing_capacity_estimate");
-
-                    b.Property<double?>("BearingConfidence")
-                        .HasColumnType("double precision")
-                        .HasColumnName("bearing_confidence");
-
-                    b.Property<string>("BearingFramework")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("bearing_framework");
-
-                    b.Property<double?>("BearingMaxKpa")
-                        .HasColumnType("double precision")
-                        .HasColumnName("bearing_max_kpa");
-
-                    b.Property<double?>("BearingMinKpa")
-                        .HasColumnType("double precision")
-                        .HasColumnName("bearing_min_kpa");
-
-                    b.Property<string>("BearingModelName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("bearing_model_name");
-
-                    b.Property<string>("BearingRange")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("bearing_range");
-
-                    b.Property<bool?>("BearingShapEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("bearing_shap_enabled");
-
-                    b.Property<string>("BearingTrafficLight")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("bearing_traffic_light");
-
-                    b.Property<double?>("BearingTrainingR2")
-                        .HasColumnType("double precision")
-                        .HasColumnName("bearing_training_r2");
-
                     b.Property<double?>("BsiMean")
                         .HasColumnType("double precision")
                         .HasColumnName("bsi_mean");
@@ -522,23 +578,10 @@ namespace Planora.Infrastructure.Migrations
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("depth_profile_image_url");
 
-                    b.Property<string>("FeatureImportanceJson")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("feature_importance_json");
-
-                    b.Property<string>("FloorCountCategory")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("floor_count_category");
-
                     b.Property<string>("HeatmapTileUrl")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("heatmap_tile_url");
-
-                    b.Property<int?>("MaxFloorsWithoutDeepFoundation")
-                        .HasColumnType("integer")
-                        .HasColumnName("max_floors_without_deep_foundation");
 
                     b.Property<string>("MultiDepthProfileJson")
                         .HasColumnType("jsonb")
@@ -570,11 +613,6 @@ namespace Planora.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("primary_type");
 
-                    b.Property<string>("RecommendedFoundation")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("recommended_foundation");
-
                     b.Property<double>("SandPercent")
                         .HasColumnType("double precision")
                         .HasColumnName("sand_percent");
@@ -582,10 +620,6 @@ namespace Planora.Infrastructure.Migrations
                     b.Property<double>("SiltPercent")
                         .HasColumnType("double precision")
                         .HasColumnName("silt_percent");
-
-                    b.Property<string>("SoilFactorsJson")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("soil_factors_json");
 
                     b.Property<string>("SoilTypeGeoJsonUrl")
                         .HasMaxLength(2000)
@@ -1667,6 +1701,16 @@ namespace Planora.Infrastructure.Migrations
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
                 });
 
+            modelBuilder.Entity("Planora.Domain.Analysis.BearingResult", b =>
+                {
+                    b.HasOne("Planora.Domain.AnalysisJob.AnalysisJob", null)
+                        .WithMany()
+                        .HasForeignKey("AnalysisJobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_bearing_results_analysis_jobs_analysis_job_id");
+                });
+
             modelBuilder.Entity("Planora.Domain.Analysis.BoreholeResult", b =>
                 {
                     b.HasOne("Planora.Domain.AnalysisJob.AnalysisJob", null)
@@ -1772,7 +1816,7 @@ namespace Planora.Infrastructure.Migrations
 
                             b1.HasKey("AnalysisJobId");
 
-                            b1.ToTable("AnalysisJobs", (string)null);
+                            b1.ToTable("AnalysisJobs");
 
                             b1.WithOwner()
                                 .HasForeignKey("AnalysisJobId")

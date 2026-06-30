@@ -4,27 +4,27 @@ namespace Planora.Application.Features.Analysis.Dtos;
 
 public sealed record RiskResultPayload
 {
-    [JsonPropertyName("pythonJobId")]
-    public string PythonJobId { get; init; } = string.Empty;
-
-    [JsonPropertyName("floodRiskScore")]
-    public int FloodRiskScore { get; init; }
-
-    [JsonPropertyName("seismicRiskScore")]
-    public int SeismicRiskScore { get; init; }
-
-    [JsonPropertyName("expansiveSoilRisk")]
-    public int ExpansiveSoilRisk { get; init; }
-
-    [JsonPropertyName("liquefactionRisk")]
-    public int LiquefactionRisk { get; init; }
-
-    [JsonPropertyName("overallRiskScore")]
-    public int OverallRiskScore { get; init; }
+    [JsonPropertyName("overallScore")]
+    public int OverallScore { get; init; }
 
     [JsonPropertyName("overallRiskLevel")]
     public string? OverallRiskLevel { get; init; }
 
+    [JsonPropertyName("maxScore")]
+    public int? MaxScore { get; init; }
+
+    [JsonPropertyName("riskBreakdown")]
+    public RiskBreakdownPayload? RiskBreakdown { get; init; }
+
+    [JsonPropertyName("visualizationAssets")]
+    public RiskAssetsPayload? VisualizationAssets { get; init; }
+
+    [JsonPropertyName("mitigationSuggestions")]
+    public List<RiskMitigationSuggestionPayload>? MitigationSuggestions { get; init; }
+}
+
+public sealed record RiskBreakdownPayload
+{
     [JsonPropertyName("flood")]
     public RiskSubResultPayload? Flood { get; init; }
 
@@ -36,12 +36,15 @@ public sealed record RiskResultPayload
 
     [JsonPropertyName("liquefaction")]
     public RiskSubResultPayload? Liquefaction { get; init; }
+}
+
+public sealed record RiskAssetsPayload
+{
+    [JsonPropertyName("floodRiskZonesGeoJsonUrl")]
+    public string? FloodRiskZonesGeoJsonUrl { get; init; }
 
     [JsonPropertyName("riskHeatmapTileUrl")]
     public string? RiskHeatmapTileUrl { get; init; }
-
-    [JsonPropertyName("mitigationSuggestions")]
-    public List<RiskMitigationSuggestionPayload>? MitigationSuggestions { get; init; }
 }
 
 public sealed record RiskMitigationSuggestionPayload

@@ -24,7 +24,7 @@ using Planora.Infrastructure.Persistence.Repositories;
 using Planora.Infrastructure.Repositories;
 using Planora.Infrastructure.Services;
 using Planora.Infrastructure.Services.Reporting;
-using Refit;
+//using Refit;
 
 namespace Planora.Infrastructure;
 
@@ -36,7 +36,7 @@ public static class DependencyInjection
     {
         // --- AWS Setup ---
         var awsOptions = configuration.GetAWSOptions();
-        var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")
+        var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY")
                         ?? configuration["AWS:AccessKey"];
         var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")
                         ?? configuration["AWS:SecretKey"];
@@ -106,10 +106,14 @@ public static class DependencyInjection
         
         var aiOptions = configuration.GetSection(AiOptions.SectionName).Get<AiOptions>()
             ?? new AiOptions();
-            
+
         // services.AddTransient<AiApiKeyHandler>();
-        services.AddRefitClient<IAiApiClient>()
-        .ConfigureHttpClient((client) =>
+        //services.AddRefitClient<IAiApiClient>()
+        //.ConfigureHttpClient((client) =>
+        //{
+        //    client.BaseAddress = new Uri(aiOptions.BaseUrl);
+        //});
+        services.AddHttpClient<IAiApiClient, AiApiClient>(client =>
         {
             client.BaseAddress = new Uri(aiOptions.BaseUrl);
         });
@@ -190,6 +194,7 @@ public static class DependencyInjection
         services.AddScoped<ISoilResultRepository, SoilResultRepository>();
         services.AddScoped<IRiskResultRepository, RiskResultRepository>();
         services.AddScoped<IBoreholeResultRepository, BoreholeResultRepository>();
+        services.AddScoped<IBearingResultRepository, BearingResultRepository>();
         services.AddScoped<IAnalysisResultQuery, AnalysisResultQuery>();
 
 

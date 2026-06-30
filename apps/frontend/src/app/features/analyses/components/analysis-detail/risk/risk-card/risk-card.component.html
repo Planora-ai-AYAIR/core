@@ -44,7 +44,7 @@
     </div>
 
     <!-- Factors -->
-    @for (f of risk.factors; track f.label) {
+    @for (f of risk.factors; track f.detail) {
       <div class="flex justify-between items-baseline gap-4 text-xs">
         <span class="text-planora-basalt-600 font-medium">{{ f.label }}</span>
         <span class="text-planora-basalt-500 text-right leading-relaxed">{{ f.detail }}</span>

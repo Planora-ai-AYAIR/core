@@ -154,5 +154,5 @@ module "apigw" {
   source = "./apigw"
 
   environment     = var.environment
-  api_backend_url = "http://ac780c7e579dc4ba5ac4c59fefff278a-c16daf94c84d9209.elb.us-east-1.amazonaws.com"
+  api_backend_url = "http://af643c15bf89c4a29a98f3226f99502c-30a1899528294365.elb.us-east-1.amazonaws.com"
 }

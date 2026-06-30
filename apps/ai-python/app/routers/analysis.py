@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
+import asyncio
+from app.services.webhook_service import send_analysis_webhook
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
@@ -240,15 +242,42 @@ def _run_pipeline(python_job_id: str, request: AnalysisJobRequest) -> None:
         logger.info("Job completed — pythonJobId=%s duration=%.1fs",
                     python_job_id, (completed - started).total_seconds())
 
+        _fire_webhook(
+                python_job_id,
+                {
+                    "pythonJobId":  python_job_id,
+                    "backendJobId": request.job_id,
+                    "parcelId":     request.parcel_id,
+                    "status":       JobStatus.COMPLETED.value,
+                    "startedAt":    started.isoformat().replace("+00:00", "Z"),
+                    "completedAt":  completed.isoformat().replace("+00:00", "Z"),
+                    "result":       result.model_dump(by_alias=True, mode="json"),
+                },
+                "analysis.completed",
+            )
+
     except Exception as exc:
-        logger.error("Job FAILED — %s\n%s", python_job_id, traceback.format_exc())
-        error_code, description = _classify_error(exc)
-        _update_job(
-            python_job_id,
-            status=JobStatus.FAILED,
-            completedAt=datetime.now(timezone.utc),
-            errors=[ErrorDetail(code=error_code, description=description)],
-        )
+            logger.error("Job FAILED — %s\n%s", python_job_id, traceback.format_exc())
+            error_code, description = _classify_error(exc)
+            _update_job(
+                python_job_id,
+                status=JobStatus.FAILED,
+                completedAt=datetime.now(timezone.utc),
+                errors=[ErrorDetail(code=error_code, description=description)],
+            )
+
+            _fire_webhook(
+                python_job_id,
+                {
+                    "pythonJobId":  python_job_id,
+                    "backendJobId": request.job_id,
+                    "parcelId":     request.parcel_id,
+                    "status":       JobStatus.FAILED.value,
+                    "reason":       description,
+                    "errorCode":    error_code,
+                },
+                "analysis.failed",
+            )
 
 
 def _set_stage(job_id: str, stage_idx: int) -> None:
@@ -292,23 +321,35 @@ def _stage_terrain(geo_json: dict, bbox: list, contour_interval: float) -> dict:
         }
 
 
+_DEFAULT_SOIL = {
+    "clay_0_5":   20.0, "sand_0_5":   55.0, "silt_0_5":   25.0, "bdod_0_5":   1.45,
+    "clay_5_15":  21.0, "sand_5_15":  54.0, "bdod_5_15":  1.46,
+    "clay_15_30": 22.0, "sand_15_30": 52.0, "bdod_15_30": 1.47,
+    "clay_30_60": 23.0, "sand_30_60": 50.0, "bdod_30_60": 1.48,
+    "clay_60_100":25.0, "sand_60_100":48.0, "bdod_60_100":1.50,
+    "clay_100_200":27.0,"sand_100_200":45.0,"bdod_100_200":1.52,
+    "phh2o_0_5": 7.8,  "ocd_0_5": 1.2, "cec_0_5": 14.0,
+}
+
+
 # FIX 1 — soil never crashes the job
 def _stage_soil(geo_json: dict) -> dict:
     try:
         from app.services.soilgrids_service import get_soil_composition
-        return get_soil_composition(geo_json)
+        soil = get_soil_composition(geo_json)
     except Exception as exc:
         logger.warning("SoilGrids failed (%s) — using default soil values", exc)
-        return {
-            "clay_0_5":   20.0, "sand_0_5":   55.0, "silt_0_5":   25.0, "bdod_0_5":   1.45,
-            "clay_5_15":  21.0, "sand_5_15":  54.0, "bdod_5_15":  1.46,
-            "clay_15_30": 22.0, "sand_15_30": 52.0, "bdod_15_30": 1.47,
-            "clay_30_60": 23.0, "sand_30_60": 50.0, "bdod_30_60": 1.48,
-            "clay_60_100":25.0, "sand_60_100":48.0, "bdod_60_100":1.50,
-            "clay_100_200":27.0,"sand_100_200":45.0,"bdod_100_200":1.52,
-            "phh2o_0_5": 7.8,  "ocd_0_5": 1.2, "cec_0_5": 14.0,
-            "_source": "default_fallback",
-        }
+        soil = {**_DEFAULT_SOIL, "_source": "default_fallback"}
+
+    # SoilGrids can return a successful response with individual depths/properties
+    # set to None (no data at that location) — fill just those gaps, keep the rest.
+    missing = [k for k in _DEFAULT_SOIL if soil.get(k) is None]
+    if missing:
+        logger.warning("SoilGrids returned null for %s — using defaults for those fields", missing)
+        for k in missing:
+            soil[k] = _DEFAULT_SOIL[k]
+
+    return soil
 
 
 def _stage_bearing(soil: dict, terrain: dict) -> dict | None:
@@ -836,6 +877,22 @@ def _build_borehole_geojson(points: list[dict]) -> dict:
         for p in points
     ]}
 
+# ═══════════════════════════════════════════════════════════════════════════
+# PIPELINE
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _fire_webhook(python_job_id: str, data: dict, event_type: str) -> None:
+    """Deliver a completion/failure webhook from the synchronous pipeline task.
+
+    ``_run_pipeline`` runs in FastAPI's threadpool (no event loop), while
+    ``send_analysis_webhook`` is async — so we drive it with ``asyncio.run``.
+    Delivery errors are already swallowed inside the webhook service; this guard
+    only protects against the (unlikely) event-loop setup failing.
+    """
+    try:
+        asyncio.run(send_analysis_webhook(python_job_id, data, event_type))
+    except Exception:
+        logger.error("Webhook dispatch failed — pythonJobId=%s\n%s", python_job_id, traceback.format_exc())
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HELPERS

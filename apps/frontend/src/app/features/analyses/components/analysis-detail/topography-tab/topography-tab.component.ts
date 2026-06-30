@@ -31,8 +31,12 @@ export class TopographyTabComponent {
   });
 
   slopeData = computed(() => this._facade.topographyData()?.slopeDistribution ?? []);
-  pondingZones = computed(() => this._facade.topographyData()?.pondingZones ?? []);
-  engineeringFlags = computed(() => this._facade.topographyData()?.engineeringFlags ?? []);
+
+  pondingRisk = computed(() => {
+    const d = this._facade.topographyData();
+    if (!d) return null;
+    return d.pondingRisk;
+  });
 
   // ── Helpers ──
   elevDelta() {
@@ -42,7 +46,7 @@ export class TopographyTabComponent {
 
   meanPercent() {
     const s = this.topoStats();
-    if (!s) return 0;
+    if (!s || s.maxElevation === s.minElevation) return 50;
     return +(
       ((s.meanElevation - s.minElevation) / (s.maxElevation - s.minElevation)) *
       100
@@ -50,9 +54,9 @@ export class TopographyTabComponent {
   }
 
   getSlopeColor(name: string): string {
-    if (name.includes('Flat')) return '#9BB88C';
-    if (name.includes('Gentle')) return '#C7A14D';
-    if (name.includes('Moderate')) return '#B86E3D';
+    if (name.includes('0-2%')) return '#9BB88C';
+    if (name.includes('2-5%')) return '#C7A14D';
+    if (name.includes('5-15%')) return '#B86E3D';
     return '#5A2714';
   }
 

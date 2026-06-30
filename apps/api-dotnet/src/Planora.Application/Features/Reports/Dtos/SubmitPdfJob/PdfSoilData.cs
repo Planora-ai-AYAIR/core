@@ -14,8 +14,6 @@ namespace Planora.Application.Features.Reports.Dtos.SubmitPdfJob
         public double BulkDensity { get; set; }
         public double OrganicCarbon { get; set; }
         public double Ph { get; set; }
-        public double BearingCapacityEstimate { get; set; }
-        public string BearingCapacityCategory { get; set; } = string.Empty;
         public string? PrimaryType { get; set; }
         public string? UsdaClass { get; set; }
         public double? AiConfidence { get; set; }

@@ -25,6 +25,49 @@
     </div>
   </header>
 
+  <!-- Report Banner (only when analysis is fully completed) -->
+  @if (allModulesCompleted()) {
+    <div
+      class="bg-white border-b border-planora-desert-200 px-6 py-3 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <i class="pi pi-file-pdf text-planora-clay-500 text-xl"></i>
+        <div>
+          <p class="text-sm font-semibold text-planora-basalt-800">Site Intelligence Report</p>
+          @if (reportFacade.reportStatus() === 'ready') {
+            <p class="text-xs text-green-600 font-mono">Ready for download</p>
+          } @else if (reportFacade.reportStatus() === 'generating') {
+            <p class="text-xs text-amber-600">Generating PDF…</p>
+          } @else if (reportFacade.reportStatus() === 'failed') {
+            <p class="text-xs text-red-600">{{ reportFacade.reportError() }}</p>
+          } @else {
+            <p class="text-xs text-planora-basalt-400">Generate a professional PDF report</p>
+          }
+        </div>
+      </div>
+      <div>
+        @if (reportFacade.reportStatus() === 'ready' && reportFacade.reportDownloadUrl()) {
+          <a
+            [href]="reportFacade.reportDownloadUrl()"
+            target="_blank"
+            class="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-colors"
+          >
+            <i class="pi pi-download mr-1"></i> Download
+          </a>
+        } @else if (
+          reportFacade.reportStatus() === 'idle' || reportFacade.reportStatus() === 'failed'
+        ) {
+          <button
+            (click)="onGenerateReport()"
+            class="px-4 py-2 bg-planora-clay-500 text-white text-sm font-bold rounded-xl hover:bg-planora-clay-600 transition-colors"
+          >
+            <i class="pi pi-cog mr-1"></i> Generate Report
+          </button>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Section navigation (tabs) - styled like chapter tabs -->
   <nav
     class="bg-planora-limestone border-b border-planora-desert-200 px-4 sm:px-8 flex gap-0 overflow-x-auto shadow-inner"
@@ -79,73 +122,80 @@
       class="flex-1 overflow-y-auto bg-planora-limestone border-l border-planora-desert-200 lg:flex-none lg:w-md"
     >
       <div class="p-6">
-        <h2 class="font-display text-2xl font-bold text-planora-basalt-900 mb-4">
-          {{ activeModuleIndex() + 1 }}. {{ activeModuleLabel() }}
-        </h2>
-        <p class="text-sm text-planora-basalt-600 italic mb-6 leading-relaxed">
-          {{ activeModuleDescription() }}
-        </p>
+        @if (_analysisFacade.loading()) {
+          <div class="flex items-center justify-center py-12">
+            <i class="pi pi-spin pi-spinner text-3xl text-planora-clay-500"></i>
+            <p class="ml-3 text-sm text-planora-basalt-500">Loading analysis data…</p>
+          </div>
+        } @else {
+          <h2 class="font-display text-2xl font-bold text-planora-basalt-900 mb-4">
+            {{ activeModuleIndex() + 1 }}. {{ activeModuleLabel() }}
+          </h2>
+          <p class="text-sm text-planora-basalt-600 italic mb-6 leading-relaxed">
+            {{ activeModuleDescription() }}
+          </p>
 
-        <!-- Single active tab via @switch - no hidden divs, no inputs -->
-        @switch (activeModule()) {
-          @case ('topography') {
-            @if (moduleProgress()['topography']?.status === 'Completed') {
-              <app-topography-tab></app-topography-tab>
-            } @else {
-              <app-module-progress
-                moduleName="Topography"
-                [status]="moduleProgress()['topography'].status"
-                [estimatedSeconds]="moduleProgress()['topography'].estimatedSeconds"
-                (cancel)="cancelModule('topography')"
-              ></app-module-progress>
+          <!-- Single active tab via @switch - no hidden divs, no inputs -->
+          @switch (activeModule()) {
+            @case ('topography') {
+              @if (moduleProgress()['topography']?.status === 'Completed') {
+                <app-topography-tab></app-topography-tab>
+              } @else {
+                <app-module-progress
+                  moduleName="Topography"
+                  [status]="moduleProgress()['topography'].status"
+                  [estimatedSeconds]="moduleProgress()['topography'].estimatedSeconds"
+                  (cancel)="cancelModule('topography')"
+                ></app-module-progress>
+              }
             }
-          }
-          @case ('soil') {
-            @if (moduleProgress()['soil']?.status === 'Completed') {
-              <app-soil-tab></app-soil-tab>
-            } @else {
-              <app-module-progress
-                moduleName="Soil Composition"
-                [status]="moduleProgress()['soil'].status"
-                [estimatedSeconds]="moduleProgress()['soil'].estimatedSeconds"
-                (cancel)="cancelModule('soil')"
-              ></app-module-progress>
+            @case ('soil') {
+              @if (moduleProgress()['soil']?.status === 'Completed') {
+                <app-soil-tab></app-soil-tab>
+              } @else {
+                <app-module-progress
+                  moduleName="Soil Composition"
+                  [status]="moduleProgress()['soil'].status"
+                  [estimatedSeconds]="moduleProgress()['soil'].estimatedSeconds"
+                  (cancel)="cancelModule('soil')"
+                ></app-module-progress>
+              }
             }
-          }
-          @case ('bearing') {
-            @if (moduleProgress()['bearing']?.status === 'Completed') {
-              <app-bearing-tab></app-bearing-tab>
-            } @else {
-              <app-module-progress
-                moduleName="Bearing Capacity"
-                [status]="moduleProgress()['bearing'].status"
-                [estimatedSeconds]="moduleProgress()['bearing'].estimatedSeconds"
-                (cancel)="cancelModule('bearing')"
-              ></app-module-progress>
+            @case ('bearing') {
+              @if (moduleProgress()['bearing']?.status === 'Completed') {
+                <app-bearing-tab></app-bearing-tab>
+              } @else {
+                <app-module-progress
+                  moduleName="Bearing Capacity"
+                  [status]="moduleProgress()['bearing'].status"
+                  [estimatedSeconds]="moduleProgress()['bearing'].estimatedSeconds"
+                  (cancel)="cancelModule('bearing')"
+                ></app-module-progress>
+              }
             }
-          }
-          @case ('risk') {
-            @if (moduleProgress()['risk']?.status === 'Completed') {
-              <app-risk-tab></app-risk-tab>
-            } @else {
-              <app-module-progress
-                moduleName="Risk Assessment"
-                [status]="moduleProgress()['risk'].status"
-                [estimatedSeconds]="moduleProgress()['risk'].estimatedSeconds"
-                (cancel)="cancelModule('risk')"
-              ></app-module-progress>
+            @case ('risk') {
+              @if (moduleProgress()['risk']?.status === 'Completed') {
+                <app-risk-tab></app-risk-tab>
+              } @else {
+                <app-module-progress
+                  moduleName="Risk Assessment"
+                  [status]="moduleProgress()['risk'].status"
+                  [estimatedSeconds]="moduleProgress()['risk'].estimatedSeconds"
+                  (cancel)="cancelModule('risk')"
+                ></app-module-progress>
+              }
             }
-          }
-          @case ('borehole') {
-            @if (moduleProgress()['borehole']?.status === 'Completed') {
-              <app-borehole-tab></app-borehole-tab>
-            } @else {
-              <app-module-progress
-                moduleName="Borehole Analysis"
-                [status]="moduleProgress()['borehole'].status"
-                [estimatedSeconds]="moduleProgress()['borehole'].estimatedSeconds"
-                (cancel)="cancelModule('borehole')"
-              ></app-module-progress>
+            @case ('borehole') {
+              @if (moduleProgress()['borehole']?.status === 'Completed') {
+                <app-borehole-tab></app-borehole-tab>
+              } @else {
+                <app-module-progress
+                  moduleName="Borehole Analysis"
+                  [status]="moduleProgress()['borehole'].status"
+                  [estimatedSeconds]="moduleProgress()['borehole'].estimatedSeconds"
+                  (cancel)="cancelModule('borehole')"
+                ></app-module-progress>
+              }
             }
           }
         }

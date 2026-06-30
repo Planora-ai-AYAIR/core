@@ -39,19 +39,23 @@ public sealed class RefreshParcelAssetsHandler(
         }
 
         // 1. Load completed analysis jobs and the matching module results.
+        //    Aggregated flow stores all module results under the single
+        //    Aggregated job's Id; fall back to per-module jobs otherwise.
         var jobs = await analysisJobRepository.GetByParcelIdAsync(request.ParcelId, ct);
 
+        var aggregatedJob = FindCompletedJob(jobs, AnalysisType.Aggregated);
+
         var topographyResult = await LoadResultAsync(
-            FindCompletedJob(jobs, AnalysisType.Topography),
+            aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Topography),
             topographyResultRepository.GetByAnalysisJobIdAsync, ct);
         var soilResult = await LoadResultAsync(
-            FindCompletedJob(jobs, AnalysisType.Soil),
+            aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Soil),
             soilResultRepository.GetByAnalysisJobIdAsync, ct);
         var riskResult = await LoadResultAsync(
-            FindCompletedJob(jobs, AnalysisType.Risk),
+            aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Risk),
             riskResultRepository.GetByAnalysisJobIdAsync, ct);
         var boreholeResult = await LoadResultAsync(
-            FindCompletedJob(jobs, AnalysisType.Borehole),
+            aggregatedJob ?? FindCompletedJob(jobs, AnalysisType.Borehole),
             boreholeResultRepository.GetByAnalysisJobIdAsync, ct);
 
         // 2. Re-sign all map-layer keys concurrently. Missing keys resolve to "".

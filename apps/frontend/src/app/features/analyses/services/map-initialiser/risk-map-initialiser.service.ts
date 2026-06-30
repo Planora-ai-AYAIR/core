@@ -20,6 +20,9 @@ export class RiskMapInitialiser implements MapInitialiser<RiskData> {
     map: maplibregl.Map,
     features: { risk: string; coords: [number, number][] }[],
   ) {
+    if (map.getSource('flood-src') || map.getLayer('flood-zone')) {
+      return;
+    }
     map.addSource('flood-src', {
       type: 'geojson',
       data: {
@@ -43,6 +46,9 @@ export class RiskMapInitialiser implements MapInitialiser<RiskData> {
   }
 
   private addSeismicZones(map: maplibregl.Map, geoJSON: any) {
+    if (map.getSource('seismic-src') || map.getLayer('seismic-zone')) {
+      return;
+    }
     map.addSource('seismic-src', { type: 'geojson', data: geoJSON });
     map.addLayer({
       id: 'seismic-zone',
@@ -92,6 +98,9 @@ export class RiskMapInitialiser implements MapInitialiser<RiskData> {
   }
 
   private addExpansiveSoilZones(map: maplibregl.Map, geoJSON: any) {
+    if (map.getSource('expansive-src') || map.getLayer('expansive-soil')) {
+      return;
+    }
     map.addSource('expansive-src', { type: 'geojson', data: geoJSON });
     map.addLayer({
       id: 'expansive-soil',
@@ -117,6 +126,9 @@ export class RiskMapInitialiser implements MapInitialiser<RiskData> {
   }
 
   private addLiquefactionZones(map: maplibregl.Map, geoJSON: any) {
+    if (map.getSource('liquefaction-src') || map.getLayer('liquefaction')) {
+      return;
+    }
     map.addSource('liquefaction-src', { type: 'geojson', data: geoJSON });
     map.addLayer({
       id: 'liquefaction',

@@ -3,12 +3,20 @@ export interface TopographyData {
   maxElevation: number;
   meanElevation: number;
   cutFill: number;
-  slopeDistribution: { name: string; value: number }[];
-  pondingZones: { id: number; lat: number; lng: number; area: number; risk: string }[];
-  engineeringFlags: { text: string }[];
-  // Map layers
-  elevationGrid: { lng: number; lat: number; elev: number }[];
-  contourLines: any[]; // Feature[]
-  slopePolygons: any[]; // Feature[]
-  pondingPolygons: any[]; // Feature[]
+  slopeDistribution: {
+    name: string;
+    value: number;
+  }[];
+  pondingRisk?: {
+    riskLevel: string;
+    zonesCount: number;
+    affectedAreaM2: number;
+  };
+
+  pondingZones: any[];
+  engineeringFlags: any[];
+  elevationGrid: any[];
+  contourLines: any[];
+  slopePolygons: any[];
+  pondingPolygons: any[];
 }
