@@ -26,9 +26,8 @@ export class ReportFacadeService {
     this.reportError.set(null);
     this.api.submitReport(parcelId, options).subscribe({
       next: (response) => {
-        this.reportJobId = response.reportJobId;
-        // 👇 Store it for refresh resilience
-        localStorage.setItem(`report_job_${parcelId}`, response.reportJobId);
+        this.reportJobId = response.reportId;
+        localStorage.setItem(`report_job_${parcelId}`, response.reportId);
       },
       error: (err) => {
         const code = err?.error?.errors?.[0]?.code;
@@ -43,7 +42,7 @@ export class ReportFacadeService {
   }
   checkExistingReport(parcelId: string) {
     const storedJobId = localStorage.getItem(`report_job_${parcelId}`);
-    if (storedJobId) {
+    if (storedJobId && storedJobId !== 'undefined' && storedJobId.length > 10) {
       this.reportJobId = storedJobId;
       this.reportStatus.set('generating');
       this.pollReportStatus(storedJobId, parcelId);
@@ -51,6 +50,10 @@ export class ReportFacadeService {
   }
 
   private pollReportStatus(reportId: string, parcelId: string) {
+    if (!reportId || reportId === 'undefined') {
+      console.warn('Invalid reportId, aborting polling');
+      return;
+    }
     const interval = setInterval(() => {
       this.api.getReportDownload(reportId).subscribe({
         next: (data) => {

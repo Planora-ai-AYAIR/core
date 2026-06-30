@@ -21,6 +21,10 @@ export class SignalRService implements OnDestroy {
   reportFailed$ = this.reportFailedSubject.asObservable();
 
   async startConnection(): Promise<void> {
+    if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+      return;
+    }
+
     // 1. Wait for a valid token (refreshes if necessary)
     const token = await this.auth.getValidAccessToken();
     if (!token) {

@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
 
-  // apiUrl: 'https://n8ng4pqeob.execute-api.us-east-1.amazonaws.com/v1/api/',
+  //apiUrl: 'https://zcniglcccc.execute-api.us-east-1.amazonaws.com/v1/api/',
   apiUrl: 'https://planora-ai.runasp.net/api/',
 
   // APIs

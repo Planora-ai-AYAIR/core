@@ -45,9 +45,8 @@ export class AnalysisDetailFacadeService {
   async startRealtimeProgress(parcelId: string) {
     this.loading.set(true);
 
-    // Ensure SignalR connection is started (if not already)
     try {
-      this.signalR.startConnection(); // fire and forget; start() handles its own promise
+      await this.signalR.startConnection();
     } catch (_) {
       this.error.set('Unable to establish real‑time connection');
       this.loading.set(false);
@@ -62,9 +61,7 @@ export class AnalysisDetailFacadeService {
       },
       error: (err) => {
         if (err.status === 409) {
-          // Not completed yet – subscribe to SignalR for real-time updates
           this.subscribeToSignalR(parcelId);
-          // Also fetch current module status to show progress
           this.api
             .getParcelAnalysisStatus(parcelId)
             .subscribe((s) => this.updateProgressFromStatus(s));
@@ -120,61 +117,75 @@ export class AnalysisDetailFacadeService {
   }
 
   // ── SignalR event handler (per‑module & aggregated) ────────────────
-  private handleAnalysisResult(envelope: AnalysisResultEnvelope, parcelId: string): void {
-    if (envelope.ParcelId !== parcelId) return;
+  private handleAnalysisResult(raw: any, parcelId: string): void {
+    // Normalise case – backend may send camelCase
+    const eventType = raw.eventType || raw.EventType || '';
+    const envelopeParcelId = raw.parcelId || raw.ParcelId || '';
+    if (envelopeParcelId !== parcelId) return;
 
-    const eventType = envelope.EventType;
-    const payload = envelope.Result;
-    if (!payload) return;
+    // Unwrap the double‑result structure
+    const outerResult = raw.result || raw.Result;
+    if (!outerResult) return;
+    // The actual module data is inside outerResult.result
+    const innerResult = outerResult.result;
+    if (!innerResult) return;
 
-    // Per‑module events
-    if (eventType === 'TopographyCompleted' || eventType === 'AnalysisCompleted') {
-      const topo = eventType === 'AnalysisCompleted' ? payload.topography : payload;
+    // Normalise the event type to our internal constant
+    const isAnalysisCompleted =
+      eventType === 'analysis.completed' || eventType === 'AnalysisCompleted';
+
+    if (eventType === 'TopographyCompleted' || isAnalysisCompleted) {
+      const topo = innerResult.topography;
       if (topo) {
-        this.topographyData.set(this.mapTopographyFromSignalR(topo));
+        this.topographyData.set(this.mapTopographyFromFull(topo)); // ✅ use FromFull
         this.moduleProgress.update((prev) => ({
           ...prev,
-          ['topography']: { status: 'Completed', estimatedSeconds: 0 },
+          topography: { status: 'Completed', estimatedSeconds: 0 },
         }));
       }
     }
 
-    if (eventType === 'SoilCompleted' || eventType === 'AnalysisCompleted') {
-      const soil = eventType === 'AnalysisCompleted' ? payload.soil : payload;
+    if (eventType === 'SoilCompleted' || isAnalysisCompleted) {
+      const soil = innerResult.soil;
       if (soil) {
-        this.soilData.set(this.mapSoilFromSignalR(soil));
-        if (soil.bearingCapacityEstimate || soil.bearing) {
-          this.bearingData.set(this.mapBearingFromSignalR(soil));
-        }
+        this.soilData.set(this.mapSoilFromFull(soil)); // ✅ use FromFull
         this.moduleProgress.update((prev) => ({
           ...prev,
-          ['soil']: { status: 'Completed', estimatedSeconds: 0 },
-          ['bearing']:
-            soil.bearingCapacityEstimate || soil.bearing
-              ? { status: 'Completed', estimatedSeconds: 0 }
-              : prev['bearing'],
+          soil: { status: 'Completed', estimatedSeconds: 0 },
         }));
       }
     }
 
-    if (eventType === 'RiskCompleted' || eventType === 'AnalysisCompleted') {
-      const risk = eventType === 'AnalysisCompleted' ? payload.risk : payload;
+    // ✅ NEW: Bearing is a top‑level module, not embedded in soil
+    if (eventType === 'BearingCompleted' || isAnalysisCompleted) {
+      const bearing = innerResult.bearing;
+      if (bearing) {
+        this.bearingData.set(this.mapBearingFromFull(bearing)); // ✅ use FromFull
+        this.moduleProgress.update((prev) => ({
+          ...prev,
+          bearing: { status: 'Completed', estimatedSeconds: 0 },
+        }));
+      }
+    }
+
+    if (eventType === 'RiskCompleted' || isAnalysisCompleted) {
+      const risk = innerResult.risk;
       if (risk) {
-        this.riskData.set(this.mapRiskFromSignalR(risk));
+        this.riskData.set(this.mapRiskFromFull(risk)); // ✅ use FromFull
         this.moduleProgress.update((prev) => ({
           ...prev,
-          ['risk']: { status: 'Completed', estimatedSeconds: 0 },
+          risk: { status: 'Completed', estimatedSeconds: 0 },
         }));
       }
     }
 
-    if (eventType === 'BoreholeCompleted' || eventType === 'AnalysisCompleted') {
-      const bore = eventType === 'AnalysisCompleted' ? payload.borehole : payload;
+    if (eventType === 'BoreholeCompleted' || isAnalysisCompleted) {
+      const bore = innerResult.borehole;
       if (bore) {
-        this.boreholeData.set(this.mapBoreholeFromSignalR(bore));
+        this.boreholeData.set(this.mapBoreholeFromFull(bore)); // ✅ use FromFull
         this.moduleProgress.update((prev) => ({
           ...prev,
-          ['borehole']: { status: 'Completed', estimatedSeconds: 0 },
+          borehole: { status: 'Completed', estimatedSeconds: 0 },
         }));
       }
     }
@@ -199,7 +210,7 @@ export class AnalysisDetailFacadeService {
   }
 
   private updateProgressFromStatus(status: ParcelAnalysisStatusResponse): void {
-    const progress: Record<string, { status: ModuleStatus; estimatedSeconds: number }> = {};
+    const progress = { ...this.moduleProgress() };
     status.modules.forEach((m) => {
       const mappedStatus: ModuleStatus =
         m.status === 'Completed' ? 'Completed' : m.status === 'Failed' ? 'Failed' : 'Processing';

@@ -43,7 +43,7 @@ import { SignalRService } from '../../../../core/services/signalr.service';
 })
 export class AnalysisDetailComponent implements OnInit, OnDestroy {
   private _layerService = inject(MapLayerService);
-  private _analysisFacade = inject(AnalysisDetailFacadeService);
+  _analysisFacade = inject(AnalysisDetailFacadeService);
   private _parcelFacade = inject(ParcelFacadeService);
   reportFacade = inject(ReportFacadeService);
   private signalR = inject(SignalRService);
