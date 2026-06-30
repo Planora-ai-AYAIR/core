@@ -16,9 +16,9 @@ export class App implements OnInit {
 
   protected readonly title = signal('planora-portal');
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if (this.auth.isAuthenticated()) {
-      this.signalR.startConnection();
+      await this.signalR.startConnection();
     }
   }
 }

@@ -2,13 +2,25 @@ import { Injectable } from '@angular/core';
 import { MapInitialiser } from '../../interfaces/map-initialiser';
 import maplibregl from 'maplibre-gl';
 import { BoreholeData } from '../../interfaces/borehole-data';
-import type { FeatureCollection, Polygon } from 'geojson';
 
-@Injectable({ providedIn: 'root' })
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'root' }) 
 export class BoreholeMapInitialiser implements MapInitialiser<BoreholeData> {
   addLayers(map: maplibregl.Map, data: BoreholeData): void {
-    // Add borehole points source
+    // Avoid duplicate source/layer creation
+    if (map.getSource('boreholes-src')) {
+      // Update existing source
+      (map.getSource('boreholes-src') as maplibregl.GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: data.placementPoints.map((p) => ({
+          type: 'Feature',
+          properties: { id: p.id, priority: p.priority, reason: p.reason, depth: p.estimatedDepth },
+          geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+        })),
+      });
+      return;
+    }
+
+    // First time – add source and layer
     map.addSource('boreholes-src', {
       type: 'geojson',
       data: {

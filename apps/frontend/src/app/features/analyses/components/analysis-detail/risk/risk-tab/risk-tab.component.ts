@@ -55,12 +55,14 @@ export class RiskTabComponent {
   relevantMitigations = computed(() => {
     const data = this.riskData();
     if (!data) return [];
-    const highRiskTypes: string[] = [];
-    if (data.floodRisk.score >= 40) highRiskTypes.push('High Flood');
-    if (data.seismicRisk.score >= 40) highRiskTypes.push('High Seismic');
-    if (data.expansiveSoilRisk.score >= 40) highRiskTypes.push('High Expansive Soil');
-    if (data.liquefactionRisk.score >= 40) highRiskTypes.push('High Liquefaction');
-    return data.mitigations.filter((m) => highRiskTypes.includes(m.risk));
+
+    const highRiskTypes = new Set<string>();
+    if (data.floodRisk.score >= 40) highRiskTypes.add('flood');
+    if (data.seismicRisk.score >= 40) highRiskTypes.add('seismic');
+    if (data.expansiveSoilRisk.score >= 40) highRiskTypes.add('expansiveSoil');
+    if (data.liquefactionRisk.score >= 40) highRiskTypes.add('liquefaction');
+
+    return data.mitigations.filter((m) => highRiskTypes.has(m.riskType));
   });
 
   onToggleLayer(layerId: string) {

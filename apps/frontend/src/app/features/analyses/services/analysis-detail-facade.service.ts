@@ -226,6 +226,17 @@ export class AnalysisDetailFacadeService {
 
   private mapTopographyFromSignalR(payload: any): TopographyData {
     const slopeDist = payload.slopeDistribution || [];
+    const zonesCount = payload.pondingZonesCount ?? 0;
+    const totalArea = payload.pondingTotalArea ?? 0;
+
+    // Derive ponding risk level
+    let riskLevel = 'Low';
+    if (zonesCount > 0 && totalArea > 10000) {
+      riskLevel = 'High';
+    } else if (zonesCount > 0 && totalArea > 5000) {
+      riskLevel = 'Medium';
+    }
+
     return {
       minElevation: payload.elevationMin ?? 0,
       maxElevation: payload.elevationMax ?? 0,
@@ -235,6 +246,13 @@ export class AnalysisDetailFacadeService {
         name: s.range || s.category,
         value: s.percentage,
       })),
+      // ── Added ponding risk summary ──
+      pondingRisk: {
+        riskLevel: riskLevel,
+        zonesCount: zonesCount,
+        affectedAreaM2: totalArea,
+      },
+      // ── Still kept for future visual assets ──
       pondingZones: [],
       engineeringFlags: [],
       elevationGrid: [],
@@ -272,6 +290,7 @@ export class AnalysisDetailFacadeService {
         { color: '#A0522D', label: 'Silt' },
         { color: '#C0392B', label: 'Clay' },
       ],
+      spectralIndices: payload?.spectralIndices ?? undefined,
     };
   }
 
@@ -283,7 +302,7 @@ export class AnalysisDetailFacadeService {
         min: bearing.uncertaintyRange?.minimumKpa ?? 0,
         max: bearing.uncertaintyRange?.maximumKpa ?? 0,
       },
-      capacityClass: (payload.bearingCapacityCategory as any) ?? 'Medium',
+      capacityClass: payload.bearingCapacityCategory ?? 'Medium',
       isUnreliableEstimate: false,
       floorCountCategory: bearing.floorCountCategory ?? '1-2 floors',
       maxFloorsWithoutDeepFoundation: bearing.maxFloorsWithoutDeepFoundation ?? 0,
@@ -328,6 +347,24 @@ export class AnalysisDetailFacadeService {
       buildingLoadReferences: [],
       bearingPoints: [],
       waterTableLines: [],
+      trafficLight: bearing.trafficLight ?? undefined,
+      range: bearing.range ?? undefined,
+      confidence: bearing.confidence ?? undefined,
+      disclaimer: bearing.disclaimer ?? undefined,
+      modelMetadata: bearing.modelMetadata
+        ? {
+            modelName: bearing.modelMetadata.modelName ?? '',
+            framework: bearing.modelMetadata.framework ?? '',
+            trainingR2: bearing.modelMetadata.trainingR2 ?? 0,
+            shapEnabled: bearing.modelMetadata.shapEnabled ?? false,
+          }
+        : undefined,
+
+      featureImportance:
+        bearing?.featureImportance?.map((f: any) => ({
+          feature: f.feature,
+          weight: f.weight,
+        })) ?? undefined,
     };
   }
 
@@ -349,7 +386,13 @@ export class AnalysisDetailFacadeService {
       seismicRisk: sub(payload.seismic, 'pi pi-compass', '#F59E0B'),
       expansiveSoilRisk: sub(payload.expansiveSoil, 'pi pi-arrows-v', '#A0522D'),
       liquefactionRisk: sub(payload.liquefaction, 'pi pi-exclamation-triangle', '#8B5CF6'),
-      mitigations: [],
+      mitigations:
+        payload?.mitigationSuggestions?.map((m: any) => ({
+          riskType: m.riskType ?? '',
+          suggestion: m.suggestion ?? '',
+          costImpact: m.costImpact ?? '',
+          feasibility: m.feasibility ?? '',
+        })) ?? [],
       floodFeatures: [],
       seismicZonesGeoJSON: null,
       expansiveSoilZonesGeoJSON: null,
@@ -399,6 +442,7 @@ export class AnalysisDetailFacadeService {
     const elevation = dto?.elevation ?? {};
     const slope = dto?.slopeDistribution ?? [];
     const cutFill = dto?.cutFillAnalysis ?? {};
+    const ponding = dto?.pondingRisk ?? {};
     return {
       minElevation: elevation.minimumMeters ?? 0,
       maxElevation: elevation.maximumMeters ?? 0,
@@ -408,6 +452,11 @@ export class AnalysisDetailFacadeService {
         name: s.range,
         value: s.percentage,
       })),
+      pondingRisk: {
+        riskLevel: ponding.riskLevel ?? 'Unknown',
+        zonesCount: ponding.zonesCount ?? 0,
+        affectedAreaM2: ponding.affectedAreaM2 ?? 0,
+      },
       pondingZones: [],
       engineeringFlags: [],
       elevationGrid: [],
@@ -448,6 +497,7 @@ export class AnalysisDetailFacadeService {
         { color: '#A0522D', label: 'Silt' },
         { color: '#C0392B', label: 'Clay' },
       ],
+      spectralIndices: dto?.spectralIndices ?? undefined,
     };
   }
 
@@ -458,7 +508,7 @@ export class AnalysisDetailFacadeService {
         min: dto?.uncertaintyRange?.minimumKpa ?? 0,
         max: dto?.uncertaintyRange?.maximumKpa ?? 0,
       },
-      capacityClass: (dto?.classification as any) ?? 'Medium',
+      capacityClass: dto?.classification ?? 'Medium',
       isUnreliableEstimate: false,
       floorCountCategory: dto?.floorCountCategory ?? '1-2 floors',
       maxFloorsWithoutDeepFoundation: dto?.maxFloorsWithoutDeepFoundation ?? 0,
@@ -503,6 +553,23 @@ export class AnalysisDetailFacadeService {
       buildingLoadReferences: [],
       bearingPoints: [],
       waterTableLines: [],
+      trafficLight: dto?.trafficLight ?? undefined,
+      range: dto?.range ?? undefined,
+      confidence: dto?.confidence ?? undefined,
+      disclaimer: dto?.disclaimer ?? undefined,
+      modelMetadata: dto?.modelMetadata
+        ? {
+            modelName: dto.modelMetadata.modelName ?? '',
+            framework: dto.modelMetadata.framework ?? '',
+            trainingR2: dto.modelMetadata.trainingR2 ?? 0,
+            shapEnabled: dto.modelMetadata.shapEnabled ?? false,
+          }
+        : undefined,
+      featureImportance:
+        dto?.featureImportance?.map((f: any) => ({
+          feature: f.feature,
+          weight: f.weight,
+        })) ?? undefined,
     };
   }
 
@@ -519,7 +586,7 @@ export class AnalysisDetailFacadeService {
     return {
       overallRiskScore: dto?.overallScore ?? 0,
       overallRiskLevel: dto?.overallRiskLevel ?? '',
-      benchmarkComparison: 'Lower than 65% of sites in Nile Delta region',
+      benchmarkComparison: 'Lower than 65% of sites in Nile Delta region', // static for now
       floodRisk: sub(dto?.riskBreakdown?.flood, 'pi pi-cloud-download', '#3B82F6'),
       seismicRisk: sub(dto?.riskBreakdown?.seismic, 'pi pi-compass', '#F59E0B'),
       expansiveSoilRisk: sub(dto?.riskBreakdown?.expansiveSoil, 'pi pi-arrows-v', '#A0522D'),
@@ -528,7 +595,15 @@ export class AnalysisDetailFacadeService {
         'pi pi-exclamation-triangle',
         '#8B5CF6',
       ),
-      mitigations: [],
+      // 👇 Mitigation suggestions from the API
+      mitigations:
+        dto?.mitigationSuggestions?.map((m: any) => ({
+          riskType: m.riskType ?? '',
+          suggestion: m.suggestion ?? '',
+          costImpact: m.costImpact ?? '',
+          feasibility: m.feasibility ?? '',
+        })) ?? [],
+      // Map visual layers (empty until GeoJSON available)
       floodFeatures: [],
       seismicZonesGeoJSON: null,
       expansiveSoilZonesGeoJSON: null,

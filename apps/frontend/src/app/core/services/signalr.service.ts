@@ -20,13 +20,39 @@ export class SignalRService implements OnDestroy {
   reportGenerated$ = this.reportGeneratedSubject.asObservable();
   reportFailed$ = this.reportFailedSubject.asObservable();
 
-  startConnection(): void {
+  async startConnection(): Promise<void> {
+    // 1. Wait for a valid token (refreshes if necessary)
+    const token = await this.auth.getValidAccessToken();
+    if (!token) {
+      console.warn('SignalR: No valid token available, skipping connection');
+      return;
+    }
+
+    // 2. Build connection with an async accessTokenFactory that always fetches fresh token
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.getBaseUrl()}/hubs/notifications`, {
-        accessTokenFactory: () => this.auth.accessToken ?? '',
+        accessTokenFactory: async () => {
+          // This runs BEFORE every connection or reconnection attempt
+          const freshToken = await this.auth.getValidAccessToken();
+          return freshToken ?? '';
+        },
       })
       .withAutomaticReconnect()
       .build();
+
+    // 3. Register event handlers
+    this.registerEvents();
+
+    // 4. Start
+    try {
+      await this.hubConnection.start();
+    } catch (err) {
+      console.error('SignalR error:', err);
+    }
+  }
+
+  private registerEvents(): void {
+    if (!this.hubConnection) return;
 
     this.hubConnection.on('NotificationReceived', (notification: NotificationDto) => {
       this.notificationSubject.next(notification);
@@ -43,8 +69,6 @@ export class SignalRService implements OnDestroy {
     this.hubConnection.on('ReportFailed', (event: any) => {
       this.reportFailedSubject.next(event);
     });
-
-    this.hubConnection.start().catch((err) => console.error('SignalR error:', err));
   }
 
   private getBaseUrl(): string {
@@ -56,8 +80,8 @@ export class SignalRService implements OnDestroy {
   }
 
   stopConnection(): void {
-  this.hubConnection?.stop();
-}
+    this.hubConnection?.stop();
+  }
 
   ngOnDestroy(): void {
     this.hubConnection?.stop();

@@ -63,6 +63,8 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
   parcelCoordinates = signal('');
   mapCenter = signal<[number, number]>([31.942, 30.633]);
 
+  private pendingFlyTo: { center: [number, number]; zoom: number } | null = null;
+
   parcelId!: string;
 
   private parcelBoundary: [number, number][] | null = null;
@@ -109,6 +111,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['topography']?.status;
       if (map && data && progress === 'Completed') {
         this._topographyInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -118,6 +121,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['soil']?.status;
       if (map && data && progress === 'Completed') {
         this._soilInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -127,6 +131,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['bearing']?.status;
       if (map && data && progress === 'Completed') {
         this._bearingInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -136,6 +141,7 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['risk']?.status;
       if (map && data && progress === 'Completed') {
         this._riskInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
       }
     });
 
@@ -145,6 +151,13 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       const progress = this.moduleProgress()['borehole']?.status;
       if (map && data && progress === 'Completed') {
         this._boreholeInit.addLayers(map, data);
+        this._layerService.refreshVisibility();
+      }
+    });
+
+    effect(() => {
+      if (this.allModulesCompleted()) {
+        this.reportFacade.checkExistingReport(this.parcelId);
       }
     });
   }
@@ -168,6 +181,14 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
           );
           this.mapCenter.set([parcel.centroidLongitude, parcel.centroidLatitude]);
           this._addParcelBoundary(parcel.boundaryCoordinates);
+
+          // Fly the map to the parcel’s centroid if map is ready, otherwise defer
+          const target: [number, number] = [parcel.centroidLongitude, parcel.centroidLatitude];
+          if (this.map()) {
+            this.map()!.flyTo({ center: target, zoom: 17, essential: true });
+          } else {
+            this.pendingFlyTo = { center: target, zoom: 17 };
+          }
         }
       });
 
@@ -365,6 +386,15 @@ export class AnalysisDetailComponent implements OnInit, OnDestroy {
       this.map.set(map);
       if (this.parcelBoundary) {
         this._drawBoundary();
+      }
+
+      if (this.pendingFlyTo) {
+        map.flyTo({
+          center: this.pendingFlyTo.center,
+          zoom: this.pendingFlyTo.zoom,
+          essential: true,
+        });
+        this.pendingFlyTo = null;
       }
     };
 
