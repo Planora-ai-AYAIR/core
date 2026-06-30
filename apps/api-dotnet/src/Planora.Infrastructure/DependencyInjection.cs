@@ -36,7 +36,7 @@ public static class DependencyInjection
     {
         // --- AWS Setup ---
         var awsOptions = configuration.GetAWSOptions();
-        var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")
+        var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY")
                         ?? configuration["AWS:AccessKey"];
         var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")
                         ?? configuration["AWS:SecretKey"];
