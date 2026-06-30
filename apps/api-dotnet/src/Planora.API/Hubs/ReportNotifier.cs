@@ -11,7 +11,7 @@ public sealed class ReportNotifier(
     public async Task NotifyReportGeneratedAsync(
         Guid parcelId, Guid reportId, CancellationToken ct)
     {
-        var groupName = $"parcel_{parcelId}";
+        var groupName = $"parcel:{parcelId}";
         await hubContext.Clients.Group(groupName)
             .SendAsync("ReportGenerated", new
             {
@@ -27,7 +27,7 @@ public sealed class ReportNotifier(
     public async Task NotifyReportFailedAsync(
         Guid parcelId, Guid reportId, string errorMessage, CancellationToken ct)
     {
-        var groupName = $"parcel_{parcelId}";
+        var groupName = $"parcel:{parcelId}";
         await hubContext.Clients.Group(groupName)
             .SendAsync("ReportFailed", new
             {
