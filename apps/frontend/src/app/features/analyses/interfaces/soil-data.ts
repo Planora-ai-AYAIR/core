@@ -18,4 +18,9 @@ export interface SoilData {
   depthProfiles: SoilDepthData[];
   heatmapUrls: Record<string, string>;
   heatmapLegend: { color: string; label: string }[];
+  spectralIndices?: {
+    ndviMean: number;
+    bsiMean: number;
+    ndmiMean: number;
+  };
 }

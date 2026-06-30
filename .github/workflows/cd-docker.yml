@@ -52,7 +52,7 @@ jobs:
 
       - name: Restart API Deployment
         run: |
-          kubectl rollout restart deployment/api-dotnet -n planora
+          kubectl rollout restart deployment/api-dotnet -n planora || true
 
   build-push-ai:
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
 
       - name: Restart AI Deployment
         run: |
-          kubectl rollout restart deployment/ai-python -n planora
+          kubectl rollout restart deployment/ai-python -n planora || true
 
   build-push-frontend:
     runs-on: ubuntu-latest
@@ -132,4 +132,4 @@ jobs:
 
       - name: Restart Frontend Deployment
         run: |
-          kubectl rollout restart deployment/frontend -n planora
+          kubectl rollout restart deployment/frontend -n planora || true

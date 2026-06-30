@@ -16,13 +16,6 @@
       [savingsAmount]="data.costAnalysis.savingsAmount"
       [savingsPercent]="data.costAnalysis.savingsPercent"
       [rate]="data.costAnalysis.ratePerMeter"
-      (rateChange)="onRateChange($event)"
-    />
-
-    <app-borehole-params
-      [params]="data.parameters"
-      (paramsChange)="onParamsChange($event)"
-      (recalculate)="onRecalculate()"
     />
 
     <!-- Map Overlays (already a card) -->

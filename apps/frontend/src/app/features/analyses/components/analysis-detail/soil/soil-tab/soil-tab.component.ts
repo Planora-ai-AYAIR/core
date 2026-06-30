@@ -44,6 +44,8 @@ export class SoilTabComponent {
   selectedDepth = signal('0-20cm');
   profileViewMode = signal<'stacked' | 'side-by-side'>('stacked');
 
+  spectralIndices = computed(() => this._facade.soilData()?.spectralIndices ?? null);
+  
   constructor() {
     effect(() => {
       // These establish what SHOULD trigger the effect execution

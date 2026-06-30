@@ -4,7 +4,6 @@ import { MapLayerService } from '../../../../services/map-layer.service';
 import { AnalysisDetailFacadeService } from '../../../../services/analysis-detail-facade.service';
 import { BoreholeSummaryComponent } from '../borehole-summary/borehole-summary.component';
 import { CostComparisonComponent } from '../cost-comparison/cost-comparison.component';
-import { BoreholeParamsComponent } from '../borehole-params/borehole-params.component';
 import { BoreholeParameters } from '../../../../interfaces/borehole-data';
 import { LayerControlComponent } from '../../layer-control/layer-control.component';
 
@@ -15,7 +14,6 @@ import { LayerControlComponent } from '../../layer-control/layer-control.compone
     CommonModule,
     BoreholeSummaryComponent,
     CostComparisonComponent,
-    BoreholeParamsComponent,
     LayerControlComponent,
   ],
   templateUrl: './borehole-tab.component.html',
@@ -33,18 +31,6 @@ export class BoreholeTabComponent {
   }
   onLayerOpacityChange(layerId: string, opacity: number) {
     this._layerService.setLayerOpacity(layerId, opacity);
-  }
-
-  onRateChange(rate: number) {
-    // Update rate in facade (you can extend facade with an update method)
-  }
-
-  onParamsChange(partial: Partial<BoreholeParameters>) {
-    // Similarly update facade parameters
-  }
-
-  onRecalculate() {
-    // Trigger a recalculation (future API call)
   }
 
   downloadGeoJSON() {

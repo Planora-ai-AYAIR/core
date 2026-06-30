@@ -6,10 +6,57 @@ import { TopographyData } from '../../interfaces/topography-data';
 @Injectable({ providedIn: 'root' })
 export class TopographyMapInitialiser implements MapInitialiser<TopographyData> {
   addLayers(map: maplibregl.Map, data: TopographyData): void {
-    this.addHeatmap(map, data.elevationGrid);
-    this.addContours(map, data.contourLines);
-    this.addSlope(map, data.slopePolygons);
-    this.addPonding(map, data.pondingPolygons);
+    // 1. Elevation Heatmap
+    if (data.elevationGrid?.length) {
+      if (map.getSource('elevation-source')) {
+        (map.getSource('elevation-source') as maplibregl.GeoJSONSource).setData({
+          type: 'FeatureCollection',
+          features: data.elevationGrid.map((p) => ({
+            type: 'Feature',
+            properties: { elev: p.elev },
+            geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+          })),
+        });
+      } else {
+        this.addHeatmap(map, data.elevationGrid);
+      }
+    }
+
+    // 2. Contour Lines
+    if (data.contourLines?.length) {
+      if (map.getSource('contours')) {
+        (map.getSource('contours') as maplibregl.GeoJSONSource).setData({
+          type: 'FeatureCollection',
+          features: data.contourLines,
+        });
+      } else {
+        this.addContours(map, data.contourLines);
+      }
+    }
+
+    // 3. Slope Categories
+    if (data.slopePolygons?.length) {
+      if (map.getSource('slope-categories')) {
+        (map.getSource('slope-categories') as maplibregl.GeoJSONSource).setData({
+          type: 'FeatureCollection',
+          features: data.slopePolygons,
+        });
+      } else {
+        this.addSlope(map, data.slopePolygons);
+      }
+    }
+
+    // 4. Ponding Zones
+    if (data.pondingPolygons?.length) {
+      if (map.getSource('ponding')) {
+        (map.getSource('ponding') as maplibregl.GeoJSONSource).setData({
+          type: 'FeatureCollection',
+          features: data.pondingPolygons,
+        });
+      } else {
+        this.addPonding(map, data.pondingPolygons);
+      }
+    }
   }
 
   private addHeatmap(map: maplibregl.Map, grid: any[]) {
